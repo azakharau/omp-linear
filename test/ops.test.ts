@@ -2,7 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { buildSchema, parse, validate, type OperationDefinitionNode } from "graphql";
+import { assertInputType, buildSchema, coerceInputValue, parse, validate, type OperationDefinitionNode } from "graphql";
 
 import { createLinearClient, type LinearClient } from "../src/client/graphql.ts";
 import { ergonomicOps, OP_DOCUMENTS, type ActorContext } from "../src/ops/index.ts";
@@ -231,6 +231,19 @@ describe("actor attribution", () => {
 		});
 
 		await opNamed("linear_issue_create").run(client, { team: "ABC", title: "New" }, USER_CTX);
+
+		const input = calls.find(call => call.operation === "mutation")!.variables.input as Record<string, unknown>;
+		expect(input).toEqual({ teamId: "t-1", title: "New" });
+	});
+
+	test("an app actor without a label (main session) sends no createAsUser", async () => {
+		const { client, calls } = await fakeLinear({
+			LinearTeamLookup: () => ({ teams: { nodes: [{ id: "t-1", key: "ABC", name: "Alpha" }] } }),
+			LinearIssueCreate: () => ({ issueCreate: { success: true, issue: { id: ISSUE_ABC12.id } } }),
+			LinearIssueGet: () => ({ issue: ISSUE_ABC12 }),
+		});
+
+		await opNamed("linear_issue_create").run(client, { team: "ABC", title: "New" }, { actor: "app", authorLabel: null });
 
 		const input = calls.find(call => call.operation === "mutation")!.variables.input as Record<string, unknown>;
 		expect(input).toEqual({ teamId: "t-1", title: "New" });
@@ -613,6 +626,24 @@ describe("linear_issue_search", () => {
 		});
 		await opNamed("linear_issue_search").run(client, { first: 5000 }, USER_CTX);
 		expect(calls[0]!.variables.first).toBe(100);
+	});
+
+	test("filters by exact priority and by any of several labels, case-insensitively, with a filter the pinned schema accepts", async () => {
+		const { client, calls } = await fakeLinear({
+			LinearIssueList: () => ({ issues: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
+		});
+		await opNamed("linear_issue_search").run(client, { priority: 2, labels: ["Bug", "ux"] }, USER_CTX);
+		const filter = calls[0]!.variables.filter;
+		expect(filter).toEqual({
+			priority: { eq: 2 },
+			labels: { some: { or: [{ name: { eqIgnoreCase: "Bug" } }, { name: { eqIgnoreCase: "ux" } }] } },
+		});
+		expect(() => coerceInputValue(filter, assertInputType(schema.getType("IssueFilter")))).not.toThrow();
+
+		for (const priority of [5, -1, 1.5]) {
+			await expect(opNamed("linear_issue_search").run(client, { priority }, USER_CTX)).rejects.toThrow(/"priority" must be an integer from 0 to 4/);
+		}
+		expect(calls.length).toBe(1);
 	});
 
 	test("without a query lists my stale issues through the issues root in one request", async () => {

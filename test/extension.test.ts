@@ -328,9 +328,9 @@ describe("linear extension in a real OMP session", () => {
 			});
 		};
 		try {
-			expect(await run([activateCall("linear_issue_create"), create], "Main")).toEqual([{ authorization: "Bearer app-token-1", author: "OMP · Main" }]);
+			expect(await run([activateCall("linear_issue_create"), create], "Main")).toEqual([{ authorization: "Bearer app-token-1", author: undefined }]);
 			expect(await run([activateCall("linear_issue_create"), create], "0-App", { name: "reviewer", parentId: "Main" })).toEqual([
-				{ authorization: "Bearer app-token-1", author: "OMP · reviewer [0-App]" },
+				{ authorization: "Bearer app-token-1", author: "Code Reviewer" },
 			]);
 			expect(tokenRequests.length).toBe(1);
 			expect(Object.fromEntries(tokenRequests[0]!)).toEqual({
@@ -406,7 +406,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("actor=app: Main and two concurrent subagent sessions each attribute mutations to their own ctx.agent author; actor=user sends none", async () => {
+	test("actor=app: Main sends no createAsUser and two concurrent subagent sessions each attribute mutations to their own display name; actor=user sends none", async () => {
 		const linear = fakeLinear(body => {
 			const key = body.query.includes("commentCreate") ? "commentCreate" : "issueCreate";
 			return { data: { [key]: { success: true, [key === "issueCreate" ? "issue" : "comment"]: { id: "x" } } } };
@@ -430,14 +430,17 @@ describe("linear extension in a real OMP session", () => {
 			});
 		};
 		const task = { name: "task", parentId: "Main" };
+		const inputOf = (r: (typeof linear.requests)[number]) => r.body.variables?.input as Record<string, unknown> | undefined;
 		try {
-			await Promise.all([run("key-app", "Main"), run("key-app", "0-Child1", undefined, task), run("key-app", "1-Child2", undefined, task)]);
-			const labels = ["OMP · Main", "OMP · task [0-Child1]", "OMP · task [1-Child2]"];
-			const createAsUsers = linear.requests.map(r => (r.body.variables?.input as { createAsUser?: string } | undefined)?.createAsUser);
+			await Promise.all([
+				run("key-app", "Main"),
+				run("key-app", "0-Child1", undefined, { name: "reviewer", parentId: "Main" }),
+				run("key-app", "1-Child2", undefined, { name: "api-reviewer", parentId: "Main" }),
+			]);
+			const createAsUsers = linear.requests.map(r => inputOf(r)?.createAsUser);
 			expect(linear.requests.length).toBe(6);
-			expect(createAsUsers.every(value => typeof value === "string")).toBe(true);
-			expect(new Set(createAsUsers)).toEqual(new Set(labels));
-			for (const label of labels) expect(createAsUsers.filter(v => v === label).length).toBe(2);
+			expect(linear.requests.filter(r => inputOf(r) !== undefined && !("createAsUser" in (inputOf(r) ?? {}))).length).toBe(2);
+			for (const label of ["Code Reviewer", "API Reviewer"]) expect(createAsUsers.filter(v => v === label).length).toBe(2);
 
 			linear.requests.length = 0;
 			await run("key-user", "2-UserActor", undefined, task);
@@ -490,9 +493,8 @@ describe("linear extension in a real OMP session", () => {
 			return mutations.map(authorOf);
 		};
 		try {
-			expect(await run("ergo-app", "Main")).toEqual(["OMP · Main", "OMP · Main", "OMP · Main"]);
-			const childLabel = "OMP · reviewer [0-Ergo]";
-			expect(await run("ergo-app", "0-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([childLabel, childLabel, childLabel]);
+			expect(await run("ergo-app", "Main")).toEqual([undefined, undefined, undefined]);
+			expect(await run("ergo-app", "0-Ergo", { name: "reviewer", parentId: "Main" })).toEqual(["Code Reviewer", "Code Reviewer", "Code Reviewer"]);
 			expect(await run("ergo-user", "1-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([undefined, undefined, undefined]);
 		} finally {
 			linear.stop();
@@ -501,7 +503,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	}, 30_000);
 
-	test("actor=app rejects a caller-supplied createAsUser that differs from the session author, before any request", async () => {
+	test("actor=app: the main session may not supply createAsUser on the typed or the raw path; nothing is sent", async () => {
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "x" } } } }));
 		const remove = await storeConnection(connection("key-app2", "app"));
 		const sessionManager = host.SessionManager.inMemory();
@@ -509,10 +511,21 @@ describe("linear extension in a real OMP session", () => {
 		const script: ScriptedCall[] = [
 			activateCall("lm_issueCreate"),
 			["lm_issueCreate", { i: "Creating", input: { teamId: "team-1", title: "Spoof", createAsUser: "someone else" } }],
+			activateCall("linear_graphql"),
+			[
+				"linear_graphql",
+				{
+					i: "Raw",
+					document: "mutation ($input: IssueCreateInput!) { issueCreate(input: $input) { success } }",
+					variables: { input: { teamId: "team-1", title: "Spoof", createAsUser: "someone else" } },
+				},
+			],
 		];
 		try {
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager }, async (session, model) => {
-				expect(await promptForOutput(session, model, 2)).toContain("conflicts with the session author");
+				await session.prompt("spoof");
+				expect(toolOutputs(model.requests[2]!)[0]).toContain('createAsUser "someone else" is not allowed');
+				expect(toolOutputs(model.requests[4]!)[0]).toContain('createAsUser "someone else" is not allowed');
 				expect(linear.requests.length).toBe(0);
 			});
 		} finally {
@@ -559,7 +572,7 @@ describe("linear extension in a real OMP session", () => {
 				const output = await promptForOutput(session, model, 2);
 				expect(output).toMatch(/mutation made reported success=false/);
 				expect(linear.requests.length).toBe(1);
-				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe("OMP · reviewer [0-Frag]");
+				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe("Code Reviewer");
 			});
 		} finally {
 			linear.stop();
@@ -635,10 +648,10 @@ describe("linear extension in a real OMP session", () => {
 				expect(toolNamesOf(model.requests[0]!)).toContain("lq_teams");
 				const rawOutput = toolOutputs(model.requests[2]!).find(o => o.includes('"selected"'));
 				if (!rawOutput) throw new Error(`connections output missing: ${JSON.stringify(toolOutputs(model.requests[2]!))}`);
-				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string } };
+				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string | null } };
 				expect(output.selected).toBe("conn-A");
 				expect(output.activeOperation).toBe("linear_connections");
-				expect(output.author.label).toBe("OMP · Main");
+				expect(output.author.label).toBeNull();
 			});
 		} finally {
 			fs.rmSync(sessionsDir, { recursive: true, force: true });
@@ -649,20 +662,22 @@ describe("linear extension in a real OMP session", () => {
 		// One host per process, loaded through the host's own loader: host identity, credentials under the host agent dir.
 		const remove = await storeConnection(connection("loader-proof", "user"));
 		try {
-			const { toolNames, authorLabel, connectionIds } = runLoaderPathProof(PRISTINE_HOST, agentDir);
+			const { toolNames, authorId, authorLabel, connectionIds } = runLoaderPathProof(PRISTINE_HOST, agentDir);
 			expect(toolNames).toContain(SEARCH_TOOL);
 			expect(toolNames).toContain("linear_connections");
 			expect(toolNames.filter(isLinearOperation).length).toBe(495);
-			expect(authorLabel).toBe("OMP · Main");
+			expect(authorId).toBe("Main");
+			expect(authorLabel).toBeNull();
 			expect(connectionIds).toContain("loader-proof");
 		} finally {
 			await remove();
 		}
 	}, 30_000);
 
-	test("author labels: main is OMP · Main, a subagent names its definition and registry id, a missing identity throws", () => {
-		expect(authorLabel({ kind: "main", id: "Main", name: "main" })).toBe("OMP · Main");
-		expect(authorLabel({ kind: "sub", id: "0-Review", name: "reviewer" })).toBe("OMP · reviewer [0-Review]");
+	test("author labels: main has none, a subagent gets its definition's display name, a missing identity throws", () => {
+		expect(authorLabel({ kind: "main", name: "main" })).toBeNull();
+		expect(authorLabel({ kind: "sub", name: "reviewer" })).toBe("Code Reviewer");
+		expect(authorLabel({ kind: "sub", name: "api-reviewer" })).toBe("API Reviewer");
 		expect(() => resolveAuthor(undefined)).toThrow(/OMP >= 18.20.0 is required/);
 	});
 

@@ -31,7 +31,6 @@ export interface SmokeStep {
 const hostRoot = process.argv[2];
 if (!hostRoot) throw new Error("usage: smoke-host.ts <hostRoot>");
 
-const AUTHOR = "OMP · Main";
 const API_KEY = "lin_api_smoke_secret_9f3c";
 const steps: SmokeStep[] = [];
 
@@ -169,10 +168,11 @@ async function runMain(host: Host): Promise<void> {
   await session.prompt("raw mutation as app");
   const rawOutput = toolOutputs(model.requests[6]!)[0] ?? "";
   const raw = linear.requests[1];
-  const createAsUser = (raw?.body.variables?.input as { createAsUser?: string } | undefined)?.createAsUser;
+  const rawInput = raw?.body.variables?.input as Record<string, unknown> | undefined;
+  const createAsUser = rawInput?.createAsUser;
   record(
-   "raw mutation actor=app: createAsUser attributed to the session author with the OAuth bearer",
-   linear.requests.length === 2 && createAsUser === AUTHOR && raw?.authorization === "Bearer smoke-oauth-access" && rawOutput.includes("SMK-1") && !rawOutput.includes("smoke-oauth-access"),
+   "raw mutation actor=app (main): no createAsUser, so the application is the author, with the OAuth bearer",
+   linear.requests.length === 2 && rawInput !== undefined && !("createAsUser" in rawInput) && raw?.authorization === "Bearer smoke-oauth-access" && rawOutput.includes("SMK-1") && !rawOutput.includes("smoke-oauth-access"),
    `requests=${linear.requests.length}, createAsUser=${JSON.stringify(createAsUser)}, authorization=${raw?.authorization ?? "none"}, output contains token=${rawOutput.includes("smoke-oauth-access")}`,
   );
  } finally {

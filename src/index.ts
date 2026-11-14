@@ -10,8 +10,9 @@
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
  * activated operation are persisted as `linear-state` entries. The author of every outbound call
- * is the host-provided `ctx.agent` identity (OMP >= 18.20.0); `actor=app` connections attribute
- * mutations to that author via `createAsUser`.
+ * is the host-provided `ctx.agent` identity (OMP >= 18.20.0); `actor=app` connections attribute a
+ * subagent's mutations to its display name via `createAsUser` and send none for the main agent,
+ * so Linear shows the application itself.
  */
 import { randomUUID } from "node:crypto";
 import * as path from "node:path";
@@ -474,7 +475,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    name: "linear_graphql",
    label: "Linear GraphQL",
    description:
-    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the session author.",
+    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the subagent author; the main session writes as the application and may not set createAsUser.",
    parameters: objectSchema(
     {
      document: { type: "string", minLength: 1 },

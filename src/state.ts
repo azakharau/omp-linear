@@ -9,7 +9,7 @@ export interface LinearSessionState {
 	/** Currently activated typed/ergonomic tool name, null when only the always-on tools are active. */
 	activeOperation: string | null;
 	/** Host-provided author of this session (`ctx.agent`), null when the host gives no identity. */
-	actor: { id: string; displayName: string; label: string } | null;
+	actor: { id: string; displayName: string; label: string | null } | null;
 }
 
 export function emptyState(): LinearSessionState {
@@ -47,9 +47,9 @@ function normalize(data: unknown): LinearSessionState {
 		typeof actor === "object" &&
 		typeof (actor as Record<string, unknown>).id === "string" &&
 		typeof (actor as Record<string, unknown>).displayName === "string" &&
-		typeof (actor as Record<string, unknown>).label === "string"
+		((actor as Record<string, unknown>).label === null || typeof (actor as Record<string, unknown>).label === "string")
 	) {
-		const a = actor as { id: string; displayName: string; label: string };
+		const a = actor as { id: string; displayName: string; label: string | null };
 		state.actor = { id: a.id, displayName: a.displayName, label: a.label };
 	}
 	return state;

@@ -4,7 +4,7 @@ import type { AttributionTarget } from "../schema/raw";
 /**
  * Mutation roots that accept `createAsUser`, keyed by root field name: either on an input
  * object (`issueCreate(input:)`) or as a direct argument (`attachmentLinkURL(createAsUser:)`).
- * Computed once from the pinned schema; Linear renders such mutations as "<author> via <app>".
+ * Computed once from the pinned schema; Linear renders such mutations as "<author> by <app>".
  */
 export function attributionTargets(schema: GraphQLSchema): Map<string, AttributionTarget> {
  const targets = new Map<string, AttributionTarget>();
@@ -26,33 +26,39 @@ export function attributionTargets(schema: GraphQLSchema): Map<string, Attributi
  return targets;
 }
 
-function rejectForeignAuthor(field: string, supplied: unknown, author: string): void {
- if (supplied !== undefined && supplied !== author) {
-  throw new Error(`${field}: createAsUser "${String(supplied)}" conflicts with the session author "${author}"; omit it`);
- }
+/** Shared by typed and raw attribution: a null author (main session) accepts no `createAsUser` at all. */
+export function rejectForeignAuthor(field: string, supplied: unknown, author: string | null): void {
+ if (supplied === undefined || supplied === author) return;
+ throw new Error(
+  author === null
+   ? `${field}: createAsUser "${String(supplied)}" is not allowed: the main session writes as the application; omit it`
+   : `${field}: createAsUser "${String(supplied)}" conflicts with the session author "${author}"; omit it`,
+ );
 }
 
 /**
  * Returns typed-tool arguments with `createAsUser` set to `author`, on the attributed input or
- * as the direct argument. A caller-supplied `createAsUser` that differs from the session author
- * is rejected: an `actor=app` connection may never impersonate someone else.
+ * as the direct argument; a null author leaves the arguments unchanged. A caller-supplied
+ * `createAsUser` that differs from the session author is rejected: an `actor=app` connection may
+ * never impersonate someone else.
  */
 export function attributeTypedArgs(
  args: Record<string, unknown>,
  target: AttributionTarget,
- author: string,
+ author: string | null,
 ): Record<string, unknown> {
  if (target.kind === "argument") {
   rejectForeignAuthor(target.field, args.createAsUser, author);
-  return { ...args, createAsUser: author };
+  return author === null ? args : { ...args, createAsUser: author };
  }
  const input = args[target.inputArg];
  if (input === undefined) {
+  if (author === null) return args;
   throw new Error(`${target.field}: argument "${target.inputArg}" is required for actor=app attribution`);
  }
  if (input === null || typeof input !== "object" || Array.isArray(input)) {
   throw new Error(`${target.field}: argument "${target.inputArg}" must be an object`);
  }
  rejectForeignAuthor(target.field, (input as Record<string, unknown>).createAsUser, author);
- return { ...args, [target.inputArg]: { ...(input as Record<string, unknown>), createAsUser: author } };
+ return author === null ? args : { ...args, [target.inputArg]: { ...(input as Record<string, unknown>), createAsUser: author } };
 }

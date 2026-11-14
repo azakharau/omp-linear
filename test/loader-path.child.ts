@@ -3,8 +3,9 @@
  * `additionalExtensionPaths` -> `package.json` `omp.extensions` -> `./src/index.ts`, with the
  * extension's `@oh-my-pi/*` imports rewritten by the host to its own module tree.
  *
- * The host gives the session the top-level `ctx.agent` identity (`Main`), so the reported author
- * label is `OMP · Main` only when the loaded extension reads it through the host's own runner.
+ * The host gives the session the top-level `ctx.agent` identity (`Main`), so the reported author id
+ * is `Main` (and its label null, the main agent writes as the application) only when the loaded
+ * extension reads it through the host's own runner.
  * Prints one JSON line (`LoaderPathProof`) on stdout; spawned by `runLoaderPathProof`.
  */
 import { getAgentDir } from "@oh-my-pi/pi-coding-agent";
@@ -34,10 +35,11 @@ try {
   .map(item => item.output)
   .find(o => o.includes('"selected"'));
  if (!output) throw new Error(`linear_connections produced no output: ${JSON.stringify(model.requests.map(r => r.input))}`);
- const parsed = JSON.parse(output) as { author: { label: string } | null; connections: { id: string }[] };
+ const parsed = JSON.parse(output) as { author: { id: string; label: string | null } | null; connections: { id: string }[] };
  console.log(
   JSON.stringify({
    toolNames: session.getAllToolNames(),
+   authorId: parsed.author?.id ?? null,
    authorLabel: parsed.author?.label ?? null,
    connectionIds: parsed.connections.map(c => c.id),
   }),

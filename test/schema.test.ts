@@ -429,21 +429,40 @@ describe("injectCreateAsUser", () => {
 		expect(link).toEqual({ field: "attachmentLinkURL", inputArg: "createAsUser", kind: "argument" });
 		expect(pinned.get("issueCreate")).toEqual({ field: "issueCreate", inputArg: "input" });
 
-		expect(attributeTypedArgs({ issueId: "i", url: "u" }, link!, "OMP · Main")).toEqual({ issueId: "i", url: "u", createAsUser: "OMP · Main" });
-		expect(() => attributeTypedArgs({ issueId: "i", url: "u", createAsUser: "OMP · Main" }, link!, "OMP · task [0-X]")).toThrow(/conflicts with the session author/);
+		expect(attributeTypedArgs({ issueId: "i", url: "u" }, link!, "Task Agent")).toEqual({ issueId: "i", url: "u", createAsUser: "Task Agent" });
+		expect(() => attributeTypedArgs({ issueId: "i", url: "u", createAsUser: "Code Reviewer" }, link!, "Task Agent")).toThrow(/conflicts with the session author/);
 
-		const literal = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u", createAsUser: "OMP · Main") { success } }', {}, [link!], "OMP · task [0-X]");
-		expect(literal.document).toContain('createAsUser: "OMP · task [0-X]"');
-		expect(literal.document).not.toContain('"OMP · Main"');
-		const missing = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u") { success } }', {}, [link!], "OMP · task [0-X]");
-		expect(missing.document).toContain('createAsUser: "OMP · task [0-X]"');
+		const literal = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u", createAsUser: "Code Reviewer") { success } }', {}, [link!], "Task Agent");
+		expect(literal.document).toContain('createAsUser: "Task Agent"');
+		expect(literal.document).not.toContain('"Code Reviewer"');
+		const missing = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u") { success } }', {}, [link!], "Task Agent");
+		expect(missing.document).toContain('createAsUser: "Task Agent"');
 		const variable = injectCreateAsUser(
 			"mutation M($who: String) { attachmentLinkURL(issueId: \"i\", url: \"u\", createAsUser: $who) { success } }",
-			{ who: "OMP · Main" },
+			{ who: "Code Reviewer" },
 			[link!],
-			"OMP · task [0-X]",
+			"Task Agent",
 		);
-		expect(variable.variables).toEqual({ who: "OMP · task [0-X]" });
+		expect(variable.variables).toEqual({ who: "Task Agent" });
+	});
+
+	test("a null author (main session) injects nothing and rejects any caller-supplied createAsUser", () => {
+		const link = attributionTargets(schema).get("attachmentLinkURL")!;
+		expect(attributeTypedArgs({ issueId: "i", url: "u" }, link, null)).toEqual({ issueId: "i", url: "u" });
+		expect(() => attributeTypedArgs({ issueId: "i", url: "u", createAsUser: "Code Reviewer" }, link, null)).toThrow(/not allowed/);
+
+		const linkDoc = 'mutation { attachmentLinkURL(issueId: "i", url: "u") { success } }';
+		expect(injectCreateAsUser(linkDoc, {}, [link], null)).toEqual({ document: linkDoc, variables: {} });
+		const issueDoc = "mutation M($input: IssueCreateInput!) { issueCreate(input: $input) { success } }";
+		const input = { title: "T", teamId: "t" };
+		expect(injectCreateAsUser(issueDoc, { input }, targets, null)).toEqual({ document: issueDoc, variables: { input } });
+		expect(() => injectCreateAsUser(issueDoc, { input: { ...input, createAsUser: "X" } }, targets, null)).toThrow(/not allowed/);
+		expect(() =>
+			injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u", createAsUser: "X") { success } }', {}, [link], null),
+		).toThrow(/not allowed/);
+		expect(() =>
+			injectCreateAsUser('mutation { issueCreate(input: {title: "T", teamId: "t", createAsUser: "X"}) { success } }', {}, targets, null),
+		).toThrow(/not allowed/);
 	});
 });
 
