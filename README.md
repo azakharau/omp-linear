@@ -37,13 +37,12 @@ The repository is its own marketplace (`.omp-plugin/marketplace.json`):
 ```sh
 omp plugin marketplace add azakharau/omp-linear
 omp plugin install omp-linear@omp-linear
-omp plugin list                 # omp-linear@omp-linear (1.0.0) (user)
+omp plugin list                 # omp-linear@omp-linear (<version>) (user)
 ```
 
-The repository is private, so `marketplace add` needs git access to it: an SSH key that GitHub
-accepts, or `gh auth login` with HTTPS git credentials. `--scope project` installs for the
-current project only. `omp plugin upgrade omp-linear@omp-linear` installs a newer catalog
-version. Restart the session after an install so the extension loads.
+`--scope project` installs for the current project only.
+`omp plugin marketplace update omp-linear && omp plugin upgrade omp-linear@omp-linear` installs a
+newer catalog version. Restart the session after an install so the extension loads.
 
 ### From a checkout
 
@@ -222,15 +221,14 @@ then `bun run generate:catalog`. Introspection shows what the key's workspace ca
 Dependencies, bun and OMP stay on their latest releases. Before work on the repository, run
 `bun update --latest`, then `bun run build` and `bun run check`. CI uses the latest bun.
 
-`smoke:binary` runs `/home/agent/.local/lib/omp/bin/omp` by default (`--omp <bin>` or `OMP_BIN`
+`smoke:binary` runs the `omp` binary on PATH by default (`--omp <bin>` or `OMP_BIN`
 changes it). It uses a throwaway HOME and agent dir under `.scratch/`, a fake model and a fake
 Linear on loopback. It checks that `linear_tool_search` is the only Linear tool at start and is a
 native function, that `linear_issue_get` works in the main agent, in a `task` child and in a
 child restricted to `read`, that each Linear request carries the key file value, and that the
 key never reaches a model request.
 
-Design notes live in `docs/`: [`docs/research-assignment.md`](docs/research-assignment.md) and
-[`docs/research-report.md`](docs/research-report.md). Changes are listed in
+Design notes live in [`docs/research-report.md`](docs/research-report.md). Changes are listed in
 [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Security notes

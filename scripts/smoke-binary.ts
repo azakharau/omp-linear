@@ -1,5 +1,5 @@
 /**
- * Smoke on the REAL installed `omp` binary (default /home/agent/.local/lib/omp/bin/omp, or
+ * Smoke on the REAL installed `omp` binary (default: `omp` on PATH, or
  * `--omp <bin>` / `OMP_BIN`). Runs `scripts/measure-context.ts` with a throwaway key file for
  * `linear.apiKeyFile`, a fake model and a fake Linear on loopback, for two load paths:
  * `-e src/index.ts` and `extensions: [<repo>]` in the agent config. HOME, XDG_* and the agent

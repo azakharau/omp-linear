@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-14
+
+### Changed
+
+- The repository is public. Examples use neutral identifiers (`ENG-123`).
+- `smoke:binary` and `measure-context` use the `omp` binary on PATH by default.
+- The research assignment is no longer part of the repository. The research report stays in
+  `docs/`.
+
 ## [1.0.1] - 2026-11-14
 
 ### Changed
@@ -73,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
-[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/azakharau/omp-linear/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/azakharau/omp-linear/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/azakharau/omp-linear/releases/tag/v1.0.0

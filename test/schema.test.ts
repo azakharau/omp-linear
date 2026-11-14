@@ -102,7 +102,7 @@ describe("composeOperation", () => {
 	});
 
 	test("honours an explicit selection override", () => {
-		const { document } = composeOperation(descriptor("lq_issue"), { id: "MNE-1" }, "{ id title }");
+		const { document } = composeOperation(descriptor("lq_issue"), { id: "ENG-1" }, "{ id title }");
 		expect(document).toBe("query lq_issue($id: String!) {\n  issue(id: $id) {\n    id\n    title\n  }\n}");
 	});
 
@@ -119,7 +119,7 @@ describe("composeOperation", () => {
 	test("named fragments in a selection are attached and validated", () => {
 		const { document } = composeOperation(
 			descriptor("lq_issue"),
-			{ id: "MNE-1" },
+			{ id: "ENG-1" },
 			"{ ...IssueBits } fragment IssueBits on Issue { id title }",
 		);
 		expect(document).toContain("...IssueBits");
