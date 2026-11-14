@@ -1,10 +1,9 @@
 {
-  "schemaSha256": "20cadd5061b0c95acbd0ecdb2b387023b1beb3be84c10c74d22b560f61cd8730",
-  "linearCommit": "87d638c0b151575505d36822839324d2287f2e06",
-  "queryCount": 160,
-  "mutationCount": 335,
+  "schemaSha256": "d2f5923ff540bee68e1eae8f1ad7d2b3b4320f57b94dee60d779c7f3c4e27987",
+  "queryCount": 159,
+  "mutationCount": 336,
   "total": 495,
-  "generatedAt": "2026-11-14T16:41:33.338Z",
+  "generatedAt": "2026-11-14T16:52:40.465Z",
   "roots": [
     {
       "kind": "Mutation",
@@ -1667,6 +1666,13 @@
     },
     {
       "kind": "Mutation",
+      "root": "projectMilestoneMove",
+      "tool": "lm_projectMilestoneMove",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
       "root": "projectMilestoneUpdate",
       "tool": "lm_projectMilestoneUpdate",
       "argCount": 2,
@@ -2349,13 +2355,6 @@
       "root": "workflowStateUpdate",
       "tool": "lm_workflowStateUpdate",
       "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "_dummy",
-      "tool": "lq__dummy",
-      "argCount": 0,
       "deprecated": null
     },
     {
@@ -3258,7 +3257,7 @@
       "kind": "Query",
       "root": "searchDocuments",
       "tool": "lq_searchDocuments",
-      "argCount": 9,
+      "argCount": 10,
       "deprecated": null
     },
     {

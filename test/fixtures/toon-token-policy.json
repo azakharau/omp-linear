@@ -24,15 +24,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 137,
-							"toonTokens": 138,
-							"medianSaving": 0,
-							"totalSaving": -0.007299270072992803
+							"toonTokens": 141,
+							"medianSaving": -0.03050219076508265,
+							"totalSaving": -0.029197080291970767
 						},
 						"cl100k_base": {
 							"jsonTokens": 137,
-							"toonTokens": 138,
-							"medianSaving": 0,
-							"totalSaving": -0.007299270072992803
+							"toonTokens": 141,
+							"medianSaving": -0.03050219076508265,
+							"totalSaving": -0.029197080291970767
 						}
 					},
 					"qualifies": false,
@@ -44,19 +44,19 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 264,
-							"toonTokens": 222,
-							"medianSaving": 0.15901981230448387,
-							"totalSaving": 0.15909090909090906
+							"toonTokens": 226,
+							"medianSaving": 0.125,
+							"totalSaving": 0.14393939393939392
 						},
 						"cl100k_base": {
 							"jsonTokens": 264,
-							"toonTokens": 222,
-							"medianSaving": 0.15901981230448387,
-							"totalSaving": 0.15909090909090906
+							"toonTokens": 226,
+							"medianSaving": 0.125,
+							"totalSaving": 0.14393939393939392
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"3": {
 					"samples": 4,
@@ -64,15 +64,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 391,
-							"toonTokens": 306,
-							"medianSaving": 0.2136470588235294,
-							"totalSaving": 0.21739130434782605
+							"toonTokens": 311,
+							"medianSaving": 0.18,
+							"totalSaving": 0.20460358056265981
 						},
 						"cl100k_base": {
 							"jsonTokens": 391,
-							"toonTokens": 306,
-							"medianSaving": 0.2136470588235294,
-							"totalSaving": 0.21739130434782605
+							"toonTokens": 311,
+							"medianSaving": 0.18,
+							"totalSaving": 0.20460358056265981
 						}
 					},
 					"qualifies": true,
@@ -84,15 +84,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 645,
-							"toonTokens": 474,
-							"medianSaving": 0.2579538633050339,
-							"totalSaving": 0.2651162790697674
+							"toonTokens": 481,
+							"medianSaving": 0.22877358490566035,
+							"totalSaving": 0.2542635658914729
 						},
 						"cl100k_base": {
 							"jsonTokens": 645,
-							"toonTokens": 474,
-							"medianSaving": 0.2579538633050339,
-							"totalSaving": 0.2651162790697674
+							"toonTokens": 481,
+							"medianSaving": 0.22877358490566035,
+							"totalSaving": 0.2542635658914729
 						}
 					},
 					"qualifies": true,
@@ -104,15 +104,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 1280,
-							"toonTokens": 894,
-							"medianSaving": 0.2963450481297241,
-							"totalSaving": 0.30156249999999996
+							"toonTokens": 906,
+							"medianSaving": 0.27137488255559034,
+							"totalSaving": 0.29218750000000004
 						},
 						"cl100k_base": {
 							"jsonTokens": 1280,
-							"toonTokens": 894,
-							"medianSaving": 0.2963450481297241,
-							"totalSaving": 0.30156249999999996
+							"toonTokens": 906,
+							"medianSaving": 0.27137488255559034,
+							"totalSaving": 0.29218750000000004
 						}
 					},
 					"qualifies": true,
@@ -124,15 +124,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 3185,
-							"toonTokens": 2154,
-							"medianSaving": 0.3258179183315568,
-							"totalSaving": 0.3237048665620095
+							"toonTokens": 2181,
+							"medianSaving": 0.2982109423757021,
+							"totalSaving": 0.3152276295133438
 						},
 						"cl100k_base": {
 							"jsonTokens": 3185,
-							"toonTokens": 2154,
-							"medianSaving": 0.3258179183315568,
-							"totalSaving": 0.3237048665620095
+							"toonTokens": 2181,
+							"medianSaving": 0.2982109423757021,
+							"totalSaving": 0.3152276295133438
 						}
 					},
 					"qualifies": true,
@@ -144,15 +144,15 @@
 					"tokenizers": {
 						"o200k_base": {
 							"jsonTokens": 6360,
-							"toonTokens": 4254,
-							"medianSaving": 0.3357635745561365,
-							"totalSaving": 0.3311320754716981
+							"toonTokens": 4306,
+							"medianSaving": 0.30738088028122657,
+							"totalSaving": 0.3229559748427673
 						},
 						"cl100k_base": {
 							"jsonTokens": 6360,
-							"toonTokens": 4254,
-							"medianSaving": 0.3357635745561365,
-							"totalSaving": 0.3311320754716981
+							"toonTokens": 4306,
+							"medianSaving": 0.30738088028122657,
+							"totalSaving": 0.3229559748427673
 						}
 					},
 					"qualifies": true,
@@ -160,8 +160,8 @@
 				}
 			},
 			"decision": "toon",
-			"minRows": 2,
-			"reason": "wins from 2 row(s) per table upwards on both tokenizers, losslessly"
+			"minRows": 3,
+			"reason": "wins from 3 row(s) per table upwards on both tokenizers, losslessly"
 		},
 		"keyed-table": {
 			"byPageSize": {
@@ -313,140 +313,140 @@
 		"object": {
 			"byPageSize": {
 				"1": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"2": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"3": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"5": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"10": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"25": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"50": {
-					"samples": 101,
-					"lossless": 101,
+					"samples": 100,
+					"lossless": 100,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1648,
-							"toonTokens": 1521,
+							"jsonTokens": 1633,
+							"toonTokens": 1505,
 							"medianSaving": 0.05555555555555558,
-							"totalSaving": 0.0770631067961165
+							"totalSaving": 0.07838334353949783
 						},
 						"cl100k_base": {
-							"jsonTokens": 1633,
-							"toonTokens": 1459,
+							"jsonTokens": 1617,
+							"toonTokens": 1442,
 							"medianSaving": 0.11111111111111116,
-							"totalSaving": 0.10655235762400495
+							"totalSaving": 0.10822510822510822
 						}
 					},
 					"qualifies": false,
@@ -460,140 +460,140 @@
 		"nested": {
 			"byPageSize": {
 				"1": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 35248,
-							"toonTokens": 35585,
-							"medianSaving": 0.022727272727272707,
-							"totalSaving": -0.00956082614616438
+							"jsonTokens": 35324,
+							"toonTokens": 35680,
+							"medianSaving": 0,
+							"totalSaving": -0.01007813384667644
 						},
 						"cl100k_base": {
-							"jsonTokens": 33972,
-							"toonTokens": 35240,
+							"jsonTokens": 34075,
+							"toonTokens": 35331,
 							"medianSaving": 0,
-							"totalSaving": -0.03732485576356992
+							"totalSaving": -0.03685986793837115
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"2": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 51572,
-							"toonTokens": 49112,
-							"medianSaving": 0.022727272727272707,
-							"totalSaving": 0.04770030248972312
+							"jsonTokens": 51673,
+							"toonTokens": 49192,
+							"medianSaving": 0,
+							"totalSaving": 0.04801346931666439
 						},
 						"cl100k_base": {
-							"jsonTokens": 49759,
-							"toonTokens": 48719,
+							"jsonTokens": 49897,
+							"toonTokens": 48789,
 							"medianSaving": 0,
-							"totalSaving": 0.020900741574388593
+							"totalSaving": 0.022205743832294567
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"3": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 68400,
-							"toonTokens": 63087,
-							"medianSaving": 0.02564102564102566,
-							"totalSaving": 0.07767543859649118
+							"jsonTokens": 68536,
+							"toonTokens": 63160,
+							"medianSaving": 0.011428571428571455,
+							"totalSaving": 0.07844052760592968
 						},
 						"cl100k_base": {
-							"jsonTokens": 66060,
-							"toonTokens": 62656,
+							"jsonTokens": 66243,
+							"toonTokens": 62713,
 							"medianSaving": 0,
-							"totalSaving": 0.05152891310929453
+							"totalSaving": 0.053288649366725505
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"5": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 103568,
-							"toonTokens": 92381,
-							"medianSaving": 0.03448275862068961,
-							"totalSaving": 0.1080159894948246
+							"jsonTokens": 103804,
+							"toonTokens": 92464,
+							"medianSaving": 0.020408163265306145,
+							"totalSaving": 0.1092443451119417
 						},
 						"cl100k_base": {
-							"jsonTokens": 100204,
-							"toonTokens": 91904,
+							"jsonTokens": 100507,
+							"toonTokens": 91959,
 							"medianSaving": 0,
-							"totalSaving": 0.08283102470959247
+							"totalSaving": 0.08504880257096525
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"10": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 200308,
-							"toonTokens": 173456,
-							"medianSaving": 0.045454545454545414,
-							"totalSaving": 0.134053557521417
+							"jsonTokens": 200969,
+							"toonTokens": 173704,
+							"medianSaving": 0.020408163265306145,
+							"totalSaving": 0.13566769004174772
 						},
 						"cl100k_base": {
-							"jsonTokens": 194559,
-							"toonTokens": 173039,
+							"jsonTokens": 195337,
+							"toonTokens": 173229,
 							"medianSaving": 0,
-							"totalSaving": 0.11060912114063082
+							"totalSaving": 0.11317876285598738
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"25": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 568438,
-							"toonTokens": 486191,
-							"medianSaving": 0.045454545454545414,
-							"totalSaving": 0.14468948240617274
+							"jsonTokens": 571874,
+							"toonTokens": 488134,
+							"medianSaving": 0.03359173126614989,
+							"totalSaving": 0.146430857146854
 						},
 						"cl100k_base": {
-							"jsonTokens": 557034,
-							"toonTokens": 487454,
+							"jsonTokens": 560737,
+							"toonTokens": 489249,
 							"medianSaving": 0,
-							"totalSaving": 0.1249115852892283
+							"totalSaving": 0.12748935775595338
 						}
 					},
 					"qualifies": false,
 					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
 				},
 				"50": {
-					"samples": 375,
-					"lossless": 375,
+					"samples": 377,
+					"lossless": 377,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 1439988,
-							"toonTokens": 1237416,
-							"medianSaving": 0.04761904761904767,
-							"totalSaving": 0.1406761723014358
+							"jsonTokens": 1453049,
+							"toonTokens": 1246184,
+							"medianSaving": 0.045454545454545414,
+							"totalSaving": 0.14236615558043808
 						},
 						"cl100k_base": {
-							"jsonTokens": 1424159,
-							"toonTokens": 1246479,
+							"jsonTokens": 1437737,
+							"toonTokens": 1254949,
 							"medianSaving": 0,
-							"totalSaving": 0.1247613503829278
+							"totalSaving": 0.12713590872322267
 						}
 					},
 					"qualifies": false,
@@ -607,144 +607,144 @@
 		"scalar": {
 			"byPageSize": {
 				"1": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"2": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"3": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"5": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"10": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"25": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				},
 				"50": {
-					"samples": 1,
-					"lossless": 1,
+					"samples": 0,
+					"lossless": 0,
 					"tokenizers": {
 						"o200k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						},
 						"cl100k_base": {
-							"jsonTokens": 4,
-							"toonTokens": 2,
-							"medianSaving": 0.5,
-							"totalSaving": 0.5
+							"jsonTokens": 0,
+							"toonTokens": 0,
+							"medianSaving": 0,
+							"totalSaving": 0
 						}
 					},
-					"qualifies": true,
-					"note": "median token saving >= 0.15 on both tokenizers"
+					"qualifies": false,
+					"note": "no samples of this class at this page size"
 				}
 			},
 			"decision": "json",

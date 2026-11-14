@@ -22,7 +22,7 @@
 		"scalar": "json"
 	},
 	"minRows": {
-		"table": 2,
+		"table": 3,
 		"keyed-table": 25,
 		"object": null,
 		"nested": null,

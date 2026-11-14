@@ -154,9 +154,13 @@ Every failure names its outcome: `not_sent`, `rejected` (the server refused, not
 applied and never retries it.
 
 `bun run schema:check --key-file ~/linear.env` compares the pinned schema with live Linear
-introspection. It lists live-only and pinned-only root fields, changed arguments, and ergonomic
-documents that the live schema rejects. Exit codes: 0 no drift, 1 drift, 2 request failed.
-Pinned-only roots can be internal operations that public introspection does not show.
+introspection. It lists live-only and pinned-only root fields, changed arguments, every type whose
+definition differs, and ergonomic documents that the live schema rejects. Exit codes: 0 no drift,
+1 drift, 2 request failed.
+
+The pinned schema comes from live introspection, not from the SDK file in linear/linear: that file
+lags behind the API. To refresh the pin, run `bun run schema:check --key-file ~/linear.env --write`,
+then `bun run generate:catalog`. Introspection shows what the key's workspace can see.
 
 ## Attribution (`actor=app`)
 
