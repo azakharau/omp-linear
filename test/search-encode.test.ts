@@ -45,7 +45,7 @@ describe("tokenizer", () => {
 
 describe("search", () => {
 	test("indexes the full catalog plus the hand-written tools", () => {
-		expect(docs.length).toBe(550 + Object.keys(ERGONOMIC).length);
+		expect(docs.length).toBe(495 + Object.keys(ERGONOMIC).length);
 	});
 
 	test("'create issue' and 'new ticket' both rank linear_issue_create first", () => {

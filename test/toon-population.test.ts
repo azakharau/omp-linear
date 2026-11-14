@@ -8,7 +8,7 @@ import { catalog, LIST_ROWS, populateOne } from "../scripts/support/populate.ts"
 /**
  * Output population verification.
  *
- * Every one of the 550 catalog operations is composed with its default selection and executed
+ * Every one of the 495 catalog operations is composed with its default selection and executed
  * against the pinned schema with a synthesising resolver, producing a response of exactly the shape
  * the real API would return for that selection. Each response goes through `encodeOutput`, and the
  * resulting format/shape/byte decision is compared to a frozen baseline, so a change in the
@@ -53,7 +53,7 @@ const baseline = JSON.parse(fs.readFileSync(BASELINE, "utf8")) as {
 
 describe("schema-derived output population", () => {
  test("every catalog operation produces a populated response", () => {
-  expect(rows.length).toBe(550);
+  expect(rows.length).toBe(495);
   expect(baseline.listRows).toBe(LIST_ROWS);
   // A populated response is never empty: the default selection always pulls real fields.
   expect(rows.filter((r) => r.bytes < 3)).toEqual([]);

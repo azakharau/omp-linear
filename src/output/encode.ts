@@ -4,7 +4,7 @@
  * The decision is purely structural — shape class plus row count — and is taken before anything is
  * serialised, so a payload is never encoded twice to compare formats. The table in `policy.json` is
  * produced offline by `scripts/measure-toon-policy.ts` from real token counts (o200k_base and
- * cl100k_base) over the populated 550-operation corpus at a ladder of page sizes: a class is marked
+ * cl100k_base) over the populated 495-operation corpus at a ladder of page sizes: a class is marked
  * `toon` only where both tokenizers show at least a 15% median token saving and every sample decodes
  * back losslessly, and `minRows` is the smallest table size from which that holds and keeps holding.
  */

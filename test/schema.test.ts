@@ -36,18 +36,18 @@ describe("catalog coverage", () => {
 		const expected = new Set<string>();
 		for (const name of Object.keys(schema.getQueryType()!.getFields())) expected.add(`Query.${name}`);
 		for (const name of Object.keys(schema.getMutationType()!.getFields())) expected.add(`Mutation.${name}`);
-		expect(catalog.length).toBe(550);
+		expect(catalog.length).toBe(495);
 		expect(roots.size).toBe(catalog.length);
 		expect([...roots].sort()).toEqual([...expected].sort());
 	});
 
 	test("manifest matches the pinned schema digest and the generated catalog", () => {
 		const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "generated", "coverage-manifest.json"), "utf8"));
-		expect(manifest.schemaSha256).toBe("354098d4acd5859524f0f9a77e5b29691e4b4f186b5334e97125ef8c4a2719da");
-		expect(manifest.linearCommit).toBe("3addb24bdf771700da1c050742e70e645cc7e36a");
-		expect(manifest.total).toBe(550);
-		expect(manifest.queryCount + manifest.mutationCount).toBe(550);
-		expect(manifest.roots.length).toBe(550);
+		expect(manifest.schemaSha256).toBe("20cadd5061b0c95acbd0ecdb2b387023b1beb3be84c10c74d22b560f61cd8730");
+		expect(manifest.linearCommit).toBe("87d638c0b151575505d36822839324d2287f2e06");
+		expect(manifest.total).toBe(495);
+		expect(manifest.queryCount + manifest.mutationCount).toBe(495);
+		expect(manifest.roots.length).toBe(495);
 	});
 
 	test("every argument is present with required mirroring GraphQL non-null", () => {
@@ -196,7 +196,7 @@ describe("describe", () => {
 		expect(input).toContain("  teamId: String!");
 
 		expect(describeName("PaginationOrderBy")).toBe(
-			"enum PaginationOrderBy — By which field should the pagination order by\n  createdAt\n  updatedAt",
+			"enum PaginationOrderBy — The timestamp used to order a paginated list. Forward pagination returns the newest results first.\n  createdAt\n  updatedAt",
 		);
 
 		const union = describeName("AgentActivityContent");
@@ -449,5 +449,5 @@ describe("injectCreateAsUser", () => {
 test("the pinned SDL on disk is the one the catalog was generated from", () => {
 	const sdl = fs.readFileSync(path.join(ROOT, "schema", "linear.schema.graphql"), "utf8");
 	const rebuilt = buildSchema(sdl);
-	expect(Object.keys(rebuilt.getQueryType()!.getFields()).length + Object.keys(rebuilt.getMutationType()!.getFields()).length).toBe(550);
+	expect(Object.keys(rebuilt.getQueryType()!.getFields()).length + Object.keys(rebuilt.getMutationType()!.getFields()).length).toBe(495);
 });
