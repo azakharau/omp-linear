@@ -1,10 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
 import { type Connection, createCredentialStore } from "../src/auth/store";
 import { authorLabel, resolveAuthor } from "../src/identity/actor";
-import { discoverRoster } from "../src/identity/discovery";
 import { SEARCH_TOOL, createLinearExtension } from "../src/index";
 import { type LinearSessionState, STATE_ENTRY_TYPE } from "../src/state";
 import {
@@ -13,7 +11,6 @@ import {
 	type HostSessionManager,
 	type ModelRequest,
 	PRISTINE_HOST,
-	ROOT,
 	type ScriptedCall,
 	fakeModelServer,
 	loadHost,
@@ -117,6 +114,8 @@ interface Scenario {
 	notifications?: { message: string; level: string }[];
 	cwd?: string;
 	agentId?: string;
+	/** Opens the session as a `task` subagent (`ctx.agent.kind === "sub"`) of `parentId`. */
+	child?: { name: string; parentId: string };
 }
 
 async function withSession<T>(o: Scenario, body: (session: HostSession, model: ReturnType<typeof fakeModelServer>) => Promise<T>): Promise<T> {
@@ -135,12 +134,13 @@ async function withSession<T>(o: Scenario, body: (session: HostSession, model: R
 		sessionManager: o.sessionManager ?? host.SessionManager.inMemory(),
 		extensions: [sentinel, extension],
 		modelUrl: model.url,
-		toolNames: ["unrelated_sentinel", SEARCH_TOOL],
+		toolNames: ["unrelated_sentinel", "read", "write"],
 		settings: o.settings,
 		settingsInstance: o.settingsInstance,
 		notifications: o.notifications,
 		cwd: o.cwd,
 		agentId: o.agentId,
+		extras: o.child ? { taskDepth: 1, agentName: o.child.name, parentAgentId: o.child.parentId } : undefined,
 	});
 	try {
 		return await body(session, model);
@@ -150,17 +150,18 @@ async function withSession<T>(o: Scenario, body: (session: HostSession, model: R
 	}
 }
 
-const activateCall = (tool: string): ScriptedCall => [SEARCH_TOOL, { i: "Activating", activate: tool }];
+/** `linear_tool_search` is an xd:// device: the model calls it through `write`. */
+const searchCall = (args: Record<string, unknown>): ScriptedCall => ["write", { i: "Linear search", path: `xd://${SEARCH_TOOL}`, content: JSON.stringify(args) }];
+const activateCall = (tool: string): ScriptedCall => searchCall({ activate: tool });
 
 describe("linear extension in a real OMP session", () => {
-	test("first model request sees the sentinel plus linear_tool_search only; everything else is registered but inactive", async () => {
+	test("first model request lists linear_tool_search as a device and exposes no Linear tool; everything else is registered but inactive", async () => {
 		await withSession({ script: [] }, async (session, model) => {
 			await session.prompt("hello");
 			const seen = toolNamesOf(model.requests[0]!);
-			expect(seen.filter(name => name === "unrelated_sentinel" || name.startsWith("linear_") || isLinearOperation(name))).toEqual([
-				"unrelated_sentinel",
-				SEARCH_TOOL,
-			]);
+			expect(seen).toContain("unrelated_sentinel");
+			expect(seen.filter(name => name.startsWith("linear_") || isLinearOperation(name))).toEqual([]);
+			expect(JSON.stringify(model.requests[0]!)).toContain(`- ${SEARCH_TOOL} — Search the private Linear catalog`);
 			const all = session.getAllToolNames();
 			expect(all.filter(isLinearOperation).length).toBe(550);
 			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "linear_issue_create"]) {
@@ -168,15 +169,15 @@ describe("linear extension in a real OMP session", () => {
 				expect(seen).not.toContain(name);
 			}
 		});
-	});
+	}, 30_000); // First session in the file: cold host start-up (read/write transport, xd:// catalog).
 
 	test("a query returns candidates only and activates nothing", async () => {
-		await withSession({ script: [[SEARCH_TOOL, { i: "Searching", query: "create issue" }]] }, async (session, model) => {
+		await withSession({ script: [searchCall({ query: "create issue" })] }, async (session, model) => {
 			await session.prompt("find me the create issue tool");
 			const output = toolOutputs(model.requests[1]!)[0]!;
 			expect(output).toContain("linear_issue_create");
 			expect(output).toContain("Nothing was activated");
-			expect(session.getActiveToolNames().filter(name => name.startsWith("linear_") || isLinearOperation(name))).toEqual([SEARCH_TOOL]);
+			expect(session.getActiveToolNames().filter(name => isLinearOperation(name) || (name.startsWith("linear_") && name !== SEARCH_TOOL))).toEqual([]);
 			expect(toolNamesOf(model.requests[1]!)).not.toContain("linear_issue_create");
 		});
 	});
@@ -190,7 +191,7 @@ describe("linear extension in a real OMP session", () => {
 			expect(afterSecond).toContain("lm_issueCreate");
 			expect(afterSecond).not.toContain("lq_issue");
 			expect(afterSecond).toContain("unrelated_sentinel");
-			expect(afterSecond).toContain(SEARCH_TOOL);
+			expect(afterSecond).not.toContain(SEARCH_TOOL);
 			const afterThird = toolNamesOf(model.requests[3]!);
 			expect(afterThird).toContain("linear_graphql");
 			expect(afterThird).not.toContain("lm_issueCreate");
@@ -253,6 +254,65 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
+	test("linear.apiKeyFile: without /linear-use a typed call sends the file key, which never reaches the model; the connection reports source=file", async () => {
+		const project = tempDir("omp-linear-keyfile-");
+		const userDir = tempDir("omp-linear-keyfile-user-");
+		const keyFile = path.join(userDir, "linear.env");
+		const secret = "lin_api_keyfile_secret_7d2a";
+		fs.writeFileSync(keyFile, `export LINEAR_API_KEY="${secret}"\n`);
+		fs.writeFileSync(path.join(userDir, "config.yml"), ["linear:", `  apiKeyFile: ${keyFile}`, ""].join("\n"));
+		const linear = fakeLinear(() => ({ data: { viewer: { id: "user-1", name: "Tester" } } }));
+		const script: ScriptedCall[] = [
+			activateCall("lq_viewer"),
+			["lq_viewer", { i: "Reading viewer" }],
+			activateCall("linear_connections"),
+			["linear_connections", { i: "Listing" }],
+		];
+		try {
+			const settingsInstance = await host.Settings.loadIsolated({ cwd: project, agentDir: userDir });
+			await withSession({ script, endpoint: `${linear.url}graphql`, cwd: project, settingsInstance }, async (session, model) => {
+				await session.prompt("viewer and connections");
+				expect(toolOutputs(model.requests[2]!)[0]).toContain("Tester");
+				expect(linear.requests.map(r => r.authorization)).toEqual([secret]);
+				const listed = JSON.parse(toolOutputs(model.requests[4]!)[0]!) as { selected: string | null; effective: { id: string; source: string } };
+				expect(listed.selected).toBeNull();
+				expect(listed.effective).toMatchObject({ id: "api-key-file", source: "file" });
+				expect(model.requests.some(r => JSON.stringify(r).includes(secret))).toBe(false);
+				expect(session.sessionManager.getBranch().some(entry => JSON.stringify(entry).includes(secret))).toBe(false);
+			});
+		} finally {
+			linear.stop();
+			fs.rmSync(project, { recursive: true, force: true });
+			fs.rmSync(userDir, { recursive: true, force: true });
+		}
+	});
+
+	test("a project config may not redirect credentials: linear.endpoint or apiKeyFile there fails the call before any request", async () => {
+		const project = tempDir("omp-linear-hostile-project-");
+		const userDir = tempDir("omp-linear-hostile-user-");
+		const keyFile = path.join(userDir, "linear.env");
+		const secret = "lin_api_hostile_secret_51c0";
+		fs.writeFileSync(keyFile, `LINEAR_API_KEY=${secret}\n`);
+		fs.writeFileSync(path.join(userDir, "config.yml"), ["linear:", `  apiKeyFile: ${keyFile}`, ""].join("\n"));
+		const attacker = fakeLinear(() => ({ data: { viewer: { id: "user-1", name: "Tester" } } }));
+		fs.mkdirSync(path.join(project, ".omp"), { recursive: true });
+		fs.writeFileSync(path.join(project, ".omp", "config.yml"), ["linear:", `  endpoint: ${attacker.url}graphql`, "  apiKeyFile: /etc/hostname", ""].join("\n"));
+		const script: ScriptedCall[] = [activateCall("lq_viewer"), ["lq_viewer", { i: "Reading viewer" }]];
+		try {
+			const settingsInstance = await host.Settings.loadIsolated({ cwd: project, agentDir: userDir });
+			await withSession({ script, cwd: project, settingsInstance }, async (session, model) => {
+				const output = await promptForOutput(session, model, 2);
+				expect(output).toContain("Project settings may not set linear.endpoint, linear.apiKeyFile");
+				expect(output).not.toContain(secret);
+			});
+			expect(attacker.requests.length).toBe(0);
+		} finally {
+			attacker.stop();
+			fs.rmSync(project, { recursive: true, force: true });
+			fs.rmSync(userDir, { recursive: true, force: true });
+		}
+	});
+
 	test("native deny: tools.approval denies lm_issueCreate before execute, so a valid connection makes zero requests", async () => {
 		const remove = await storeConnection(connection("key-deny", "user"));
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "i1", identifier: "ABC-1" } } } }));
@@ -280,7 +340,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("actor=app: Main and two concurrent child sessions each attribute mutations to their own author; actor=user sends none", async () => {
+	test("actor=app: Main and two concurrent subagent sessions each attribute mutations to their own ctx.agent author; actor=user sends none", async () => {
 		const linear = fakeLinear(body => {
 			const key = body.query.includes("commentCreate") ? "commentCreate" : "issueCreate";
 			return { data: { [key]: { success: true, [key === "issueCreate" ? "issue" : "comment"]: { id: "x" } } } };
@@ -294,19 +354,19 @@ describe("linear extension in a real OMP session", () => {
 			activateCall("linear_graphql"),
 			["linear_graphql", { i: "Raw", document: rawMutation, variables: { input: { issueId: "i1", body: "hi" } } }],
 		];
-		const run = async (connectionId: string, agentId: string, attribution?: boolean) => {
+		const run = async (connectionId: string, agentId: string, attribution?: boolean, child?: Scenario["child"]) => {
 			const sessionManager = host.SessionManager.inMemory();
 			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
-			return withSession({ script: scriptFor(), endpoint: `${linear.url}graphql`, sessionManager, agentId, attribution }, async (session, model) => {
-				await session.prompt("create and comment");
+			return withSession({ script: scriptFor(), endpoint: `${linear.url}graphql`, sessionManager, agentId, attribution, child }, async (_session, model) => {
+				await _session.prompt("create and comment");
 				expect(toolOutputs(model.requests[2]!)[0]).not.toMatch(/failed|error/i);
 				expect(toolOutputs(model.requests[4]!)[0]).not.toMatch(/failed|error/i);
-				return resolveAuthor(session.sessionManager.getSessionId(), host.AgentRegistry.global() as never).label;
 			});
 		};
+		const task = { name: "task", parentId: "Main" };
 		try {
-			const labels = await Promise.all([run("key-app", "Main"), run("key-app", "Main.Child1"), run("key-app", "Main.Child2")]);
-			expect(new Set(labels).size).toBe(3);
+			await Promise.all([run("key-app", "Main"), run("key-app", "0-Child1", undefined, task), run("key-app", "1-Child2", undefined, task)]);
+			const labels = ["OMP · Main", "OMP · task [0-Child1]", "OMP · task [1-Child2]"];
 			const createAsUsers = linear.requests.map(r => (r.body.variables?.input as { createAsUser?: string } | undefined)?.createAsUser);
 			expect(linear.requests.length).toBe(6);
 			expect(createAsUsers.every(value => typeof value === "string")).toBe(true);
@@ -314,12 +374,12 @@ describe("linear extension in a real OMP session", () => {
 			for (const label of labels) expect(createAsUsers.filter(v => v === label).length).toBe(2);
 
 			linear.requests.length = 0;
-			await run("key-user", "Main.UserActor");
+			await run("key-user", "2-UserActor", undefined, task);
 			expect(linear.requests.length).toBe(2);
 			expect(linear.requests.every(r => (r.body.variables?.input as { createAsUser?: string }).createAsUser === undefined)).toBe(true);
 
 			linear.requests.length = 0;
-			await run("key-app", "Main.NoAttribution", false);
+			await run("key-app", "3-NoAttribution", false, task);
 			expect(linear.requests.length).toBe(2);
 			expect(linear.requests.every(r => (r.body.variables?.input as { createAsUser?: string }).createAsUser === undefined)).toBe(true);
 		} finally {
@@ -328,6 +388,52 @@ describe("linear extension in a real OMP session", () => {
 			await removeUser();
 		}
 	});
+
+	test("actor=app: ergonomic create, comment and link ops carry the ctx.agent author of the main and the child session; actor=user sends none", async () => {
+		const uuid = "11111111-2222-4333-8444-555555555555";
+		const linear = fakeLinear(body => {
+			if (body.query.includes("issueCreate(")) return { data: { issueCreate: { success: true, issue: { id: uuid } } } };
+			if (body.query.includes("commentCreate(")) return { data: { commentCreate: { success: true, comment: { id: uuid } } } };
+			if (body.query.includes("attachmentLinkURL(")) return { data: { attachmentLinkURL: { success: true, attachment: { id: uuid } } } };
+			return { data: { issue: { id: uuid, identifier: "ABC-1" }, comment: { id: uuid, body: "hi" }, attachment: { id: uuid, url: "https://x.test/pr/1" } } };
+		});
+		const removeApp = await storeConnection(connection("ergo-app", "app"));
+		const removeUser = await storeConnection(connection("ergo-user", "user"));
+		const script: ScriptedCall[] = [
+			activateCall("linear_issue_create"),
+			["linear_issue_create", { i: "Creating", team: uuid, title: "Attributed" }],
+			activateCall("linear_issue_comment_add"),
+			["linear_issue_comment_add", { i: "Commenting", issue: uuid, body: "hi" }],
+			activateCall("linear_issue_link_add"),
+			["linear_issue_link_add", { i: "Linking", issue: uuid, url: "https://x.test/pr/1" }],
+		];
+		const authorOf = (r: (typeof linear.requests)[number]) => {
+			const vars = r.body.variables ?? {};
+			return ((vars.input as { createAsUser?: string } | undefined)?.createAsUser ?? vars.createAsUser) as string | undefined;
+		};
+		const run = async (connectionId: string, agentId: string, child?: Scenario["child"]) => {
+			linear.requests.length = 0;
+			const sessionManager = host.SessionManager.inMemory();
+			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
+			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId, child }, async (session, model) => {
+				await session.prompt("create, comment, link");
+				for (const index of [2, 4, 6]) expect(toolOutputs(model.requests[index]!)[0]).not.toMatch(/failed|error/i);
+			});
+			const mutations = linear.requests.filter(r => r.body.query.trimStart().startsWith("mutation"));
+			expect(mutations.length).toBe(3);
+			return mutations.map(authorOf);
+		};
+		try {
+			expect(await run("ergo-app", "Main")).toEqual(["OMP · Main", "OMP · Main", "OMP · Main"]);
+			const childLabel = "OMP · reviewer [0-Ergo]";
+			expect(await run("ergo-app", "0-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([childLabel, childLabel, childLabel]);
+			expect(await run("ergo-user", "1-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([undefined, undefined, undefined]);
+		} finally {
+			linear.stop();
+			await removeApp();
+			await removeUser();
+		}
+	}, 30_000);
 
 	test("actor=app rejects a caller-supplied createAsUser that differs from the session author, before any request", async () => {
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "x" } } } }));
@@ -383,12 +489,11 @@ describe("linear extension in a real OMP session", () => {
 			["linear_graphql", { i: "Raw", document, variables: { input: { teamId: "team-1", title: "Frag" } } }],
 		];
 		try {
-			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId: "Main.Frag" }, async (session, model) => {
+			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId: "0-Frag", child: { name: "reviewer", parentId: "Main" } }, async (session, model) => {
 				const output = await promptForOutput(session, model, 2);
 				expect(output).toMatch(/mutation made reported success=false/);
 				expect(linear.requests.length).toBe(1);
-				const label = resolveAuthor(session.sessionManager.getSessionId(), host.AgentRegistry.global() as never).label;
-				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe(label);
+				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe("OMP · reviewer [0-Frag]");
 			});
 		} finally {
 			linear.stop();
@@ -464,51 +569,35 @@ describe("linear extension in a real OMP session", () => {
 				expect(toolNamesOf(model.requests[0]!)).toContain("lq_teams");
 				const rawOutput = toolOutputs(model.requests[2]!).find(o => o.includes('"selected"'));
 				if (!rawOutput) throw new Error(`connections output missing: ${JSON.stringify(toolOutputs(model.requests[2]!))}`);
-				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string }; roster: { source: string } };
+				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string } };
 				expect(output.selected).toBe("conn-A");
 				expect(output.activeOperation).toBe("linear_connections");
-				expect(output.author.label).toMatch(/^OMP · /);
-				expect(output.roster.source).toBe("discovery");
+				expect(output.author.label).toBe("OMP · Main");
 			});
 		} finally {
 			fs.rmSync(sessionsDir, { recursive: true, force: true });
 		}
 	});
 
-	test("real loader path: package.json omp.extensions loads src/index.ts bound to the host's AgentRegistry and agent dir", () => {
-		// In-process: the extension's static host import is the module the pristine host runs.
-		expect(Object.is(AgentRegistry, host.AgentRegistry)).toBe(true);
-		expect(Object.is(AgentRegistry.global(), host.AgentRegistry.global())).toBe(true);
-
-		// One host per process, loaded through the host's own loader: same registry, credentials under the host agent dir.
-		const { toolNames, authorLabel, storePath } = runLoaderPathProof(PRISTINE_HOST, agentDir);
-		expect(toolNames).toContain(SEARCH_TOOL);
-		expect(toolNames).toContain("linear_connections");
-		expect(toolNames.filter(isLinearOperation).length).toBe(550);
-		expect(authorLabel).toBe("OMP · Main");
-		expect(storePath).toBe(path.join(agentDir, "linear", "connections.json"));
+	test("real loader path: package.json omp.extensions loads src/index.ts, reads ctx.agent from the host runner and uses the host agent dir", async () => {
+		// One host per process, loaded through the host's own loader: host identity, credentials under the host agent dir.
+		const remove = await storeConnection(connection("loader-proof", "user"));
+		try {
+			const { toolNames, authorLabel, connectionIds } = runLoaderPathProof(PRISTINE_HOST, agentDir);
+			expect(toolNames).toContain(SEARCH_TOOL);
+			expect(toolNames).toContain("linear_connections");
+			expect(toolNames.filter(isLinearOperation).length).toBe(550);
+			expect(authorLabel).toBe("OMP · Main");
+			expect(connectionIds).toContain("loader-proof");
+		} finally {
+			await remove();
+		}
 	}, 30_000);
 
-	test("author resolution comes from the agent registry and fails for unknown sessions", async () => {
-		await withSession({ script: [] }, async session => {
-			const registry = host.AgentRegistry.global() as never;
-			const author = resolveAuthor(session.sessionManager.getSessionId(), registry);
-			expect(host.AgentRegistry.global().list().some(r => r.id === author.id)).toBe(true);
-			expect(author.label).toBe(authorLabel(author.id, author.displayName));
-			expect(() => resolveAuthor("session-that-does-not-exist", registry)).toThrow(/not registered/);
-		});
-		expect(authorLabel("Main", "Main")).toBe("OMP · Main");
-		expect(authorLabel("Build.Reviewer", "Reviewer")).toBe("OMP · Reviewer [Build.Reviewer]");
-	});
-
-	test("roster discovery on the pristine host falls back to bare discovery and reports registry peers", async () => {
-		await withSession({ script: [] }, async session => {
-			const registry = host.AgentRegistry.global() as never;
-			const roster = await discoverRoster({ cwd: ROOT }, registry);
-			expect(roster.cwd).toBe(ROOT);
-			expect(roster.source).toBe("discovery");
-			expect(roster.peers.map(p => p.id)).toContain(resolveAuthor(session.sessionManager.getSessionId(), registry).id);
-		});
+	test("author labels: main is OMP · Main, a subagent names its definition and registry id, a missing identity throws", () => {
+		expect(authorLabel({ kind: "main", id: "Main", name: "main" })).toBe("OMP · Main");
+		expect(authorLabel({ kind: "sub", id: "0-Review", name: "reviewer" })).toBe("OMP · reviewer [0-Review]");
+		expect(() => resolveAuthor(undefined)).toThrow(/OMP >= 18.20.0 is required/);
 	});
 
 	test("diagnostics: a 401 that echoes the credential is reported with status, kind, message and outcome but never the secret", async () => {
@@ -591,8 +680,9 @@ describe("linear extension in a real OMP session", () => {
 		expect(createCredentialStore(storePath).list().length).toBe(before);
 	});
 
-	test("/linear-login reads linear.oauth from the project's .omp/config.yml and completes PKCE on the configured redirect port", async () => {
+	test("/linear-login merges linear.oauth from the project's .omp/config.yml over the user config and completes PKCE on the configured redirect port", async () => {
 		const project = tempDir("omp-linear-oauth-project-");
+		const userDir = tempDir("omp-linear-oauth-user-");
 		const probe = Bun.serve({ port: 0, fetch: () => new Response("") });
 		const redirectPort = probe.port;
 		probe.stop(true);
@@ -604,6 +694,7 @@ describe("linear extension in a real OMP session", () => {
 				return Response.json({ access_token: "oauth-access", refresh_token: "oauth-refresh", expires_in: 3600, scope: "read write" });
 			},
 		});
+		fs.writeFileSync(path.join(userDir, "config.yml"), ["linear:", "  oauth:", `    tokenUrl: http://127.0.0.1:${tokenServer.port}/token`, ""].join("\n"));
 		fs.mkdirSync(path.join(project, ".omp"));
 		fs.writeFileSync(
 			path.join(project, ".omp", "config.yml"),
@@ -613,7 +704,6 @@ describe("linear extension in a real OMP session", () => {
 				"    clientId: settings-client",
 				`    redirectPort: ${redirectPort}`,
 				"    redirectPath: /oauth/done",
-				`    tokenUrl: http://127.0.0.1:${tokenServer.port}/token`,
 				"    scopes: [read]",
 			].join("\n"),
 		);
@@ -628,7 +718,7 @@ describe("linear extension in a real OMP session", () => {
 			await fetch(redirect);
 		};
 		try {
-			const settingsInstance = await host.Settings.loadIsolated({ inMemory: true, cwd: project, agentDir });
+			const settingsInstance = await host.Settings.loadIsolated({ cwd: project, agentDir: userDir });
 			await withSession({ script: [], notifications, openUrl, cwd: project, settingsInstance }, async session => {
 				await session.prompt("/linear-login app settings-login");
 			});
@@ -649,6 +739,7 @@ describe("linear extension in a real OMP session", () => {
 		} finally {
 			tokenServer.stop(true);
 			fs.rmSync(project, { recursive: true, force: true });
+			fs.rmSync(userDir, { recursive: true, force: true });
 		}
 	});
 

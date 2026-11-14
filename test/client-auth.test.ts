@@ -431,6 +431,31 @@ describe("token endpoint interaction", () => {
 		const revoke = token.requests.find(entry => entry.path === "/revoke")!;
 		expect(new URLSearchParams(revoke.body).get("token")).toBe(SENTINELS.accessToken);
 	});
+
+	test("a token error that echoes the request keeps only error/error_description, scrubbed and capped", async () => {
+		const secret = "client-secret-value-123456";
+		const token = await startServer(() => ({
+			status: 400,
+			body: JSON.stringify({
+				error: "invalid_grant",
+				error_description: `bad code verifier-abcdefgh with ${secret} ${"x".repeat(400)}`,
+				echo: { client_secret: secret, code: "code-abcdefgh" },
+			}),
+		}));
+		const config: OAuthClientConfig = {
+			clientId: "client-1",
+			clientSecret: secret,
+			authorizeUrl: `${token.url}/authorize`,
+			tokenUrl: `${token.url}/token`,
+			revokeUrl: `${token.url}/revoke`,
+			scopes: ["read"],
+		};
+		const error = await exchangeCode(config, { code: "code-abcdefgh", verifier: "verifier-abcdefgh", redirectUri: "http://127.0.0.1/callback" }).catch(e => e as Error);
+		if (!(error instanceof Error)) throw new Error("exchange should fail");
+		expect(error.message).toMatch(/^token endpoint rejected the request: HTTP 400 invalid_grant: bad code \[redacted\] with \[redacted\]/);
+		for (const leaked of [secret, "verifier-abcdefgh", "code-abcdefgh", "echo"]) expect(error.message).not.toContain(leaked);
+		expect(error.message.length).toBeLessThan(260);
+	});
 });
 
 describe("graphql client", () => {
@@ -451,6 +476,27 @@ describe("graphql client", () => {
 			}),
 		};
 	}
+
+	test("an auth-header failure that echoes a credential is reported with the known secrets scrubbed and nothing sent", async () => {
+		const secret = "plainsecretvalue-9q8w7e";
+		let fetched = 0;
+		const client = createLinearClient({
+			endpoint: "http://127.0.0.1:9/graphql",
+			fetchImpl: (async () => {
+				fetched++;
+				return new Response("{}");
+			}) as unknown as typeof fetch,
+			getAuthHeaders: async () => {
+				throw new Error(`refresh rejected for ${secret}`);
+			},
+			knownSecrets: () => [secret],
+		});
+		const result = await client.execute(QUERY, {});
+		expect(result).toMatchObject({ ok: false, kind: "auth", outcome: "not_sent" });
+		if (result.ok) throw new Error("unreachable");
+		expect(result.message).toBe("could not build auth headers: refresh rejected for [redacted]");
+		expect(fetched).toBe(0);
+	});
 
 	test("200 with data only", async () => {
 		const { server, client } = await clientFor(() => ({

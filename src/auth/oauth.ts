@@ -15,6 +15,7 @@ import {
  type CredentialStore,
  summarize,
 } from "./store.ts";
+import { safeMessage } from "../client/graphql";
 
 export interface OAuthClientConfig {
  clientId: string;
@@ -238,7 +239,7 @@ async function postTokenRequest(
  });
  const text = await response.text();
  if (!response.ok) {
-  throw new Error(`token endpoint rejected the request: HTTP ${response.status} ${text.slice(0, 500)}`);
+  throw new Error(`token endpoint rejected the request: HTTP ${response.status}${oauthErrorDetail(text, [...form.values()])}`);
  }
  const body: unknown = JSON.parse(text);
  if (typeof body !== "object" || body === null || !("access_token" in body)) {
@@ -257,6 +258,25 @@ async function postTokenRequest(
   expiresIn: typeof expiresIn === "number" ? expiresIn : null,
   scope: typeof scope === "string" ? scope : null,
  };
+}
+
+/**
+ * Only the RFC 6749 `error` / `error_description` fields of a token error, scrubbed of every value
+ * the request carried (code, verifier, refresh token, client secret) and capped. Never the raw body.
+ */
+function oauthErrorDetail(body: string, sent: string[]): string {
+ let parsed: unknown;
+ try {
+  parsed = JSON.parse(body);
+ } catch {
+  return "";
+ }
+ if (typeof parsed !== "object" || parsed === null) return "";
+ const record = new Map<string, unknown>(Object.entries(parsed));
+ const fields = [record.get("error"), record.get("error_description")].filter(
+  (value): value is string => typeof value === "string" && value.length > 0,
+ );
+ return fields.length > 0 ? ` ${safeMessage(fields.join(": "), sent)}` : "";
 }
 
 export function exchangeCode(

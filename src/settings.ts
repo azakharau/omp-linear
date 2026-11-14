@@ -3,7 +3,8 @@
  *
  * Read from the session's settings — the same `getGlobalSettings()`/`getProjectSettings()`
  * raw layers the host exposes to extensions (see `legacy-pi-coding-agent-shim.ts`), project
- * over global. Tool and command handlers run inside the session's active settings scope
+ * over global, except the credential-bearing keys in `USER_ONLY`, which only the global layer
+ * may set. Tool and command handlers run inside the session's active settings scope
  * (`ExtensionRunner.runScoped`), so `findScopedSettings(cwd)` is that session's instance.
  * `LINEAR_OAUTH_CLIENT_ID` / `LINEAR_OAUTH_CLIENT_SECRET` from the environment take
  * precedence for the OAuth client credentials. Nothing is fabricated: a missing client id
@@ -28,12 +29,18 @@ export type LinearOAuthSettings = typeof OAuthSettingsSchema.infer;
 const LinearSettingsSchema = type({
  /** GraphQL endpoint override (proxies, fakes); default https://api.linear.app/graphql. */
  "endpoint?": "string",
+ /** Env-style file with `LINEAR_API_KEY=...`; read on every call, the key never enters the session. */
+ "apiKeyFile?": "string",
+ /** Stored connection id used when the session has not selected one with /linear-use. */
+ "defaultConnection?": "string",
  "oauth?": OAuthSettingsSchema,
 });
 const SettingsLayerSchema = type({ "linear?": LinearSettingsSchema });
 
 export interface LinearSettings {
  endpoint?: string;
+ apiKeyFile?: string;
+ defaultConnection?: string;
  oauth: LinearOAuthSettings;
 }
 
@@ -48,13 +55,38 @@ function linearBlock(layer: unknown, source: string): typeof LinearSettingsSchem
  return checked.linear ?? {};
 }
 
-/** `linear` from the session settings, project layer over global. */
+/**
+ * Settings that decide where credentials go or which credential is read. A project config is
+ * repository content, so it may not set them: a cloned repository could otherwise send the
+ * user's key or OAuth code to its own server.
+ */
+const USER_ONLY = ["endpoint", "apiKeyFile", "oauth.authorizeUrl", "oauth.tokenUrl", "oauth.revokeUrl"] as const;
+
+function rejectUserOnly(project: typeof LinearSettingsSchema.infer): void {
+ const oauth: Record<string, unknown> = project.oauth ?? {};
+ const set = USER_ONLY.filter(key =>
+  key.startsWith("oauth.") ? oauth[key.slice("oauth.".length)] !== undefined : project[key as "endpoint" | "apiKeyFile"] !== undefined,
+ );
+ if (set.length > 0) {
+  throw new Error(
+   `Project settings may not set ${set.map(key => `linear.${key}`).join(", ")}: these decide where credentials are sent. Move them to the user config (<agent dir>/config.yml).`,
+  );
+ }
+}
+
+/** `linear` from the session settings, project layer over global; credential-bearing keys from the user layer only. */
 export function readLinearSettings(cwd: string): LinearSettings {
  const settings = findScopedSettings(cwd);
  if (!settings) return { oauth: {} };
  const global = linearBlock(settings.getGlobalSettings(), "global");
  const project = linearBlock(settings.getProjectSettings(), "project");
- return { endpoint: project.endpoint ?? global.endpoint, oauth: { ...global.oauth, ...project.oauth } };
+ rejectUserOnly(project);
+ return {
+  endpoint: global.endpoint,
+  apiKeyFile: global.apiKeyFile,
+  defaultConnection: project.defaultConnection ?? global.defaultConnection,
+  oauth: { ...global.oauth, ...project.oauth },
+ };
 }
 
 /**

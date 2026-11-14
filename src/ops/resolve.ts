@@ -45,6 +45,35 @@ export const MILESTONE_LOOKUP = `query LinearMilestoneLookup($projectId: ID!, $n
   }
 }`;
 
+export const VIEWER_LOOKUP = `query LinearViewerLookup {
+  viewer { id }
+}`;
+
+export const USER_LOOKUP = `query LinearUserLookup($ref: String!) {
+  users(filter: { or: [{ displayName: { eqIgnoreCase: $ref } }, { name: { eqIgnoreCase: $ref } }, { email: { eqIgnoreCase: $ref } }] }, first: 10) {
+    nodes { id name displayName email active }
+  }
+}`;
+
+export const DOCUMENT_LOOKUP = `query LinearDocumentLookup($ref: String!) {
+  documents(filter: { or: [{ slugId: { eq: $ref } }, { title: { eq: $ref } }] }, first: 10) {
+    nodes { id title slugId }
+  }
+}`;
+
+/** Every lookup document in this module, for schema validation. */
+export const LOOKUP_DOCUMENTS: Record<string, string> = {
+	TEAM_LOOKUP,
+	ISSUE_LOOKUP,
+	STATE_LOOKUP,
+	LABEL_LOOKUP,
+	PROJECT_LOOKUP,
+	MILESTONE_LOOKUP,
+	VIEWER_LOOKUP,
+	USER_LOOKUP,
+	DOCUMENT_LOOKUP,
+};
+
 export interface LookupNode {
  id: string;
  [key: string]: unknown;
@@ -174,4 +203,22 @@ export async function resolveMilestoneId(
   ref,
   node => String(node.name),
  ).id;
+}
+
+/** `me` is the connection's own user; otherwise display name, name or email, case-insensitive. */
+export async function resolveUserId(client: LinearClient, ref: string): Promise<string> {
+ if (UUID_PATTERN.test(ref)) return ref;
+ if (ref.toLowerCase() === "me") {
+  const id = readRecord(await request(client, VIEWER_LOOKUP), "viewer").id;
+  if (typeof id !== "string") throw new Error('linear response field "viewer.id" is not a string');
+  return id;
+ }
+ const data = await request(client, USER_LOOKUP, { ref });
+ return exactlyOne(connectionNodes(data, "users"), "user", ref, node => `${node.displayName} <${node.email}>`).id;
+}
+
+export async function resolveDocumentId(client: LinearClient, ref: string): Promise<string> {
+ if (UUID_PATTERN.test(ref)) return ref;
+ const data = await request(client, DOCUMENT_LOOKUP, { ref });
+ return exactlyOne(connectionNodes(data, "documents"), "document", ref, node => `${node.title} ${node.slugId}`).id;
 }

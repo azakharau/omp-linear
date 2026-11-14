@@ -11,6 +11,7 @@ import {
 	loadCatalog,
 	type OperationDescriptor,
 } from "../src/schema/catalog.ts";
+import { attributeTypedArgs, attributionTargets } from "../src/identity/attribution.ts";
 import { classifyRawDocument, composeSelectionValidation, injectCreateAsUser, mutationPayloadRoots } from "../src/schema/raw.ts";
 
 const ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -419,6 +420,29 @@ describe("injectCreateAsUser", () => {
 		);
 		expect(result.document).toContain('createAsUser: "Agent A"');
 		expect(mutationPayloadRoots(result.document)).toEqual([{ alias: "issueCreate", field: "issueCreate" }]);
+	});
+
+	test("a direct createAsUser argument (attachmentLinkURL) is forced to the author in typed and raw calls", () => {
+		const pinned = attributionTargets(schema);
+		const link = pinned.get("attachmentLinkURL");
+		expect(link).toEqual({ field: "attachmentLinkURL", inputArg: "createAsUser", kind: "argument" });
+		expect(pinned.get("issueCreate")).toEqual({ field: "issueCreate", inputArg: "input" });
+
+		expect(attributeTypedArgs({ issueId: "i", url: "u" }, link!, "OMP · Main")).toEqual({ issueId: "i", url: "u", createAsUser: "OMP · Main" });
+		expect(() => attributeTypedArgs({ issueId: "i", url: "u", createAsUser: "OMP · Main" }, link!, "OMP · task [0-X]")).toThrow(/conflicts with the session author/);
+
+		const literal = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u", createAsUser: "OMP · Main") { success } }', {}, [link!], "OMP · task [0-X]");
+		expect(literal.document).toContain('createAsUser: "OMP · task [0-X]"');
+		expect(literal.document).not.toContain('"OMP · Main"');
+		const missing = injectCreateAsUser('mutation { attachmentLinkURL(issueId: "i", url: "u") { success } }', {}, [link!], "OMP · task [0-X]");
+		expect(missing.document).toContain('createAsUser: "OMP · task [0-X]"');
+		const variable = injectCreateAsUser(
+			"mutation M($who: String) { attachmentLinkURL(issueId: \"i\", url: \"u\", createAsUser: $who) { success } }",
+			{ who: "OMP · Main" },
+			[link!],
+			"OMP · task [0-X]",
+		);
+		expect(variable.variables).toEqual({ who: "OMP · task [0-X]" });
 	});
 });
 

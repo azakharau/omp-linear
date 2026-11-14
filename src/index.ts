@@ -1,34 +1,36 @@
 /**
  * Native Oh My Pi extension for Linear.
  *
- * Exactly one tool is always visible: `linear_tool_search`. It returns ranked candidates from the
- * private catalog and, given `activate`, swaps exactly one Linear operation into the active tool
- * set. Everything else — `linear_graphql`, `linear_schema_help`, `linear_connections`, 11 ergonomic
- * ops and 550 typed `lq_*`/`lm_*` operations — is registered `defaultInactive`.
+ * One tool is always available, as the xd:// device `linear_tool_search` (`loadMode:
+ * "discoverable"`: one catalog line in the system prompt, called through `write`). It returns
+ * ranked candidates from the private catalog and, given `activate`, swaps exactly one Linear
+ * operation into the active tool set. Everything else — `linear_graphql`, `linear_schema_help`,
+ * `linear_connections`, the ergonomic ops and 550 typed `lq_*`/`lm_*` operations — is registered
+ * `defaultInactive` and becomes a top-level tool only when activated.
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
  * activated operation are persisted as `linear-state` entries. The author of every outbound call
- * is resolved per call from the host agent registry; `actor=app` connections attribute mutations
- * to that author via `createAsUser`.
+ * is the host-provided `ctx.agent` identity (OMP >= 18.20.0); `actor=app` connections attribute
+ * mutations to that author via `createAsUser`.
  */
 import { randomUUID } from "node:crypto";
 import * as path from "node:path";
-import type { ToolApproval } from "@oh-my-pi/pi-agent-core/types";
-import { getAgentDir } from "@oh-my-pi/pi-utils";
-import type {
- ExtensionAPI,
- ExtensionCommandContext,
- ExtensionContext,
- ExtensionFactory,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
+import type { ToolApproval } from "@oh-my-pi/pi-agent-core";
+import {
+	type ExtensionAPI,
+	type ExtensionCommandContext,
+	type ExtensionContext,
+	type ExtensionFactory,
+	getAgentDir,
+} from "@oh-my-pi/pi-coding-agent";
 import { rawApproval, typedApproval } from "./approval";
 import { ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
+import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
 import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
-import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient } from "./client/graphql";
+import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient, safeMessage } from "./client/graphql";
 import { type Author, resolveAuthor } from "./identity/actor";
 import { attributeTypedArgs, attributionTargets } from "./identity/attribution";
-import { type RosterContext, type RosterTracker, createRosterTracker } from "./identity/discovery";
 import { ergonomicOps } from "./ops/index";
 import { encodeOutput } from "./output/encode";
 import { type ResolvedOAuth, readLinearSettings, resolveOAuth } from "./settings";
@@ -37,6 +39,12 @@ import { type UnpinnedNames, classifyRawDocument, injectCreateAsUser, mutationPa
 import { type LinearSessionState, emptyState, persistState, restoreState } from "./state";
 
 export const LINEAR_ENDPOINT = "https://api.linear.app/graphql";
+
+/** Where the connection of a call comes from: /linear-use, `linear.defaultConnection` or `linear.apiKeyFile`. */
+type ConnectionSource = "session" | "default" | "file";
+
+/** In-memory connection built from `linear.apiKeyFile`; it is never written to the store. */
+const API_KEY_FILE_CONNECTION = { id: "api-key-file", kind: "api_key", label: "API key file", actor: "user", workspace: null } as const;
 
 /** The only always-visible Linear tool. */
 export const SEARCH_TOOL = "linear_tool_search";
@@ -75,11 +83,17 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_issue_get: "Get a Linear issue by identifier MNE-940 or UUID.",
  linear_issue_comment_add: "Add a comment to a Linear issue, reply.",
  linear_issue_relation_add: "Add a relation between Linear issues: blocks, related.",
- linear_issue_search: "Search Linear issues with filters and cursor pagination.",
+ linear_issue_search: "Search or list Linear issues: assignee me, project, state types, stale issues not updated in N days.",
+ linear_issue_link_add: "Attach a URL link (PR, doc) to a Linear issue.",
  linear_project_create: "Create a Linear project.",
  linear_project_update: "Update a Linear project.",
+ linear_project_get: "Get a Linear project with milestones.",
+ linear_project_status_post: "Post a project status update with health onTrack atRisk offTrack.",
  linear_milestone_create: "Create a Linear project milestone.",
  linear_milestone_update: "Update a Linear project milestone.",
+ linear_document_create: "Create a Linear document in a project or issue.",
+ linear_document_update: "Update a Linear document title or content.",
+ linear_document_get: "Get a Linear document by id, slug or title.",
 };
 
 /** The host injects and strips its own intent field (`i`); tool schemas declare only real arguments. */
@@ -209,20 +223,38 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json"),
   );
   let state: LinearSessionState = emptyState();
-  let roster: RosterTracker | null = null;
   let activationChain: Promise<unknown> = Promise.resolve();
 
-  function selectedConnection(): Connection {
-   if (!state.connectionId) {
-    throw new Error(
-     "No Linear connection selected. Run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
-    );
+  /**
+   * The connection for this call: the session choice (/linear-use), then `linear.defaultConnection`,
+   * then `linear.apiKeyFile`. The key file is read on every call and is never stored or persisted.
+   */
+  function resolveConnection(cwd: string): { connection: Connection; source: ConnectionSource } {
+   if (state.connectionId) {
+    const connection = store.get(state.connectionId);
+    if (!connection) {
+     throw new Error(`Selected Linear connection "${state.connectionId}" no longer exists; run /linear-use <id>.`);
+    }
+    return { connection, source: "session" };
    }
-   const connection = store.get(state.connectionId);
-   if (!connection) {
-    throw new Error(`Selected Linear connection "${state.connectionId}" no longer exists; run /linear-use <id>.`);
+   const settings = readLinearSettings(cwd);
+   if (settings.defaultConnection) {
+    const connection = store.get(settings.defaultConnection);
+    if (!connection) {
+     throw new Error(`linear.defaultConnection "${settings.defaultConnection}" is not a stored connection; fix the setting or run /linear-use <id>.`);
+    }
+    return { connection, source: "default" };
    }
-   return connection;
+   if (settings.apiKeyFile) {
+    const apiKey = readApiKeyFile(settings.apiKeyFile);
+    return {
+     connection: { ...API_KEY_FILE_CONNECTION, createdAt: new Date().toISOString(), secret: { apiKey } },
+     source: "file",
+    };
+   }
+   throw new Error(
+    "No Linear connection selected. Set linear.apiKeyFile in the OMP settings, or run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
+   );
   }
 
   function clientFor(connection: Connection, cwd: string): LinearClient {
@@ -235,14 +267,38 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
      if ("missing" in oauth) return authHeadersFor(connection);
      return authHeadersFor(await ensureFreshAccessToken(oauth.cfg, store, connection.id, fetchImpl));
     },
+    knownSecrets: () => connectionSecrets(store.get(connection.id) ?? connection, cwd),
    });
   }
 
-  /** Fails before any HTTP when the session is unknown to the registry or no connection is selected. */
+  /** Every credential value tied to `connection`, for scrubbing error text. */
+  function connectionSecrets(connection: Connection, cwd: string): string[] {
+   if (connection.kind === "api_key") return [connection.secret.apiKey];
+   let clientSecret: string | null = null;
+   try {
+    const oauth = oauthFor(cwd);
+    if (!("missing" in oauth)) clientSecret = oauth.cfg.clientSecret;
+   } catch {
+    // Invalid OAuth settings: scrub the token values that are known.
+   }
+   return [connection.secret.accessToken, connection.secret.refreshToken, clientSecret].filter((value): value is string => !!value);
+  }
+
+  /** Fails before any HTTP when the host gives no agent identity or no connection is available. */
   function openCall(ctx: ExtensionContext): OutboundCall {
-   const author = resolveAuthor(ctx.sessionManager.getSessionId());
-   const connection = selectedConnection();
+   const author = resolveAuthor(ctx.agent);
+   const { connection } = resolveConnection(ctx.cwd);
    return { connection, client: clientFor(connection, ctx.cwd), author, actor: connection.actor };
+  }
+
+  /** Secret-free view of the connection the next call would use, or why there is none. */
+  function effectiveConnection(cwd: string): { id: string; kind: string; actor: Actor; label: string; source: ConnectionSource } | { error: string } {
+   try {
+    const { connection, source } = resolveConnection(cwd);
+    return { id: connection.id, kind: connection.kind, actor: connection.actor, label: connection.label, source };
+   } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+   }
   }
 
   function attributes(call: OutboundCall): boolean {
@@ -277,10 +333,8 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   async function onSessionOpen(ctx: ExtensionContext): Promise<void> {
    state = restoreState(ctx.sessionManager);
-   roster ??= createRosterTracker();
-   await roster.refresh(ctx as RosterContext);
    try {
-    state = { ...state, actor: resolveAuthor(ctx.sessionManager.getSessionId()) };
+    state = { ...state, actor: resolveAuthor(ctx.agent) };
    } catch {
     state = { ...state, actor: null };
    }
@@ -292,10 +346,6 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   pi.on("session_start", async (_event, ctx) => onSessionOpen(ctx));
   pi.on("session_switch", async (_event, ctx) => onSessionOpen(ctx));
-  pi.on("session_shutdown", async () => {
-   roster?.dispose();
-   roster = null;
-  });
 
   pi.registerTool({
    name: SEARCH_TOOL,
@@ -312,7 +362,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     anyOf: [{ required: ["query"] }, { required: ["activate"] }],
     additionalProperties: false,
    } as never,
-   loadMode: "essential",
+   loadMode: "discoverable",
    approval: "read",
    async execute(_id, params) {
     const { query, limit, activate: toActivate } = params as { query?: string; limit?: number; activate?: string };
@@ -360,7 +410,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    name: "linear_graphql",
    label: "Linear GraphQL",
    description:
-    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation whose input accepts createAsUser is attributed to the session author.",
+    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the session author.",
    parameters: objectSchema(
     {
      document: { type: "string", minLength: 1 },
@@ -397,20 +447,18 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
   pi.registerTool({
    name: "linear_connections",
    label: "Linear connections",
-   description: "List stored Linear connections (no secrets), the selected one, the session author and the agent roster.",
+   description: "List stored Linear connections (no secrets), the selected one and the session author.",
    parameters: objectSchema({}, []) as never,
    loadMode: "essential",
    defaultInactive: true,
    approval: "read",
-   async execute() {
-    const current = roster?.current();
+   async execute(_id, _params, _signal, _onUpdate, ctx) {
     const payload = {
      selected: state.connectionId,
+     effective: effectiveConnection(ctx.cwd),
      activeOperation: state.activeOperation,
      author: state.actor,
-     storePath: store.filePath,
      connections: store.list(),
-     roster: current ? { source: current.source, agents: current.agents.map(a => a.name), peers: current.peers } : null,
     };
     return text(JSON.stringify(payload, null, 0), payload);
    },
@@ -564,7 +612,8 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
       try {
        await revokeToken(oauth.cfg, connection.secret.accessToken, fetchImpl);
       } catch (error) {
-       ctx.ui.notify(`Token revocation failed (${String(error)}); removing locally.`, "warning");
+       const message = safeMessage(error instanceof Error ? error.message : String(error), connectionSecrets(connection, ctx.cwd));
+       ctx.ui.notify(`Token revocation failed (${message}); removing locally.`, "warning");
       }
      }
     }

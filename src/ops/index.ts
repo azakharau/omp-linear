@@ -9,12 +9,14 @@ import type { LinearClient } from "../client/graphql.ts";
 import {
  connectionNodes,
  request,
+ resolveDocumentId,
  resolveIssueId,
  resolveLabelIds,
  resolveMilestoneId,
  resolveProjectId,
  resolveStateId,
  resolveTeamId,
+ resolveUserId,
  UUID_PATTERN,
 } from "./resolve.ts";
 
@@ -41,9 +43,9 @@ export interface ErgonomicOp {
 }
 
 /**
- * Only these two inputs accept `createAsUser` in the pinned SDL
- * (`IssueCreateInput`, `CommentCreateInput`); project and milestone creation
- * cannot be attributed this way, so those ops stay app-attributed.
+ * Only `IssueCreateInput`, `CommentCreateInput` and the `attachmentLink*`
+ * mutations accept `createAsUser` in the pinned SDL; project, milestone and
+ * document writes cannot be attributed this way, so those ops stay app-attributed.
  */
 function applyActorAttribution(input: Record<string, unknown>, actorCtx: ActorContext): void {
  if (actorCtx.actor === "app") input.createAsUser = actorCtx.authorLabel;
@@ -65,6 +67,15 @@ export const ISSUE_WITH_RELATIONS_GET = `query LinearIssueRelationsGet($id: Stri
   issue(id: $id) {
     id identifier updatedAt
     relations(first: 50) { nodes { id type relatedIssue { id identifier title } } }
+  }
+}`;
+
+/** Created issues report both directions: a `blockedBy` relation is stored on the other issue. */
+export const ISSUE_CREATED_GET = `query LinearIssueCreatedGet($id: String!) {
+  issue(id: $id) {
+    ${ISSUE_FIELDS}
+    relations(first: 50) { nodes { id type relatedIssue { id identifier title } } }
+    inverseRelations(first: 50) { nodes { id type issue { id identifier title } } }
   }
 }`;
 
@@ -125,16 +136,62 @@ export const MILESTONE_UPDATE = `mutation LinearMilestoneUpdate($id: String!, $i
   projectMilestoneUpdate(id: $id, input: $input) { success projectMilestone { id } }
 }`;
 
-export const ISSUE_SEARCH = `query LinearIssueSearch($query: String, $filter: IssueFilter, $first: Int, $after: String, $includeArchived: Boolean) {
-  issueSearch(query: $query, filter: $filter, first: $first, after: $after, includeArchived: $includeArchived) {
-    nodes {
+const ISSUE_PAGE = `nodes {
       id identifier title url priority updatedAt
       state { name type }
       team { key }
       assignee { displayName }
       project { id name }
     }
-    pageInfo { hasNextPage endCursor }
+    pageInfo { hasNextPage endCursor }`;
+
+export const ISSUE_SEARCH = `query LinearIssueSearch($query: String, $filter: IssueFilter, $first: Int, $after: String, $includeArchived: Boolean) {
+  issueSearch(query: $query, filter: $filter, first: $first, after: $after, includeArchived: $includeArchived) {
+    ${ISSUE_PAGE}
+  }
+}`;
+
+export const ISSUE_LIST = `query LinearIssueList($filter: IssueFilter, $first: Int, $after: String, $includeArchived: Boolean) {
+  issues(filter: $filter, first: $first, after: $after, includeArchived: $includeArchived) {
+    ${ISSUE_PAGE}
+  }
+}`;
+
+export const PROJECT_STATUS_POST = `mutation LinearProjectStatusPost($input: ProjectUpdateCreateInput!) {
+  projectUpdateCreate(input: $input) { success projectUpdate { id } }
+}`;
+
+export const PROJECT_STATUS_GET = `query LinearProjectStatusGet($id: String!) {
+  projectUpdate(id: $id) {
+    id body health url createdAt
+    project { id name }
+    user { displayName }
+  }
+}`;
+
+export const ISSUE_LINK_ADD = `mutation LinearIssueLinkAdd($issueId: String!, $url: String!, $title: String, $createAsUser: String) {
+  attachmentLinkURL(issueId: $issueId, url: $url, title: $title, createAsUser: $createAsUser) {
+    success attachment { id }
+  }
+}`;
+
+export const ATTACHMENT_GET = `query LinearAttachmentGet($id: String!) {
+  attachment(id: $id) { id title url issue { identifier } }
+}`;
+
+export const DOCUMENT_CREATE = `mutation LinearDocumentCreate($input: DocumentCreateInput!) {
+  documentCreate(input: $input) { success document { id } }
+}`;
+
+export const DOCUMENT_UPDATE = `mutation LinearDocumentUpdate($id: String!, $input: DocumentUpdateInput!) {
+  documentUpdate(id: $id, input: $input) { success document { id } }
+}`;
+
+export const DOCUMENT_GET = `query LinearDocumentGet($id: String!) {
+  document(id: $id) {
+    id title slugId url content updatedAt
+    project { id name }
+    issue { identifier }
   }
 }`;
 
@@ -154,6 +211,15 @@ export const OP_DOCUMENTS: Record<string, string> = {
  MILESTONE_CREATE,
  MILESTONE_UPDATE,
  ISSUE_SEARCH,
+ ISSUE_CREATED_GET,
+ ISSUE_LIST,
+ PROJECT_STATUS_POST,
+ PROJECT_STATUS_GET,
+ ISSUE_LINK_ADD,
+ ATTACHMENT_GET,
+ DOCUMENT_CREATE,
+ DOCUMENT_UPDATE,
+ DOCUMENT_GET,
 };
 
 function record(value: unknown, field: string, context: string): Record<string, unknown> {
@@ -286,9 +352,68 @@ const EXPECTED_ARGS = {
  },
 } as const;
 
+const USER_REF = {
+ type: "string",
+ minLength: 1,
+ description: 'User: "me", display name, name, email or UUID',
+} as const;
+
+const RELATION_TYPES = ["blocks", "blockedBy", "related", "duplicate"];
+
+interface RelationRequest {
+ type: string;
+ issue: string;
+}
+
+function relationList(args: Record<string, unknown>): RelationRequest[] {
+ const value = args.relations;
+ if (value === undefined || value === null) return [];
+ if (!Array.isArray(value)) throw new Error('argument "relations" must be a list');
+ return value.map((entry: unknown) => {
+  if (typeof entry !== "object" || entry === null) {
+   throw new Error('each relation must be an object with "type" and "issue"');
+  }
+  const relation = entry as Record<string, unknown>;
+  const type = requiredString(relation, "type");
+  if (!RELATION_TYPES.includes(type)) {
+   throw new Error(`relation type must be one of ${RELATION_TYPES.join(", ")}, got ${JSON.stringify(type)}`);
+  }
+  return { type, issue: requiredString(relation, "issue") };
+ });
+}
+
+/**
+ * Creates relations of an already created issue one by one. A failure stops the
+ * rest and reports what exists, because the issue itself is not rolled back.
+ */
+async function createRelations(
+ client: LinearClient,
+ issueId: string,
+ relations: (RelationRequest & { otherId: string })[],
+): Promise<void> {
+ const label = (relation: RelationRequest) => `${relation.type} ${relation.issue}`;
+ for (const [index, relation] of relations.entries()) {
+  // Linear has no blockedBy type: the other issue blocks the new one.
+  const input =
+   relation.type === "blockedBy"
+    ? { issueId: relation.otherId, relatedIssueId: issueId, type: "blocks" }
+    : { issueId, relatedIssueId: relation.otherId, type: relation.type };
+  try {
+   await mutateForId(client, RELATION_CREATE, { input }, "issueRelationCreate", "issueRelation");
+  } catch (error) {
+   const created = relations.slice(0, index).map(label);
+   const notCreated = relations.slice(index).map(label);
+   throw new Error(
+    `issue ${issueId} was created, but relation "${label(relation)}" failed: ${(error as Error).message}; relations created: [${created.join(", ")}]; not created: [${notCreated.join(", ")}]`,
+   );
+  }
+ }
+}
+
 const issueCreate: ErgonomicOp = {
  name: "linear_issue_create",
- description: "Create an issue in a team, resolving team, state, labels, project and milestone by name.",
+ description:
+  "Create an issue in a team, resolving team, state, labels, project, milestone, assignee and related issues by key, name or identifier.",
  tier: "write",
  parameters: {
   type: "object",
@@ -300,10 +425,20 @@ const issueCreate: ErgonomicOp = {
    labels: { type: "array", items: { type: "string" } },
    project: { type: "string", description: "Project name or UUID" },
    milestone: { type: "string", description: "Project milestone name or UUID; requires project" },
-   assigneeId: { type: "string" },
+   assignee: USER_REF,
    parentIssue: ISSUE_REF,
    priority: { type: "integer", minimum: 0, maximum: 4 },
    dueDate: { type: "string", description: "ISO date (YYYY-MM-DD)" },
+   relations: {
+    type: "array",
+    description: "Relations created after the issue; blockedBy means the other issue blocks the new one",
+    items: {
+     type: "object",
+     properties: { type: { type: "string", enum: RELATION_TYPES }, issue: ISSUE_REF },
+     required: ["type", "issue"],
+     additionalProperties: false,
+    },
+   },
   },
   required: ["team", "title"],
   additionalProperties: false,
@@ -328,18 +463,25 @@ const issueCreate: ErgonomicOp = {
    if (projectId === undefined) throw new Error('argument "milestone" requires "project"');
    input.projectMilestoneId = await resolveMilestoneId(client, projectId, milestone);
   }
-  const assigneeId = optionalString(args, "assigneeId");
-  if (assigneeId !== undefined) input.assigneeId = assigneeId;
+  const assignee = optionalString(args, "assignee");
+  if (assignee !== undefined) input.assigneeId = await resolveUserId(client, assignee);
   const parentIssue = optionalString(args, "parentIssue");
   if (parentIssue !== undefined) input.parentId = await resolveIssueId(client, parentIssue);
   const priority = optionalNumber(args, "priority");
   if (priority !== undefined) input.priority = priority;
   const dueDate = optionalString(args, "dueDate");
   if (dueDate !== undefined) input.dueDate = dueDate;
+  // Every relation reference is resolved before the first write.
+  const relations = [];
+  for (const relation of relationList(args)) {
+   relations.push({ ...relation, otherId: await resolveIssueId(client, relation.issue) });
+  }
   applyActorAttribution(input, actorCtx);
 
   const id = await mutateForId(client, ISSUE_CREATE, { input }, "issueCreate", "issue");
-  return { issue: record(await request(client, ISSUE_GET, { id }), "issue", "issueGet") };
+  await createRelations(client, id, relations);
+  const refetch = relations.length > 0 ? ISSUE_CREATED_GET : ISSUE_GET;
+  return { issue: record(await request(client, refetch, { id }), "issue", "issueGet") };
  },
 };
 
@@ -357,7 +499,7 @@ const issueUpdate: ErgonomicOp = {
    labels: { type: "array", items: { type: "string" } },
    project: { type: "string" },
    milestone: { type: "string" },
-   assigneeId: { type: "string" },
+   assignee: USER_REF,
    priority: { type: "integer", minimum: 0, maximum: 4 },
    dueDate: { type: "string" },
    ...EXPECTED_ARGS,
@@ -402,8 +544,8 @@ const issueUpdate: ErgonomicOp = {
    if (projectId === undefined) throw new Error('argument "milestone" requires "project"');
    input.projectMilestoneId = await resolveMilestoneId(client, projectId, milestone);
   }
-  const assigneeId = optionalString(args, "assigneeId");
-  if (assigneeId !== undefined) input.assigneeId = assigneeId;
+  const assignee = optionalString(args, "assignee");
+  if (assignee !== undefined) input.assigneeId = await resolveUserId(client, assignee);
   const priority = optionalNumber(args, "priority");
   if (priority !== undefined) input.priority = priority;
   const dueDate = optionalString(args, "dueDate");
@@ -530,7 +672,7 @@ const projectCreate: ErgonomicOp = {
    name: { type: "string", minLength: 1 },
    teams: { type: "array", items: { type: "string" }, minItems: 1 },
    description: { type: "string" },
-   leadId: { type: "string" },
+   lead: USER_REF,
    startDate: { type: "string" },
    targetDate: { type: "string" },
   },
@@ -545,8 +687,8 @@ const projectCreate: ErgonomicOp = {
   const input: Record<string, unknown> = { name: requiredString(args, "name"), teamIds };
   const description = optionalString(args, "description");
   if (description !== undefined) input.description = description;
-  const leadId = optionalString(args, "leadId");
-  if (leadId !== undefined) input.leadId = leadId;
+  const lead = optionalString(args, "lead");
+  if (lead !== undefined) input.leadId = await resolveUserId(client, lead);
   const startDate = optionalString(args, "startDate");
   if (startDate !== undefined) input.startDate = startDate;
   const targetDate = optionalString(args, "targetDate");
@@ -566,7 +708,7 @@ const projectUpdate: ErgonomicOp = {
    project: { type: "string", description: "Project name or UUID" },
    name: { type: "string" },
    description: { type: "string" },
-   leadId: { type: "string" },
+   lead: USER_REF,
    startDate: { type: "string" },
    targetDate: { type: "string" },
    expectedUpdatedAt: EXPECTED_ARGS.expectedUpdatedAt,
@@ -592,8 +734,8 @@ const projectUpdate: ErgonomicOp = {
   if (name !== undefined) input.name = name;
   const description = optionalString(args, "description");
   if (description !== undefined) input.description = description;
-  const leadId = optionalString(args, "leadId");
-  if (leadId !== undefined) input.leadId = leadId;
+  const lead = optionalString(args, "lead");
+  if (lead !== undefined) input.leadId = await resolveUserId(client, lead);
   const startDate = optionalString(args, "startDate");
   if (startDate !== undefined) input.startDate = startDate;
   const targetDate = optionalString(args, "targetDate");
@@ -704,17 +846,55 @@ const milestoneUpdate: ErgonomicOp = {
  },
 };
 
+const STATE_TYPES = ["triage", "backlog", "unstarted", "started", "completed", "canceled"];
+
+async function issueFilter(
+ client: LinearClient,
+ args: Record<string, unknown>,
+): Promise<Record<string, unknown> | null> {
+ const filter: Record<string, unknown> = {};
+ const teamKey = optionalString(args, "teamKey");
+ if (teamKey !== undefined) filter.team = { key: { eq: teamKey } };
+ const state: Record<string, unknown> = {};
+ const stateName = optionalString(args, "stateName");
+ if (stateName !== undefined) state.name = { eq: stateName };
+ const stateTypes = stringList(args, "stateTypes");
+ if (stateTypes !== undefined) state.type = { in: stateTypes };
+ if (Object.keys(state).length > 0) filter.state = state;
+ const assignee = optionalString(args, "assignee");
+ if (assignee !== undefined) {
+  filter.assignee =
+   assignee.toLowerCase() === "me"
+    ? { isMe: { eq: true } }
+    : { id: { eq: await resolveUserId(client, assignee) } };
+ }
+ const project = optionalString(args, "project");
+ if (project !== undefined) filter.project = { id: { eq: await resolveProjectId(client, project) } };
+ const staleDays = optionalNumber(args, "staleDays");
+ if (staleDays !== undefined) {
+  if (!Number.isInteger(staleDays) || staleDays < 1) {
+   throw new Error('argument "staleDays" must be an integer >= 1');
+  }
+  filter.updatedAt = { lt: `-P${staleDays}D` };
+ }
+ return Object.keys(filter).length === 0 ? null : filter;
+}
+
 const issueSearch: ErgonomicOp = {
  name: "linear_issue_search",
  description:
-  "Search issues in one bounded request; team key and state name are passed to the server filter verbatim.",
+  'Search or list issues in one bounded page, filtered by team key, state, assignee ("me", name or UUID), project (name or UUID) and staleness.',
  tier: "read",
  parameters: {
   type: "object",
   properties: {
-   query: { type: "string", description: "Full-text query" },
+   query: { type: "string", description: "Full-text query; omit to list issues by filter only" },
    teamKey: { type: "string", description: "Team key such as ABC" },
    stateName: { type: "string", description: "Workflow state name such as In Progress" },
+   stateTypes: { type: "array", items: { type: "string", enum: STATE_TYPES } },
+   assignee: USER_REF,
+   project: { type: "string", description: "Project name or UUID" },
+   staleDays: { type: "integer", minimum: 1, description: "Only issues not updated in this many days" },
    first: { type: "integer", minimum: 1, maximum: 100, default: 25 },
    after: { type: "string", description: "Cursor from a previous pageInfo.endCursor" },
    includeArchived: { type: "boolean" },
@@ -722,24 +902,148 @@ const issueSearch: ErgonomicOp = {
   additionalProperties: false,
  },
  async run(client, args) {
-  const filter: Record<string, unknown> = {};
-  const teamKey = optionalString(args, "teamKey");
-  if (teamKey !== undefined) filter.team = { key: { eq: teamKey } };
-  const stateName = optionalString(args, "stateName");
-  if (stateName !== undefined) filter.state = { name: { eq: stateName } };
-  const data = await request(client, ISSUE_SEARCH, {
-   query: optionalString(args, "query") ?? null,
-   filter: Object.keys(filter).length === 0 ? null : filter,
+  const query = optionalString(args, "query");
+  const variables = {
+   filter: await issueFilter(client, args),
    // A model may ask for more than Linear will ever return in one page.
    first: Math.min(optionalNumber(args, "first") ?? 25, 100),
    after: optionalString(args, "after") ?? null,
    includeArchived: args.includeArchived === true,
-  });
-  const connection = record(data, "issueSearch", "issueSearch");
-  return {
-   nodes: connectionNodes(data, "issueSearch"),
-   pageInfo: record(connection, "pageInfo", "issueSearch"),
   };
+  const root = query === undefined ? "issues" : "issueSearch";
+  const data =
+   query === undefined
+    ? await request(client, ISSUE_LIST, variables)
+    : await request(client, ISSUE_SEARCH, { query, ...variables });
+  return {
+   nodes: connectionNodes(data, root),
+   pageInfo: record(record(data, root, root), "pageInfo", root),
+  };
+ },
+};
+
+const projectStatusPost: ErgonomicOp = {
+ name: "linear_project_status_post",
+ description: "Post a project status update with a health of onTrack, atRisk or offTrack; the project is a name or UUID.",
+ tier: "write",
+ parameters: {
+  type: "object",
+  properties: {
+   project: { type: "string", description: "Project name or UUID" },
+   body: { type: "string", minLength: 1, description: "Markdown body of the update" },
+   health: { type: "string", enum: ["onTrack", "atRisk", "offTrack"] },
+  },
+  required: ["project", "body", "health"],
+  additionalProperties: false,
+ },
+ async run(client, args) {
+  const projectId = await resolveProjectId(client, requiredString(args, "project"));
+  const input = { projectId, body: requiredString(args, "body"), health: requiredString(args, "health") };
+  const id = await mutateForId(client, PROJECT_STATUS_POST, { input }, "projectUpdateCreate", "projectUpdate");
+  return {
+   projectUpdate: record(await request(client, PROJECT_STATUS_GET, { id }), "projectUpdate", "projectUpdateGet"),
+  };
+ },
+};
+
+const issueLinkAdd: ErgonomicOp = {
+ name: "linear_issue_link_add",
+ description: "Attach a URL such as a pull request or commit link to an issue given by UUID or identifier like ABC-12.",
+ tier: "write",
+ parameters: {
+  type: "object",
+  properties: {
+   issue: ISSUE_REF,
+   url: { type: "string", minLength: 1 },
+   title: { type: "string", description: "Link title; Linear derives one from the URL when omitted" },
+  },
+  required: ["issue", "url"],
+  additionalProperties: false,
+ },
+ async run(client, args, actorCtx) {
+  const issueId = await resolveIssueId(client, requiredString(args, "issue"));
+  const variables: Record<string, unknown> = { issueId, url: requiredString(args, "url") };
+  const title = optionalString(args, "title");
+  if (title !== undefined) variables.title = title;
+  applyActorAttribution(variables, actorCtx);
+  const id = await mutateForId(client, ISSUE_LINK_ADD, variables, "attachmentLinkURL", "attachment");
+  return { attachment: record(await request(client, ATTACHMENT_GET, { id }), "attachment", "attachmentGet") };
+ },
+};
+
+const DOCUMENT_REF = { type: "string", description: "Document UUID, slug ID or exact title" } as const;
+
+async function documentResult(client: LinearClient, id: string) {
+ return { document: record(await request(client, DOCUMENT_GET, { id }), "document", "documentGet") };
+}
+
+const documentCreate: ErgonomicOp = {
+ name: "linear_document_create",
+ description: "Create a markdown document, optionally attached to a project (name or UUID) or an issue (UUID or identifier).",
+ tier: "write",
+ parameters: {
+  type: "object",
+  properties: {
+   title: { type: "string", minLength: 1 },
+   content: { type: "string", description: "Markdown content" },
+   project: { type: "string", description: "Project name or UUID" },
+   issue: ISSUE_REF,
+  },
+  required: ["title"],
+  additionalProperties: false,
+ },
+ async run(client, args) {
+  const input: Record<string, unknown> = { title: requiredString(args, "title") };
+  const content = optionalString(args, "content");
+  if (content !== undefined) input.content = content;
+  const project = optionalString(args, "project");
+  if (project !== undefined) input.projectId = await resolveProjectId(client, project);
+  const issue = optionalString(args, "issue");
+  if (issue !== undefined) input.issueId = await resolveIssueId(client, issue);
+  const id = await mutateForId(client, DOCUMENT_CREATE, { input }, "documentCreate", "document");
+  return documentResult(client, id);
+ },
+};
+
+const documentUpdate: ErgonomicOp = {
+ name: "linear_document_update",
+ description: "Change the title or markdown content of a document given by UUID, slug ID or exact title.",
+ tier: "write",
+ parameters: {
+  type: "object",
+  properties: {
+   document: DOCUMENT_REF,
+   title: { type: "string", minLength: 1 },
+   content: { type: "string", description: "Markdown content; replaces the whole document body" },
+  },
+  required: ["document"],
+  additionalProperties: false,
+ },
+ async run(client, args) {
+  const input: Record<string, unknown> = {};
+  const title = optionalString(args, "title");
+  if (title !== undefined) input.title = title;
+  const content = optionalString(args, "content");
+  if (content !== undefined) input.content = content;
+  if (Object.keys(input).length === 0) throw new Error('argument "title" or "content" is required');
+  const id = await resolveDocumentId(client, requiredString(args, "document"));
+  await mutateForId(client, DOCUMENT_UPDATE, { id, input }, "documentUpdate", "document");
+  return documentResult(client, id);
+ },
+};
+
+const documentGet: ErgonomicOp = {
+ name: "linear_document_get",
+ description: "Fetch one document with its markdown content, given by UUID, slug ID or exact title.",
+ tier: "read",
+ parameters: {
+  type: "object",
+  properties: { document: DOCUMENT_REF },
+  required: ["document"],
+  additionalProperties: false,
+ },
+ async run(client, args) {
+  return documentResult(client, await resolveDocumentId(client, requiredString(args, "document")));
  },
 };
 
@@ -750,10 +1054,15 @@ export const ergonomicOps: ErgonomicOp[] = [
  issueGet,
  issueCommentAdd,
  issueRelationAdd,
+ issueLinkAdd,
  projectCreate,
  projectUpdate,
  projectGet,
+ projectStatusPost,
  milestoneCreate,
  milestoneUpdate,
  issueSearch,
+ documentCreate,
+ documentUpdate,
+ documentGet,
 ];

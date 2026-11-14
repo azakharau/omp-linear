@@ -237,10 +237,12 @@ export function mutationPayloadRoots(document: string, operationName?: string): 
 }
 
 export interface AttributionTarget {
- /** Mutation root field name, e.g. `issueCreate` or `commentCreate`. */
+ /** Mutation root field name, e.g. `issueCreate` or `attachmentLinkURL`. */
  field: string;
- /** Name of the input argument carrying the mutation payload, e.g. `input`. */
+ /** Argument that carries `createAsUser`: the input object (`input`) or, for `argument`, `createAsUser` itself. */
  inputArg: string;
+ /** `input` (default): `createAsUser` is a field of the input object. `argument`: a direct field argument. */
+ kind?: "input" | "argument";
 }
 
 function withCreateAsUser(value: unknown, author: string, label: string): unknown {
@@ -250,11 +252,13 @@ function withCreateAsUser(value: unknown, author: string, label: string): unknow
 }
 
 /**
- * Sets `createAsUser` on every matching mutation input of the SELECTED operation, so `actor=app`
+ * Sets `createAsUser` on every matching mutation of the SELECTED operation, so `actor=app`
  * calls render as "user via application". Inline object literals are rewritten on the AST and
  * variable inputs in the variable values (an object default on the operation's variable definition
- * is materialised when no runtime value was supplied). Inline fragments and fragment spreads at
- * the mutation root are traversed; other operations keep their selections and variables.
+ * is materialised when no runtime value was supplied). A direct `createAsUser` argument is set to
+ * the author: a literal is replaced, a variable gets the author as its value, a missing argument
+ * is added. Inline fragments and fragment spreads at the mutation root are traversed; other
+ * operations keep their selections and variables.
  */
 export function injectCreateAsUser(
  document: string,
@@ -266,13 +270,13 @@ export function injectCreateAsUser(
  const parsed = parseDocument(document);
  const operation = selectOperation(parsed, operationName);
  const fragments = fragmentsOf(parsed);
- const byField = new Map(roots.map((root) => [root.field, root.inputArg]));
+ const byField = new Map(roots.map((root) => [root.field, root]));
 
- const targets = new Map<FieldNode, string>();
+ const targets = new Map<FieldNode, AttributionTarget>();
  if (operation.operation === "mutation") {
   for (const field of rootFields(operation.selectionSet, fragments)) {
-   const inputArg = byField.get(field.name.value);
-   if (inputArg) targets.set(field, inputArg);
+   const target = byField.get(field.name.value);
+   if (target) targets.set(field, target);
   }
  }
  if (!targets.size) return { document, variables };
@@ -288,10 +292,24 @@ export function injectCreateAsUser(
  const transformed = visit(parsed, {
   Field: {
    enter(node: FieldNode) {
-    const inputArg = targets.get(node);
-    if (!inputArg) return undefined;
+    const target = targets.get(node);
+    if (!target) return undefined;
+    const inputArg = target.inputArg;
     const label = `${node.alias?.value ?? node.name.value} (${node.name.value})`;
     const argument = node.arguments?.find((arg) => arg.name.value === inputArg);
+    if (target.kind === "argument") {
+     if (argument?.value.kind === Kind.VARIABLE) {
+      nextVariables[argument.value.name.value] = author;
+      return undefined;
+     }
+     const authored: ArgumentNode = {
+      kind: Kind.ARGUMENT,
+      name: { kind: Kind.NAME, value: inputArg },
+      value: { kind: Kind.STRING, value: author },
+     };
+     const others = (node.arguments ?? []).filter((arg) => arg !== argument);
+     return { ...node, arguments: [...others, authored] };
+    }
     if (!argument) throw new Error(`${label}: missing "${inputArg}" argument, cannot attribute the author`);
 
     if (argument.value.kind === Kind.VARIABLE) {

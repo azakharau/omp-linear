@@ -1,6 +1,6 @@
 /**
  * In-process OMP session harness (pattern from the research proof script).
- * `hostRoot` selects the pristine host in node_modules or the patched copy under `.patched-host`.
+ * `hostRoot` is the host source tree in node_modules (`PRISTINE_HOST`).
  * The fake model server speaks the OpenAI Responses SSE dialect and returns scripted tool calls.
  */
 import * as fs from "node:fs";
@@ -8,24 +8,19 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
-
-
-
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const PRISTINE_HOST = path.join(ROOT, "node_modules", "@oh-my-pi", "pi-coding-agent", "src");
-export const PATCHED_HOST = path.join(ROOT, ".patched-host", "src");
 
 export interface Host {
  createAgentSession: (options: Record<string, unknown>) => Promise<{ session: HostSession }>;
- discoverAuthStorage: (dir: string) => Promise<unknown>;
- ModelRegistry: new (auth: unknown) => { authStorage: { setRuntimeApiKey(p: string, k: string): void } };
+ discoverAuthStorage: (agentDir: string) => Promise<unknown>;
+ ModelRegistry: new (auth: unknown) => { authStorage: { keys: { setRuntime(p: string, k: string): void } } };
  Settings: {
   isolated(overrides: Record<string, unknown>): unknown;
   loadIsolated(options: { cwd?: string; agentDir?: string; inMemory?: boolean }): Promise<unknown>;
  };
  SessionManager: { inMemory(): HostSessionManager; open(file: string, cwd?: string): Promise<HostSessionManager> };
  initializeExtensions: (session: HostSession, hooks: Record<string, unknown>) => Promise<void>;
- AgentRegistry: { global(): { list(): { id: string; displayName: string; session?: unknown }[] } };
 }
 
 export interface HostSessionManager {
@@ -42,18 +37,15 @@ export interface HostSession {
  sessionManager: HostSessionManager;
  dispose(): Promise<void>;
  getSessionAgents(): { name: string }[];
- /** Parent-imported extension factories the host forwards to restricted children (`preloadedPreparedExtensions`). */
- preparedExtensions: readonly unknown[] | undefined;
 }
 
 export async function loadHost(hostRoot: string): Promise<Host> {
- const [sdk, models, settings, sessions, runtimeInit, registry] = await Promise.all([
+ const [sdk, models, settings, sessions, runtimeInit] = await Promise.all([
   import(path.join(hostRoot, "sdk.ts")),
   import(path.join(hostRoot, "config", "model-registry.ts")),
   import(path.join(hostRoot, "config", "settings.ts")),
   import(path.join(hostRoot, "session", "session-manager.ts")),
   import(path.join(hostRoot, "modes", "runtime-init.ts")),
-  import(path.join(hostRoot, "registry", "agent-registry.ts")),
  ]);
  return {
   createAgentSession: sdk.createAgentSession,
@@ -62,7 +54,6 @@ export async function loadHost(hostRoot: string): Promise<Host> {
   Settings: settings.Settings,
   SessionManager: sessions.SessionManager,
   initializeExtensions: runtimeInit.initializeExtensions,
-  AgentRegistry: registry.AgentRegistry,
  };
 }
 
@@ -159,9 +150,9 @@ export interface SessionOptions {
 
 export async function openSession(o: SessionOptions): Promise<HostSession> {
  const cwd = o.cwd ?? ROOT;
- const auth = await o.host.discoverAuthStorage(path.join(o.agentDir, "profiles"));
+ const auth = await o.host.discoverAuthStorage(o.agentDir);
  const registry = new o.host.ModelRegistry(auth);
- registry.authStorage.setRuntimeApiKey("openai", "offline-key");
+ registry.authStorage.keys.setRuntime("openai", "offline-key");
  const base = getBundledModel("openai", "gpt-5");
  if (!base) throw new Error("bundled gpt-5 model missing");
  const agentId = o.agentId ?? `test-${++sequence}`;
@@ -230,7 +221,8 @@ function recordingUIContext(sink: NotificationSink): Record<string, unknown> {
 export interface LoaderPathProof {
  toolNames: string[];
  authorLabel: string | null;
- storePath: string;
+ /** Connection ids `linear_connections` listed: proves which agent dir the store was opened under. */
+ connectionIds: string[];
 }
 
 /**
