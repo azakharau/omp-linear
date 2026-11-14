@@ -229,7 +229,8 @@ child restricted to `read`, that each Linear request carries the key file value,
 key never reaches a model request.
 
 Design notes live in [`docs/research-report.md`](docs/research-report.md). Changes are listed in
-[`CHANGELOG.md`](CHANGELOG.md).
+[`CHANGELOG.md`](CHANGELOG.md). See [`CONTRIBUTING.md`](CONTRIBUTING.md) before you open a pull
+request.
 
 ## Security notes
 
