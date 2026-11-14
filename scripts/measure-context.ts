@@ -9,6 +9,7 @@
  * Variants:
  *   none                   `--no-extensions`
  *   ext                    `-e src/index.ts` as shipped
+ *   ext-manifest           the package loaded from `extensions: [<repo>]` in the agent config.yml
  *   ext-search-device      only `linear_tool_search` remounted `loadMode: "discoverable"` (an xd:// device)
  *   ext-ergonomic-devices  search + utility + ergonomic tools discoverable (devices)
  *   ext-all-devices        every Linear tool discoverable
@@ -32,7 +33,7 @@ const ROOT = path.resolve(import.meta.dir, "..");
 const ISSUE_UUID = "1e9f5a3c-6c1d-4f7e-9b2a-0c8d7e6f5a41";
 const FAKE_ISSUE_IDENTIFIER = "SMK-1";
 const DEFAULT_OMP = "/home/agent/.local/lib/omp/bin/omp";
-const VARIANTS = ["none", "ext", "ext-search-device", "ext-ergonomic-devices", "ext-all-devices", "mcp"] as const;
+const VARIANTS = ["none", "ext", "ext-manifest", "ext-search-device", "ext-ergonomic-devices", "ext-all-devices", "mcp"] as const;
 type Variant = (typeof VARIANTS)[number];
 const SCENARIOS = ["S1", "S2", "S3", "S4"] as const;
 type Scenario = (typeof SCENARIOS)[number];
@@ -209,7 +210,7 @@ function decide(conversation: string, body: ResponsesRequest): Action {
 		case "CHILD-S2":
 			return finish(body, reachOperation(body));
 		case "CHILD-R":
-			return finish(body, { kind: "final", text: "observed" });
+			return finish(body, reachOperation(body));
 		default:
 			return { kind: "final", text: "ok" };
 	}
@@ -293,7 +294,7 @@ function startLinear(authorizations: string[]) {
  * keeps the extension module itself as the loader's entry, exactly as `-e src/index.ts` loads it.
  */
 function variantModule(variant: Variant): string | null {
-	if (variant === "none" || variant === "mcp") return null;
+	if (variant === "none" || variant === "mcp" || variant === "ext-manifest") return null;
 	if (variant === "ext") return path.join(ROOT, "src", "index.ts");
 	const dir = path.join(outDir, "variants", variant);
 	fs.rmSync(dir, { recursive: true, force: true });
@@ -371,6 +372,7 @@ function prepareAgentDir(variant: Variant, modelUrl: string, linearUrl: string):
 		`  endpoint: ${linearUrl}graphql`,
 	];
 	if (apiKeyFileSetting) config.push(`  apiKeyFile: ${apiKeyFileSetting}`);
+	if (variant === "ext-manifest") config.push("extensions:", `  - ${ROOT}`);
 	fs.writeFileSync(path.join(agentDir, "config.yml"), `${config.join("\n")}\n`);
 	fs.writeFileSync(
 		path.join(agentDir, "agents", "linear-restricted.md"),
@@ -453,7 +455,7 @@ function classify(output: string | null): string {
 	if (output === null) return "no-output";
 	if (output.includes(FAKE_ISSUE_IDENTIFIER)) return "ok";
 	if (output.includes("No Linear connection selected")) return "reached-execute:no-connection";
-	if (/not registered in the agent registry/.test(output)) return "reached-execute:no-author";
+	if (output.includes("OMP >= 18.20.0 is required")) return "reached-execute:no-author";
 	return `error:${output.slice(0, 160).replace(/\s+/g, " ")}`;
 }
 
@@ -504,6 +506,8 @@ interface RunReport {
 	conversations: Record<string, ConversationResult>;
 	keyInModelRequests: boolean;
 	linearRequests: number;
+	/** Every Linear request carried the `--api-key-file` key as its Authorization header. */
+	linearAuthMatchesKeyFile: boolean | null;
 }
 
 const recorded: Recorded[] = [];
@@ -537,6 +541,7 @@ try {
 				conversations,
 				keyInModelRequests: secretValue !== null && runRecords.some(record => JSON.stringify(record.body).includes(secretValue)),
 				linearRequests: authorizations.length,
+				linearAuthMatchesKeyFile: secretValue === null ? null : authorizations.length > 0 && authorizations.every(value => value === secretValue),
 			});
 			console.error(`${variant} ${scenario}: exit ${result.exitCode}, ${runRecords.length} model requests`);
 		}
