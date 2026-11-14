@@ -190,6 +190,11 @@ independently. A caller-supplied `createAsUser` that differs from the author is 
 main session any caller-supplied `createAsUser` is rejected. `actor=user` connections and API keys
 send no attribution. Linear history still shows the application as the actor of state changes.
 
+Agents cannot bypass attribution through the credentials. The extension blocks `bash`, `eval`,
+`read`, `grep` and `glob` calls that name `linear.appCredentialsFile`, `linear.apiKeyFile` or the
+connection store: the absolute path, the `~/`, `$HOME/` and `${HOME}/` forms, and the bare file name
+of a configured file. The block also applies to subagents.
+
 ## Schema drift
 
 `linear_graphql` sends documents that use names the pinned schema does not know. The result has
@@ -240,6 +245,7 @@ request.
 - With no connection, tools fail before any network call.
 - Project configs cannot set the endpoint, the key file or the OAuth URLs.
 - Each typed or raw call is one HTTP request. An ergonomic write is one mutation and one read.
+- Agent tool calls that name a credentials file are blocked (see Attribution).
 
 ## License
 

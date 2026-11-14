@@ -27,6 +27,7 @@ import {
 import { rawApproval, typedApproval } from "./approval";
 import { type AppCredentials, appAccessToken, cachedAppAccessToken, forgetAppAccessToken, readAppCredentialsFile } from "./auth/app-credentials";
 import { OAUTH_DEFAULTS, ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
+import { CREDENTIAL_ACCESS_REASON, credentialSpellings, readsCredentials } from "./auth/guard";
 import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
 import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
@@ -240,9 +241,8 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
  const activatable = new Set<string>([...UTILITY_TOOLS, ...ergonomicOps.map(op => op.name), ...catalog.map(d => d.tool)]);
 
  return (pi: ExtensionAPI) => {
-  const store: CredentialStore = createCredentialStore(
-   path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json"),
-  );
+  const storeFile = path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json");
+  const store: CredentialStore = createCredentialStore(storeFile);
   let state: LinearSessionState = emptyState();
   let activationChain: Promise<unknown> = Promise.resolve();
 
@@ -411,6 +411,18 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   pi.on("session_start", async (_event, ctx) => onSessionOpen(ctx));
   pi.on("session_switch", async (_event, ctx) => onSessionOpen(ctx));
+  pi.on("tool_call", async (event, ctx) => {
+   let named: string[];
+   try {
+    const settings = readLinearSettings(ctx.cwd);
+    named = [settings.appCredentialsFile, settings.apiKeyFile].filter((file): file is string => !!file);
+   } catch {
+    named = [];
+   }
+   if (readsCredentials(event.toolName, event.input, credentialSpellings(named, [storeFile]))) {
+    return { block: true, reason: CREDENTIAL_ACCESS_REASON };
+   }
+  });
 
   pi.registerTool({
    name: SEARCH_TOOL,

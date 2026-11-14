@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Native Oh My Pi extension for Linear",
-    "version": "1.0.2"
+    "version": "1.0.3"
   },
   "plugins": [
     {
       "name": "omp-linear",
       "description": "Native Oh My Pi extension for Linear (private typed catalog, OAuth/API-key connections, native approvals)",
       "source": "./",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Alaksiej Zacharau"
       },
