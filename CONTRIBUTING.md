@@ -51,8 +51,8 @@ bun run check
    loads `dist/` as it is, so a stale bundle ships old code.
 5. Run `bun run check`. It must pass.
 6. Run the extra checks that the change needs (see the table below).
-7. Add a line under `## [Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md) for each change that a user
-   can see.
+7. Add a line for each change that a user can see to [`CHANGELOG.md`](CHANGELOG.md), under the
+   section of the next version. Create the section if it does not exist.
 8. Open a pull request. Describe the change and list the checks that you ran.
 
 | You change | Also run |
@@ -82,8 +82,7 @@ Maintainers make releases:
 
 1. Set the same version in `package.json` and in both `version` fields of
    `.omp-plugin/marketplace.json`. Installed plugins update only when this version changes.
-2. Move the `[Unreleased]` entries in `CHANGELOG.md` to a new version section. Update the compare
-   links.
+2. Check the version section in `CHANGELOG.md`: version, date, entries and compare link.
 3. Merge the pull request. Then tag the merge commit: `git tag -a vX.Y.Z -m "omp-linear X.Y.Z"` and
    `git push origin vX.Y.Z`.
 
