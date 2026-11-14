@@ -126,7 +126,7 @@ a lookup. A reference that matches zero or many records is an error that lists t
 | --- | --- |
 | `linear_issue_create` | Create an issue with assignee, labels, project, milestone, parent and relations (`blocks`, `blockedBy`, `related`, `duplicate`). |
 | `linear_issue_update`, `linear_issue_transition` | Change fields or the workflow state. |
-| `linear_issue_get`, `linear_issue_search` | Read one issue. Search by text, or list by team, state, state type, assignee (`me`), project and `staleDays`. |
+| `linear_issue_get`, `linear_issue_search` | Read one issue. Search by text, or list by team, state, state type, assignee (`me`), project, priority, labels (any of) and `staleDays`. |
 | `linear_issue_comment_add`, `linear_issue_relation_add`, `linear_issue_link_add` | Comment, relate issues, attach a URL. |
 | `linear_project_create`, `linear_project_update`, `linear_project_get` | Projects, with `lead`. |
 | `linear_project_status_post` | Post a project update with health `onTrack`, `atRisk` or `offTrack`. |
@@ -166,12 +166,15 @@ then `bun run generate:catalog`. Introspection shows what the key's workspace ca
 
 With an `actor=app` connection (`linear.appCredentialsFile`, or OAuth created with
 `/linear-login app`), every mutation that accepts `createAsUser`
-(typed tools, raw documents, ergonomic ops) is attributed to the agent that makes the call. The
-author comes from `ctx.agent`: the main agent is `OMP · Main`, a subagent is
-`OMP · <definition name> [<agent id>]`, for example `OMP · task [0-Review]`. Parallel subagents
-attribute independently. A caller-supplied `createAsUser` that differs from the author is
-rejected. `actor=user` connections and API keys send no attribution. Linear history still shows
-the application as the actor of state changes.
+(typed tools, raw documents, ergonomic ops) is attributed to the agent that makes the call, and
+Linear renders it as "<name> by <app>". The author comes from `ctx.agent`. The main agent sends no
+`createAsUser`, so Linear shows the application itself. A subagent sends the display name of its
+agent definition, for example `Code Reviewer` for `reviewer` or `Task Agent` for `task`; the table
+lives in `src/identity/names.ts`. A name missing from the table is split on `-`/`_` and Title
+Cased with known forms kept (`api-reviewer` becomes `API Reviewer`). Parallel subagents attribute
+independently. A caller-supplied `createAsUser` that differs from the author is rejected; in the
+main session any caller-supplied `createAsUser` is rejected. `actor=user` connections and API keys
+send no attribution. Linear history still shows the application as the actor of state changes.
 
 ## Verify
 

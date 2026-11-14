@@ -30,6 +30,7 @@ import {
  type OperationDefinitionNode,
  type SelectionSetNode,
 } from "graphql";
+import { rejectForeignAuthor } from "../identity/attribution.ts";
 import { getSchema } from "./catalog.ts";
 
 export interface MutationRoot {
@@ -251,20 +252,38 @@ function withCreateAsUser(value: unknown, author: string, label: string): unknow
  return { ...(value as Record<string, unknown>), createAsUser: author };
 }
 
+/** Main session (null author): nothing is injected, and any `createAsUser` the caller wrote is rejected. */
+function rejectSuppliedAuthors(targets: Map<FieldNode, AttributionTarget>, values: Record<string, unknown>): void {
+ for (const [node, target] of targets) {
+  const label = `${node.alias?.value ?? node.name.value} (${node.name.value})`;
+  const argument = node.arguments?.find((arg) => arg.name.value === target.inputArg);
+  if (!argument) continue;
+  const value = valueFromASTUntyped(argument.value, values);
+  if (target.kind === "argument") {
+   rejectForeignAuthor(label, value ?? undefined, null);
+   continue;
+  }
+  for (const entry of Array.isArray(value) ? value : [value]) {
+   if (entry !== null && typeof entry === "object" && "createAsUser" in entry) rejectForeignAuthor(label, entry.createAsUser ?? undefined, null);
+  }
+ }
+}
+
 /**
  * Sets `createAsUser` on every matching mutation of the SELECTED operation, so `actor=app`
- * calls render as "user via application". Inline object literals are rewritten on the AST and
+ * calls render as "user by application". Inline object literals are rewritten on the AST and
  * variable inputs in the variable values (an object default on the operation's variable definition
  * is materialised when no runtime value was supplied). A direct `createAsUser` argument is set to
  * the author: a literal is replaced, a variable gets the author as its value, a missing argument
  * is added. Inline fragments and fragment spreads at the mutation root are traversed; other
- * operations keep their selections and variables.
+ * operations keep their selections and variables. A null author (main session) changes nothing
+ * and rejects any caller-supplied `createAsUser`.
  */
 export function injectCreateAsUser(
  document: string,
  variables: Record<string, unknown>,
  roots: AttributionTarget[],
- author: string,
+ author: string | null,
  operationName?: string,
 ): { document: string; variables: Record<string, unknown> } {
  const parsed = parseDocument(document);
@@ -287,6 +306,10 @@ export function injectCreateAsUser(
    definition.defaultValue ? valueFromASTUntyped(definition.defaultValue) : undefined,
   ]),
  );
+ if (author === null) {
+  rejectSuppliedAuthors(targets, { ...Object.fromEntries(defaults), ...variables });
+  return { document, variables };
+ }
  const nextVariables: Record<string, unknown> = { ...variables };
 
  const transformed = visit(parsed, {

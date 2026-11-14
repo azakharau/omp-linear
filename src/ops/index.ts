@@ -23,11 +23,12 @@ import {
 /**
  * Who the mutation is attributed to. With an `actor=app` connection Linear
  * attributes writes to the OAuth application unless `createAsUser` names the
- * human (or agent) behind them, so the caller supplies that label once.
+ * agent behind them, so the caller supplies that label once; a null label (the
+ * main session) leaves the write attributed to the application itself.
  */
 export interface ActorContext {
  actor: "user" | "app";
- authorLabel: string;
+ authorLabel: string | null;
 }
 
 export interface ErgonomicOp {
@@ -48,7 +49,7 @@ export interface ErgonomicOp {
  * document writes cannot be attributed this way, so those ops stay app-attributed.
  */
 function applyActorAttribution(input: Record<string, unknown>, actorCtx: ActorContext): void {
- if (actorCtx.actor === "app") input.createAsUser = actorCtx.authorLabel;
+ if (actorCtx.actor === "app" && actorCtx.authorLabel !== null) input.createAsUser = actorCtx.authorLabel;
 }
 
 const ISSUE_FIELDS = `id identifier title description url priority createdAt updatedAt
@@ -870,6 +871,17 @@ async function issueFilter(
  }
  const project = optionalString(args, "project");
  if (project !== undefined) filter.project = { id: { eq: await resolveProjectId(client, project) } };
+ const priority = optionalNumber(args, "priority");
+ if (priority !== undefined) {
+  if (!Number.isInteger(priority) || priority < 0 || priority > 4) {
+   throw new Error('argument "priority" must be an integer from 0 to 4');
+  }
+  filter.priority = { eq: priority };
+ }
+ const labels = stringList(args, "labels");
+ if (labels !== undefined && labels.length > 0) {
+  filter.labels = { some: { or: labels.map(name => ({ name: { eqIgnoreCase: name } })) } };
+ }
  const staleDays = optionalNumber(args, "staleDays");
  if (staleDays !== undefined) {
   if (!Number.isInteger(staleDays) || staleDays < 1) {
@@ -883,7 +895,7 @@ async function issueFilter(
 const issueSearch: ErgonomicOp = {
  name: "linear_issue_search",
  description:
-  'Search or list issues in one bounded page, filtered by team key, state, assignee ("me", name or UUID), project (name or UUID) and staleness.',
+  'Search or list issues in one bounded page, filtered by team key, state, assignee ("me", name or UUID), project (name or UUID), priority, labels and staleness.',
  tier: "read",
  parameters: {
   type: "object",
@@ -894,6 +906,8 @@ const issueSearch: ErgonomicOp = {
    stateTypes: { type: "array", items: { type: "string", enum: STATE_TYPES } },
    assignee: USER_REF,
    project: { type: "string", description: "Project name or UUID" },
+   priority: { type: "integer", minimum: 0, maximum: 4, description: "Exact priority: 0 none, 1 urgent, 2 high, 3 medium, 4 low" },
+   labels: { type: "array", items: { type: "string" }, description: "Label names; an issue matches when it has any of them (case-insensitive)" },
    staleDays: { type: "integer", minimum: 1, description: "Only issues not updated in this many days" },
    first: { type: "integer", minimum: 1, maximum: 100, default: 25 },
    after: { type: "string", description: "Cursor from a previous pageInfo.endCursor" },
