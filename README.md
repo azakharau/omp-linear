@@ -8,10 +8,11 @@ Native Oh My Pi extension for Linear. It gives OMP agents and `task` subagents:
   `linear_project_status_post`, `linear_document_create`, ...);
 - a raw `linear_graphql` tool, `linear_schema_help` and `linear_connections`.
 
-At start the model sees no Linear tool. It sees one catalog line for the xd:// device
-`linear_tool_search` and calls it through `write xd://linear_tool_search`. The device returns
+At start the model sees one Linear tool, the native function `linear_tool_search`. It returns
 ranked candidates from the private catalog. With `activate: <exact name>` it adds one Linear
-operation to the active tools and removes the operation that was active before.
+operation to the active tools and removes the operation that was active before. Every model
+request carries `linear_tool_search` plus at most one activated Linear operation; the other
+Linear tools stay registered but inactive, so their names and schemas never reach the model.
 
 ## Requirements
 
@@ -155,8 +156,8 @@ applied and never retries it.
 
 `bun run schema:check --key-file ~/linear.env` compares the pinned schema with live Linear
 introspection. It lists live-only and pinned-only root fields, changed arguments, every type whose
-definition differs, and ergonomic documents that the live schema rejects. Exit codes: 0 no drift,
-1 drift, 2 request failed.
+definition differs, and ergonomic documents that the live schema rejects or that use a field it
+marks deprecated. Exit codes: 0 no drift, 1 drift, 2 request failed.
 
 The pinned schema comes from live introspection, not from the SDK file in linear/linear: that file
 lags behind the API. To refresh the pin, run `bun run schema:check --key-file ~/linear.env --write`,
@@ -187,9 +188,10 @@ bun run smoke:binary    # the installed omp binary: -e and extensions: load path
 
 `smoke:binary` runs `/home/agent/.local/lib/omp/bin/omp` by default (`--omp <bin>` or `OMP_BIN`
 changes it). It uses a throwaway HOME and agent dir under `.scratch/`, a fake model and a fake
-Linear on loopback. It checks that no Linear tool is top-level at start, that `linear_issue_get`
-works in the main agent, in a `task` child and in a child restricted to `read`, that each Linear
-request carries the key file value, and that the key never reaches a model request.
+Linear on loopback. It checks that `linear_tool_search` is the only Linear tool at start and is a
+native function, that `linear_issue_get` works in the main agent, in a `task` child and in a
+child restricted to `read`, that each Linear request carries the key file value, and that the
+key never reaches a model request.
 
 ## Security notes
 

@@ -5,8 +5,8 @@
  * `-e src/index.ts` and `extensions: [<repo>]` in the agent config. HOME, XDG_* and the agent
  * dir live in a scratch dir under `.scratch/`; the real `~/.omp` is never read or written.
  *
- * Checks per load path: at start no Linear tool is top-level and `linear_tool_search` is an
- * xd:// device; `linear_issue_get` returns the fake issue in the main agent (S2), in a `task`
+ * Checks per load path: at start `linear_tool_search` is the only Linear tool, as a native
+ * function, and no Linear xd:// device is listed; `linear_issue_get` returns the fake issue in the main agent (S2), in a `task`
  * child (S3) and in a child restricted to `read` (S4); every Linear request carries the key
  * file value; the key never appears in a model request.
  * Prints a JSON summary with PASS/FAIL per step and exits non-zero when any step fails.
@@ -60,8 +60,8 @@ function check(reports: Report[]): Step[] {
 			if (scenario === "S1") {
 				const start = report.start;
 				record(
-					`${variant} S1: no top-level Linear tool, linear_tool_search is a device`,
-					start !== null && start.linearTools.length === 0 && start.linearDevices === 1,
+					`${variant} S1: linear_tool_search is the only Linear tool, native, no Linear device`,
+					start !== null && start.linearTools.join() === "linear_tool_search" && start.linearDevices === 0,
 					`linearTools=${JSON.stringify(start?.linearTools)}, linearDevices=${start?.linearDevices}`,
 				);
 				continue;

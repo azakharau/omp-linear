@@ -2,7 +2,8 @@
  * Schema drift: the pinned SDL (`schema/linear.schema.graphql`) against live Linear introspection.
  *
  * Reports root Query/Mutation fields present on only one side, argument changes on shared roots,
- * and every hand-written ergonomic document that no longer validates against the live schema.
+ * and every hand-written ergonomic document that no longer validates against the live schema or
+ * uses a field, argument or enum value the live schema marks deprecated.
  *
  * With --write, the live schema replaces the pinned SDL. Then run `bun run generate:catalog`.
  * The live API is the source of truth: the SDK file in linear/linear lags behind it.
@@ -23,9 +24,11 @@ import {
 	isIntrospectionType,
 	isNonNullType,
 	isSpecifiedScalarType,
+	NoDeprecatedCustomRule,
 	parse,
 	printSchema,
 	printType,
+	specifiedRules,
 	validate,
 } from "graphql";
 import { readApiKeyFile } from "../src/auth/key-file";
@@ -46,7 +49,7 @@ export interface DriftReport {
 	mutation: RootDrift;
 	/** Named types whose printed definition (fields, arguments, values, descriptions) differs or exists on one side only. */
 	changedTypes: string[];
-	/** Hand-written documents with their live validation errors. */
+	/** Hand-written documents with their live validation errors, deprecated usage included. */
 	invalidDocuments: Record<string, string[]>;
 	drift: boolean;
 }
@@ -80,7 +83,7 @@ export function compareSchemas(pinned: GraphQLSchema, live: GraphQLSchema, docum
 	const changedTypes = compareTypes(pinned, live);
 	const invalidDocuments: Record<string, string[]> = {};
 	for (const [name, document] of Object.entries(documents)) {
-		const errors = validate(live, parse(document)).map(error => error.message);
+		const errors = validate(live, parse(document), [...specifiedRules, NoDeprecatedCustomRule]).map(error => error.message);
 		if (errors.length > 0) invalidDocuments[name] = errors;
 	}
 	const drift =
@@ -132,7 +135,7 @@ function summary(report: DriftReport): string {
 	const invalid = Object.entries(report.invalidDocuments);
 	lines.push(`Types with a changed definition: ${report.changedTypes.length}`);
 	if (report.changedTypes.length > 0) lines.push(`  ${report.changedTypes.join(", ")}`);
-	lines.push(`Ergonomic documents invalid against live schema: ${invalid.length}`);
+	lines.push(`Ergonomic documents invalid or using deprecated fields against live schema: ${invalid.length}`);
 	for (const [name, errors] of invalid) lines.push(`  ${name}: ${errors.join("; ")}`);
 	lines.push(report.drift ? "Result: DRIFT" : "Result: no drift");
 	return lines.join("\n");
