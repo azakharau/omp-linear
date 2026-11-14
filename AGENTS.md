@@ -37,6 +37,8 @@ This file lists only the rules that the code and config do not show.
 - At session start the only Linear tool is `linear_tool_search`. Other tools activate through
   search. Add a new Linear operation to the catalog or to `src/ops/`, never as an always-on tool.
 - Each typed or raw call is one HTTP request. An ergonomic write is one mutation and one read.
+- Write all text in English: code, comments, tool descriptions, search aliases, tests and docs.
+  Search matches English words only.
 
 ## Conventions
 
