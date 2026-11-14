@@ -165,16 +165,17 @@ describe("encodeOutput", () => {
 	test("the measured row threshold decides, and it never serialises to find out", () => {
 		const policyFile = JSON.parse(fs.readFileSync(path.join(ROOT, "src", "output", "policy.json"), "utf8"));
 		expect(MIN_ROWS).toEqual(policyFile.minRows);
-		expect(MIN_ROWS.table).toBe(2);
+		expect(MIN_ROWS.table).toBe(3);
 		expect(MIN_ROWS["keyed-table"]).toBe(25);
 
 		// One row is below the measured break-even even though the payload is huge.
 		const oneRow = [{ id: "x", note: "y".repeat(4000) }];
 		expect(analyzeShape(oneRow)).toBe("table");
 		expect(encodeOutput(oneRow).format).toBe("json");
-		// Two tiny rows are above it: the decision is structural, not size-based.
-		const twoRows = [{ id: 1, n: "a" }, { id: 2, n: "b" }];
-		expect(encodeOutput(twoRows).format).toBe("toon");
+		// Three tiny rows are above it: the decision is structural, not size-based.
+		const tinyRows = (count: number) => Array.from({ length: count }, (_, i) => ({ id: i, n: `r${i}` }));
+		expect(encodeOutput(tinyRows(2)).format).toBe("json");
+		expect(encodeOutput(tinyRows(3)).format).toBe("toon");
 
 		// keyed-table wins only from 25 rows up.
 		const keyedRows = (count: number) => ({ nodes: Array.from({ length: count }, (_, i) => ({ id: i, n: `r${i}` })), hasNextPage: false });

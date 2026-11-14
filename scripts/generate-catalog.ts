@@ -1,5 +1,6 @@
 /**
- * Generates the pinned Linear operation catalog from schema/linear.schema.graphql.
+ * Generates the pinned Linear operation catalog from schema/linear.schema.graphql, which
+ * `bun run schema:check --write` takes from live Linear introspection.
  *
  * Output is deterministic: roots sorted by tool name, object keys emitted in a fixed order.
  * Run: bun run scripts/generate-catalog.ts
@@ -25,8 +26,6 @@ import {
 const ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const SDL_PATH = path.join(ROOT, "schema", "linear.schema.graphql");
 const OUT_DIR = path.join(ROOT, "generated");
-const LINEAR_COMMIT = "87d638c0b151575505d36822839324d2287f2e06";
-
 type JsonSchema = Record<string, unknown>;
 
 /** Scalars that carry no extra structure beyond a JSON string. */
@@ -138,7 +137,6 @@ if (import.meta.main) {
  const total = queryCount + mutationCount;
  const manifest = {
   schemaSha256,
-  linearCommit: LINEAR_COMMIT,
   queryCount,
   mutationCount,
   total,

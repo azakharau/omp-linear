@@ -116,8 +116,8 @@ describe("TOON spec conformance", () => {
    }
    expect(encoded.bytes).toBe(Buffer.byteLength(encoded.text, "utf8"));
   }
-  // Policy result, not a conformance score: the spec fixtures are mostly scalars and small
-  // nested values; only their tabular arrays reach the measured thresholds.
-  expect(qualified).toBe(1);
+  // Policy result, not a conformance score: no default-option spec fixture reaches the measured
+  // thresholds (the one 2-row table fell below when the table threshold moved to 3 rows).
+  expect(qualified).toBe(0);
  });
 });

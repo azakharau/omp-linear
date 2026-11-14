@@ -8,7 +8,7 @@
 		"scalar": "json"
 	},
 	"minRows": {
-		"table": 2,
+		"table": 3,
 		"keyed-table": 25,
 		"object": null,
 		"nested": null,
@@ -21,13 +21,12 @@
 			"toon": 4
 		},
 		"byShape": {
-			"nested": 375,
-			"object": 101,
+			"nested": 377,
+			"object": 100,
 			"keyed-table": 14,
-			"scalar": 1,
 			"table": 4
 		},
-		"encodedBytesTotal": 227916
+		"encodedBytesTotal": 228453
 	},
 	"rows": [
 		{
@@ -1453,6 +1452,12 @@
 			"bytes": 60
 		},
 		{
+			"tool": "lm_projectMilestoneMove",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 89
+		},
+		{
 			"tool": "lm_projectMilestoneUpdate",
 			"shape": "nested",
 			"format": "json",
@@ -2041,16 +2046,10 @@
 			"bytes": 86
 		},
 		{
-			"tool": "lq__dummy",
-			"shape": "scalar",
-			"format": "json",
-			"bytes": 14
-		},
-		{
 			"tool": "lq_administrableTeams",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 6152
+			"bytes": 6149
 		},
 		{
 			"tool": "lq_agentActivities",
@@ -2068,13 +2067,13 @@
 			"tool": "lq_agentSession",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 666
+			"bytes": 667
 		},
 		{
 			"tool": "lq_agentSessions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2075
+			"bytes": 2078
 		},
 		{
 			"tool": "lq_agentSkill",
@@ -2146,7 +2145,7 @@
 			"tool": "lq_authenticationSessions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2092
+			"bytes": 2080
 		},
 		{
 			"tool": "lq_availableUsers",
@@ -2254,7 +2253,7 @@
 			"tool": "lq_document",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 788
+			"bytes": 785
 		},
 		{
 			"tool": "lq_documentContentHistory",
@@ -2266,7 +2265,7 @@
 			"tool": "lq_documents",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2441
+			"bytes": 2432
 		},
 		{
 			"tool": "lq_emailIntakeAddress",
@@ -2326,13 +2325,13 @@
 			"tool": "lq_inboxNotifications",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1835
+			"bytes": 1790
 		},
 		{
 			"tool": "lq_initiative",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1203
+			"bytes": 1202
 		},
 		{
 			"tool": "lq_initiativeFilterSuggestion",
@@ -2344,13 +2343,13 @@
 			"tool": "lq_initiativeLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 494
+			"bytes": 495
 		},
 		{
 			"tool": "lq_initiativeLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1559
+			"bytes": 1562
 		},
 		{
 			"tool": "lq_initiativeRelation",
@@ -2380,19 +2379,19 @@
 			"tool": "lq_initiativeUpdate",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 567
+			"bytes": 568
 		},
 		{
 			"tool": "lq_initiativeUpdates",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1778
+			"bytes": 1781
 		},
 		{
 			"tool": "lq_initiatives",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 3686
+			"bytes": 3683
 		},
 		{
 			"tool": "lq_integration",
@@ -2428,7 +2427,7 @@
 			"tool": "lq_integrationsSettings",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 799
+			"bytes": 800
 		},
 		{
 			"tool": "lq_issue",
@@ -2470,13 +2469,13 @@
 			"tool": "lq_issueLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 540
+			"bytes": 541
 		},
 		{
 			"tool": "lq_issueLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1697
+			"bytes": 1700
 		},
 		{
 			"tool": "lq_issuePriorityValues",
@@ -2542,13 +2541,13 @@
 			"tool": "lq_jiraProject",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 633
+			"bytes": 631
 		},
 		{
 			"tool": "lq_jiraProjects",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1976
+			"bytes": 1970
 		},
 		{
 			"tool": "lq_latestReleaseByAccessKey",
@@ -2560,25 +2559,25 @@
 			"tool": "lq_notification",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 586
+			"bytes": 571
 		},
 		{
 			"tool": "lq_notificationSubscription",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 732
+			"bytes": 731
 		},
 		{
 			"tool": "lq_notificationSubscriptions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2273
+			"bytes": 2270
 		},
 		{
 			"tool": "lq_notifications",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1835
+			"bytes": 1790
 		},
 		{
 			"tool": "lq_oauthApplication",
@@ -2590,7 +2589,7 @@
 			"tool": "lq_oauthApplicationCodingSessionTrustedSource",
 			"shape": "object",
 			"format": "json",
-			"bytes": 52
+			"bytes": 61
 		},
 		{
 			"tool": "lq_oauthApplications",
@@ -2602,7 +2601,7 @@
 			"tool": "lq_organization",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2055
+			"bytes": 2062
 		},
 		{
 			"tool": "lq_organizationExists",
@@ -2618,9 +2617,9 @@
 		},
 		{
 			"tool": "lq_organizationInviteDetails",
-			"shape": "object",
+			"shape": "nested",
 			"format": "json",
-			"bytes": 86
+			"bytes": 454
 		},
 		{
 			"tool": "lq_organizationInvites",
@@ -2632,7 +2631,7 @@
 			"tool": "lq_project",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1812
+			"bytes": 1807
 		},
 		{
 			"tool": "lq_projectFilterSuggestion",
@@ -2644,25 +2643,25 @@
 			"tool": "lq_projectLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 593
+			"bytes": 594
 		},
 		{
 			"tool": "lq_projectLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1856
+			"bytes": 1859
 		},
 		{
 			"tool": "lq_projectMilestone",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 350
+			"bytes": 355
 		},
 		{
 			"tool": "lq_projectMilestones",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1127
+			"bytes": 1142
 		},
 		{
 			"tool": "lq_projectRelation",
@@ -2692,19 +2691,19 @@
 			"tool": "lq_projectUpdate",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 600
+			"bytes": 601
 		},
 		{
 			"tool": "lq_projectUpdates",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1877
+			"bytes": 1880
 		},
 		{
 			"tool": "lq_projects",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 5513
+			"bytes": 5498
 		},
 		{
 			"tool": "lq_pushSubscriptionTest",
@@ -2716,7 +2715,7 @@
 			"tool": "lq_quotas",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 443
+			"bytes": 440
 		},
 		{
 			"tool": "lq_rateLimitStatus",
@@ -2740,13 +2739,13 @@
 			"tool": "lq_releaseNote",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 565
+			"bytes": 563
 		},
 		{
 			"tool": "lq_releaseNotes",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1772
+			"bytes": 1766
 		},
 		{
 			"tool": "lq_releasePipeline",
@@ -2776,13 +2775,13 @@
 			"tool": "lq_releaseStage",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 271
+			"bytes": 270
 		},
 		{
 			"tool": "lq_releaseStages",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 890
+			"bytes": 887
 		},
 		{
 			"tool": "lq_releases",
@@ -2818,7 +2817,7 @@
 			"tool": "lq_searchDocuments",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2531
+			"bytes": 2522
 		},
 		{
 			"tool": "lq_searchIssues",
@@ -2830,7 +2829,7 @@
 			"tool": "lq_searchProjects",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 5603
+			"bytes": 5588
 		},
 		{
 			"tool": "lq_semanticSearch",
@@ -2842,7 +2841,7 @@
 			"tool": "lq_slaConfigurations",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 433
+			"bytes": 421
 		},
 		{
 			"tool": "lq_ssoUrlFromEmail",
@@ -2854,7 +2853,7 @@
 			"tool": "lq_team",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2025
+			"bytes": 2024
 		},
 		{
 			"tool": "lq_teamMembership",
@@ -2872,7 +2871,7 @@
 			"tool": "lq_teams",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 6152
+			"bytes": 6149
 		},
 		{
 			"tool": "lq_template",
@@ -2944,7 +2943,7 @@
 			"tool": "lq_userSessions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2092
+			"bytes": 2080
 		},
 		{
 			"tool": "lq_userSettings",
@@ -2980,13 +2979,13 @@
 			"tool": "lq_webhook",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 420
+			"bytes": 487
 		},
 		{
 			"tool": "lq_webhooks",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1337
+			"bytes": 1538
 		},
 		{
 			"tool": "lq_workflowState",

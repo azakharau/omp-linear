@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { buildSchema, Kind, getNamedType, isNonNullType, isObjectType } from "graphql";
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,8 +44,8 @@ describe("catalog coverage", () => {
 
 	test("manifest matches the pinned schema digest and the generated catalog", () => {
 		const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "generated", "coverage-manifest.json"), "utf8"));
-		expect(manifest.schemaSha256).toBe("20cadd5061b0c95acbd0ecdb2b387023b1beb3be84c10c74d22b560f61cd8730");
-		expect(manifest.linearCommit).toBe("87d638c0b151575505d36822839324d2287f2e06");
+		const sdl = fs.readFileSync(path.join(ROOT, "schema", "linear.schema.graphql"));
+		expect(manifest.schemaSha256).toBe(createHash("sha256").update(sdl).digest("hex"));
 		expect(manifest.total).toBe(495);
 		expect(manifest.queryCount + manifest.mutationCount).toBe(495);
 		expect(manifest.roots.length).toBe(495);
@@ -168,7 +169,7 @@ describe("composeOperation", () => {
 
 	test("mutation payload selections are composed as mutations", () => {
 		const { document } = composeOperation(descriptor("lm_issueArchive"), { id: "abc", trash: true });
-		expect(document.startsWith("mutation lm_issueArchive($id: String!, $trash: Boolean)")).toBe(true);
+		expect(document.startsWith("mutation lm_issueArchive($trash: Boolean, $id: String!)")).toBe(true);
 		expect(document).toContain("success");
 	});
 });

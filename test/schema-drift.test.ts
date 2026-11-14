@@ -25,6 +25,14 @@ describe("schema drift comparison", () => {
 		expect(report.drift).toBe(true);
 	});
 
+	test("a changed input type is drift even when every root and argument matches", () => {
+		const withInput = (fields: string) =>
+			buildSchema(`input IssueCreateInput { ${fields} } type Query { ok: Boolean } type Mutation { issueCreate(input: IssueCreateInput!): Boolean }`);
+		const report = compareSchemas(withInput("title: String!"), withInput("title: String! priority: Int"), {});
+		expect(report.changedTypes).toEqual(["IssueCreateInput"]);
+		expect(report.drift).toBe(true);
+	});
+
 	test("identical schemas with valid documents report no drift", () => {
 		const report = compareSchemas(PINNED, PINNED, { ok: "query Ok { issue(id: \"1\") { id title } }" });
 		expect(report.drift).toBe(false);
