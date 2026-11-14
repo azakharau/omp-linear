@@ -83,8 +83,9 @@ function writeProject(dir: string, config: string): string {
  return dir;
 }
 
+/** Loads the scratch agent dir's `config.yml` as the user layer and the project's `.omp/config.yml` over it. */
 async function loadSettings(host: Host, cwd: string): Promise<unknown> {
- return host.Settings.loadIsolated({ inMemory: true, cwd, agentDir: getAgentDir() });
+ return host.Settings.loadIsolated({ cwd, agentDir: getAgentDir() });
 }
 
 async function runMain(host: Host): Promise<void> {
@@ -93,7 +94,9 @@ async function runMain(host: Host): Promise<void> {
  const probe = Bun.serve({ port: 0, fetch: () => new Response("") });
  const redirectPort = probe.port;
  probe.stop(true);
- const baseConfig = ["linear:", `  endpoint: ${linear.url}`, "  oauth:", "    clientId: smoke-client", `    redirectPort: ${redirectPort}`, `    tokenUrl: ${issuer.tokenUrl}`, ""].join("\n");
+ // Credential-bearing keys (endpoint, tokenUrl) are user-only; the project carries the rest.
+ fs.writeFileSync(path.join(getAgentDir(), "config.yml"), ["linear:", `  endpoint: ${linear.url}`, "  oauth:", `    tokenUrl: ${issuer.tokenUrl}`, ""].join("\n"));
+ const baseConfig = ["linear:", "  oauth:", "    clientId: smoke-client", `    redirectPort: ${redirectPort}`, ""].join("\n");
  const project = writeProject(tempDir("omp-linear-smoke-project-"), baseConfig);
  const deniedProject = writeProject(tempDir("omp-linear-smoke-denied-"), `${baseConfig}tools:\n  approval:\n    lm_issueCreate: deny\n`);
  const store = createCredentialStore(path.join(getAgentDir(), "linear", "connections.json"));

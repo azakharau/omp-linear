@@ -66,8 +66,12 @@ Stored connections (`/linear-key`, `/linear-login`) live in
 
 ## Settings
 
-All settings are in the `linear` block of the OMP config. The project config wins over the
-global config.
+All settings are in the `linear` block of the OMP config. The project config (`.omp/config.yml`)
+wins over the user config (`<agent dir>/config.yml`), with one exception. `endpoint`,
+`apiKeyFile`, `oauth.authorizeUrl`, `oauth.tokenUrl` and `oauth.revokeUrl` decide where
+credentials go, so only the user config may set them. A project config that sets one of them
+makes every Linear call and `/linear-login` fail with an error that names the key. A cloned
+repository or an agent that writes `.omp/config.yml` cannot redirect your key or token.
 
 ```yaml
 linear:
@@ -170,4 +174,5 @@ request carries the key file value, and that the key never reaches a model reque
 - Error messages from Linear, the token endpoint and revocation are scrubbed of the credentials
   in use and capped in length.
 - With no connection, tools fail before any network call.
+- Project configs cannot set the endpoint, the key file or the OAuth URLs.
 - Each typed or raw call is one HTTP request. An ergonomic write is one mutation and one read.
