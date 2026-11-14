@@ -38,7 +38,7 @@ export const OAUTH_DEFAULTS = {
  authorizeUrl: "https://linear.app/oauth/authorize",
  tokenUrl: "https://api.linear.app/oauth/token",
  revokeUrl: "https://api.linear.app/oauth/revoke",
- scopes: ["read", "write", "issues:create", "comments:create"],
+ scopes: ["read", "write", "issues:create", "comments:create", "initiative:write"],
 } as const;
 
 /**

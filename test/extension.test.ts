@@ -286,7 +286,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("linear.appCredentialsFile: main and child share one client_credentials token (scope read,write) and attribute as app; a 401 drops it", async () => {
+	test("linear.appCredentialsFile: main and child share one client_credentials token (scope read,write,initiative:write) and attribute as app; a 401 drops it", async () => {
 		const project = tempDir("omp-linear-appcreds-");
 		const userDir = tempDir("omp-linear-appcreds-user-");
 		const credsFile = path.join(userDir, "linear-app.env");
@@ -334,7 +334,7 @@ describe("linear extension in a real OMP session", () => {
 			expect(tokenRequests.length).toBe(1);
 			expect(Object.fromEntries(tokenRequests[0]!)).toEqual({
 				grant_type: "client_credentials",
-				scope: "read,write",
+				scope: "read,write,initiative:write",
 				client_id: "app-client",
 				client_secret: clientSecret,
 			});

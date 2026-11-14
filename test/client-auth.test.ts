@@ -171,7 +171,7 @@ describe("oauth config", () => {
 			clientSecret: null,
 			authorizeUrl: "https://linear.app/oauth/authorize",
 			tokenUrl: "https://api.linear.app/oauth/token",
-			scopes: ["read", "write", "issues:create", "comments:create"],
+			scopes: ["read", "write", "issues:create", "comments:create", "initiative:write"],
 		});
 	});
 });

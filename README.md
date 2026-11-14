@@ -90,11 +90,12 @@ call. Keep the files outside the repository with mode `0600`.
 
 `linear.appCredentialsFile` gives `actor=app` access without a browser login, so it also works in
 `omp -p` and in `task` subagents. Turn on "Client credentials" in the Linear OAuth application.
-The extension requests one `client_credentials` token with scope `read,write` per OMP process,
-keeps it in memory only, renews it one day before it expires (tokens live 30 days) and requests
-a new one after Linear answers HTTP 401. Linear revokes all app-actor tokens of the application
-in the workspace when a process requests a different scope set. Every other process that uses the
-same application must request `read,write` too.
+The extension requests one `client_credentials` token with scope `read,write,initiative:write` per
+OMP process, keeps it in memory only, renews it one day before it expires (tokens live 30 days)
+and requests a new one after Linear answers HTTP 401. Without `initiative:write`, Linear refuses
+initiative reads and writes for the app. Linear revokes all app-actor tokens of the application in
+the workspace when a process requests a different scope set. Every other process that uses the
+same application must request `read,write,initiative:write` too.
 A `client_credentials` request also replaces an `/linear-login app` installation of the same
 application, so do not use both modes with one application.
 
@@ -122,7 +123,7 @@ linear:
     redirectPort: <port of the registered redirect URI>
     redirectPath: /callback         # optional
     redirectHost: 127.0.0.1         # optional: 127.0.0.1 or localhost
-    scopes: [read, write, issues:create, comments:create]   # optional
+    scopes: [read, write, issues:create, comments:create, initiative:write]   # optional
 ```
 
 `redirectPort` is required for `/linear-login`. It must be the port of the redirect URI that

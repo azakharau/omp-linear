@@ -1,6 +1,6 @@
 {
   "name": "omp-linear",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Native Oh My Pi extension for Linear (private typed catalog, OAuth/API-key connections, native approvals)",
   "keywords": [
     "omp",
