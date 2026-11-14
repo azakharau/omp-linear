@@ -7,24 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Marketplace catalog `.omp-plugin/marketplace.json`, so the repository installs with
-  `omp plugin marketplace add` and `omp plugin install omp-linear@omp-linear`.
-- Self-contained bundle `dist/index.js` (`bun run build`) as the `omp.extensions` entry, so a
-  marketplace install loads without installing dependencies; `bun run check` fails when `dist/`
-  is stale.
-- `bun run check` script that runs the offline gate (typecheck and tests).
-- GitHub Actions CI workflow that runs `bun run check`.
-- Package metadata: keywords, author, repository, homepage, bugs and engines.
-
-### Changed
-
-- The package `files` list no longer ships `scripts/`; it adds `CHANGELOG.md`.
-- The research assignment and report moved to `docs/`.
-- README reordered with an install section for marketplace, `omp plugin link`, `extensions:`
-  and `omp -e`.
-
 ## [1.0.0] - 2026-11-14
 
 ### Added
@@ -51,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arguments, type definitions and deprecated fields in ergonomic documents.
 - `smoke` and `smoke:binary`: real-loader and installed-binary smokes for the `-e` and
   `extensions:` load paths.
+- Plugin packaging: marketplace catalog `.omp-plugin/marketplace.json`
+  (`omp plugin install omp-linear@omp-linear`), a self-contained bundle `dist/index.js` as the
+  `omp.extensions` entry, so a marketplace install loads without a dependency install, and
+  package metadata (keywords, author, repository, engines).
+- `bun run check`: typecheck, stale-bundle check and tests. GitHub Actions CI runs it.
+- Design documents in `docs/`: the research assignment and the research report.
 
 ### Changed
 
