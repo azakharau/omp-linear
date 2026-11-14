@@ -704,6 +704,7 @@ describe("linear extension in a real OMP session", () => {
 				"    clientId: settings-client",
 				`    redirectPort: ${redirectPort}`,
 				"    redirectPath: /oauth/done",
+				"    redirectHost: localhost",
 				"    scopes: [read]",
 			].join("\n"),
 		);
@@ -715,6 +716,8 @@ describe("linear extension in a real OMP session", () => {
 			const redirect = new URL(authorize.searchParams.get("redirect_uri")!);
 			redirect.searchParams.set("code", "auth-code");
 			redirect.searchParams.set("state", authorize.searchParams.get("state")!);
+			// The listener binds 127.0.0.1; `localhost` may resolve to ::1 in the test runtime.
+			redirect.hostname = "127.0.0.1";
 			await fetch(redirect);
 		};
 		try {
@@ -726,11 +729,11 @@ describe("linear extension in a real OMP session", () => {
 			expect(authorizeUrls.length).toBe(1);
 			const authorize = authorizeUrls[0]!;
 			expect(authorize.searchParams.get("client_id")).toBe("settings-client");
-			expect(authorize.searchParams.get("redirect_uri")).toBe(`http://127.0.0.1:${redirectPort}/oauth/done`);
+			expect(authorize.searchParams.get("redirect_uri")).toBe(`http://localhost:${redirectPort}/oauth/done`);
 			expect(authorize.searchParams.get("scope")).toBe("read");
 			expect(authorize.searchParams.get("actor")).toBe("app");
 			expect(tokenRequests.length).toBe(1);
-			expect(tokenRequests[0]!.get("redirect_uri")).toBe(`http://127.0.0.1:${redirectPort}/oauth/done`);
+			expect(tokenRequests[0]!.get("redirect_uri")).toBe(`http://localhost:${redirectPort}/oauth/done`);
 			expect(tokenRequests[0]!.get("client_id")).toBe("settings-client");
 			const stored = createCredentialStore(storePath).list().find(c => c.label === "settings-login");
 			expect(stored).toMatchObject({ kind: "oauth", actor: "app" });

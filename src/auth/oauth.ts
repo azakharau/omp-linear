@@ -103,6 +103,11 @@ export interface OAuthRedirectConfig {
  port: number;
  /** Defaults to `/callback`; must match the registered redirect URI path. */
  path?: string;
+ /**
+  * Host written into the redirect URI: `127.0.0.1` (default) or `localhost`, whichever the
+  * Linear application registered. The listener always binds 127.0.0.1.
+  */
+ host?: "127.0.0.1" | "localhost";
  /** Tests only: allows port 0, which the OS assigns and Linear would reject. */
  allowEphemeralPort?: boolean;
 }
@@ -114,7 +119,7 @@ export interface LoopbackCallback {
 }
 
 export function redirectUriFor(redirect: OAuthRedirectConfig, port = redirect.port): string {
- return `http://127.0.0.1:${port}${redirect.path ?? DEFAULT_CALLBACK_PATH}`;
+ return `http://${redirect.host ?? "127.0.0.1"}:${port}${redirect.path ?? DEFAULT_CALLBACK_PATH}`;
 }
 
 const DEFAULT_CALLBACK_PATH = "/callback";

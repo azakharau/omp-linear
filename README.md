@@ -83,11 +83,14 @@ linear:
     clientSecret: <optional>
     redirectPort: <port of the registered redirect URI>
     redirectPath: /callback         # optional
+    redirectHost: 127.0.0.1         # optional: 127.0.0.1 or localhost
     scopes: [read, write, issues:create, comments:create]   # optional
 ```
 
 `redirectPort` is required for `/linear-login`. It must be the port of the redirect URI that
-the Linear application has (`http://127.0.0.1:<redirectPort><redirectPath>`).
+the Linear application has (`http://<redirectHost>:<redirectPort><redirectPath>`). Linear
+compares the URI exactly, so set `redirectHost: localhost` if the application registers
+`localhost`. The callback listener binds `127.0.0.1` in both cases.
 `LINEAR_OAUTH_CLIENT_ID` and `LINEAR_OAUTH_CLIENT_SECRET` in the environment override the client
 credentials. Without `clientId` and `redirectPort`, `/linear-login` names the missing keys and
 does nothing. A malformed `linear` block makes the command name the bad key.

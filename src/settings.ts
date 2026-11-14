@@ -23,6 +23,8 @@ const OAuthSettingsSchema = type({
  "scopes?": "string[]",
  "redirectPort?": "number.integer",
  "redirectPath?": "string",
+ /** Host in the registered redirect URI; the callback listener binds 127.0.0.1 either way. */
+ "redirectHost?": "'127.0.0.1' | 'localhost'",
 });
 export type LinearOAuthSettings = typeof OAuthSettingsSchema.infer;
 
@@ -109,5 +111,5 @@ export function resolveOAuth(settings: LinearOAuthSettings, env: NodeJS.ProcessE
   scopes: settings.scopes,
  });
  if ("missing" in cfg) return cfg;
- return { cfg, redirect: { port: settings.redirectPort, path: settings.redirectPath } };
+ return { cfg, redirect: { port: settings.redirectPort, path: settings.redirectPath, host: settings.redirectHost } };
 }
