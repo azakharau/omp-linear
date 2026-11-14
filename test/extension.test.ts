@@ -134,7 +134,7 @@ async function withSession<T>(o: Scenario, body: (session: HostSession, model: R
 		sessionManager: o.sessionManager ?? host.SessionManager.inMemory(),
 		extensions: [sentinel, extension],
 		modelUrl: model.url,
-		toolNames: ["unrelated_sentinel", SEARCH_TOOL],
+		toolNames: ["unrelated_sentinel", "read", "write"],
 		settings: o.settings,
 		settingsInstance: o.settingsInstance,
 		notifications: o.notifications,
@@ -150,17 +150,18 @@ async function withSession<T>(o: Scenario, body: (session: HostSession, model: R
 	}
 }
 
-const activateCall = (tool: string): ScriptedCall => [SEARCH_TOOL, { i: "Activating", activate: tool }];
+/** `linear_tool_search` is an xd:// device: the model calls it through `write`. */
+const searchCall = (args: Record<string, unknown>): ScriptedCall => ["write", { i: "Linear search", path: `xd://${SEARCH_TOOL}`, content: JSON.stringify(args) }];
+const activateCall = (tool: string): ScriptedCall => searchCall({ activate: tool });
 
 describe("linear extension in a real OMP session", () => {
-	test("first model request sees the sentinel plus linear_tool_search only; everything else is registered but inactive", async () => {
+	test("first model request lists linear_tool_search as a device and exposes no Linear tool; everything else is registered but inactive", async () => {
 		await withSession({ script: [] }, async (session, model) => {
 			await session.prompt("hello");
 			const seen = toolNamesOf(model.requests[0]!);
-			expect(seen.filter(name => name === "unrelated_sentinel" || name.startsWith("linear_") || isLinearOperation(name))).toEqual([
-				"unrelated_sentinel",
-				SEARCH_TOOL,
-			]);
+			expect(seen).toContain("unrelated_sentinel");
+			expect(seen.filter(name => name.startsWith("linear_") || isLinearOperation(name))).toEqual([]);
+			expect(JSON.stringify(model.requests[0]!)).toContain(`- ${SEARCH_TOOL} — Search the private Linear catalog`);
 			const all = session.getAllToolNames();
 			expect(all.filter(isLinearOperation).length).toBe(550);
 			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "linear_issue_create"]) {
@@ -168,15 +169,15 @@ describe("linear extension in a real OMP session", () => {
 				expect(seen).not.toContain(name);
 			}
 		});
-	});
+	}, 30_000); // First session in the file: cold host start-up (read/write transport, xd:// catalog).
 
 	test("a query returns candidates only and activates nothing", async () => {
-		await withSession({ script: [[SEARCH_TOOL, { i: "Searching", query: "create issue" }]] }, async (session, model) => {
+		await withSession({ script: [searchCall({ query: "create issue" })] }, async (session, model) => {
 			await session.prompt("find me the create issue tool");
 			const output = toolOutputs(model.requests[1]!)[0]!;
 			expect(output).toContain("linear_issue_create");
 			expect(output).toContain("Nothing was activated");
-			expect(session.getActiveToolNames().filter(name => name.startsWith("linear_") || isLinearOperation(name))).toEqual([SEARCH_TOOL]);
+			expect(session.getActiveToolNames().filter(name => isLinearOperation(name) || (name.startsWith("linear_") && name !== SEARCH_TOOL))).toEqual([]);
 			expect(toolNamesOf(model.requests[1]!)).not.toContain("linear_issue_create");
 		});
 	});
@@ -190,7 +191,7 @@ describe("linear extension in a real OMP session", () => {
 			expect(afterSecond).toContain("lm_issueCreate");
 			expect(afterSecond).not.toContain("lq_issue");
 			expect(afterSecond).toContain("unrelated_sentinel");
-			expect(afterSecond).toContain(SEARCH_TOOL);
+			expect(afterSecond).not.toContain(SEARCH_TOOL);
 			const afterThird = toolNamesOf(model.requests[3]!);
 			expect(afterThird).toContain("linear_graphql");
 			expect(afterThird).not.toContain("lm_issueCreate");

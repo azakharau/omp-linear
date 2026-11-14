@@ -1,10 +1,12 @@
 /**
  * Native Oh My Pi extension for Linear.
  *
- * Exactly one tool is always visible: `linear_tool_search`. It returns ranked candidates from the
- * private catalog and, given `activate`, swaps exactly one Linear operation into the active tool
- * set. Everything else — `linear_graphql`, `linear_schema_help`, `linear_connections`, 11 ergonomic
- * ops and 550 typed `lq_*`/`lm_*` operations — is registered `defaultInactive`.
+ * One tool is always available, as the xd:// device `linear_tool_search` (`loadMode:
+ * "discoverable"`: one catalog line in the system prompt, called through `write`). It returns
+ * ranked candidates from the private catalog and, given `activate`, swaps exactly one Linear
+ * operation into the active tool set. Everything else — `linear_graphql`, `linear_schema_help`,
+ * `linear_connections`, the ergonomic ops and 550 typed `lq_*`/`lm_*` operations — is registered
+ * `defaultInactive` and becomes a top-level tool only when activated.
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
  * activated operation are persisted as `linear-state` entries. The author of every outbound call
@@ -360,7 +362,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     anyOf: [{ required: ["query"] }, { required: ["activate"] }],
     additionalProperties: false,
    } as never,
-   loadMode: "essential",
+   loadMode: "discoverable",
    approval: "read",
    async execute(_id, params) {
     const { query, limit, activate: toActivate } = params as { query?: string; limit?: number; activate?: string };
