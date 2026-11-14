@@ -1,19 +1,18 @@
 /**
  * One smoke host: loads exactly one OMP host (argv[2]) and this package through the host's
  * REAL extension loader (`additionalExtensionPaths` -> `package.json` `omp.extensions`),
- * then drives the steps for `argv[3]` ("main" or "restricted") against a fake Linear GraphQL
- * server and a fake OAuth issuer on loopback. Prints one JSON line `{ steps: SmokeStep[] }`.
+ * then drives the steps against a fake Linear GraphQL server and a fake OAuth issuer on
+ * loopback. Prints one JSON line `{ steps: SmokeStep[] }`.
  * Spawned by `scripts/smoke.ts`; one host per process because the host's specifier shim is a
  * process-global `Bun.plugin`.
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { getAgentDir } from "@oh-my-pi/pi-utils";
+import { getAgentDir } from "@oh-my-pi/pi-coding-agent";
 import { createCredentialStore } from "../src/auth/store";
 import { STATE_ENTRY_TYPE } from "../src/state";
 import {
  type Host,
- type HostSession,
  type Notification,
  ROOT,
  type ScriptedCall,
@@ -30,8 +29,7 @@ export interface SmokeStep {
 }
 
 const hostRoot = process.argv[2];
-const mode = process.argv[3];
-if (!hostRoot || (mode !== "main" && mode !== "restricted")) throw new Error("usage: smoke-host.ts <hostRoot> main|restricted");
+if (!hostRoot) throw new Error("usage: smoke-host.ts <hostRoot>");
 
 const AUTHOR = "OMP · Main";
 const API_KEY = "lin_api_smoke_secret_9f3c";
@@ -207,61 +205,10 @@ async function runMain(host: Host): Promise<void> {
  }
 }
 
-async function runRestricted(host: Host): Promise<void> {
- const allowlist = ["linear_tool_search", "linear_schema_help"];
- const parentModel = fakeModelServer([]);
- // The parent loads the package through the real loader; the host forwards its imported
- // factories (`session.preparedExtensions`) to restricted children, exactly as the task tool does.
- const parent = await openSession({
-  host,
-  agentDir: getAgentDir(),
-  sessionManager: host.SessionManager.inMemory(),
-  modelUrl: parentModel.url,
-  toolNames: ["read"],
-  extras: { additionalExtensionPaths: [ROOT] },
- });
- const model = fakeModelServer([]);
- let session: HostSession | null = null;
- try {
-  session = await openSession({
-   host,
-   agentDir: getAgentDir(),
-   sessionManager: host.SessionManager.inMemory(),
-   modelUrl: model.url,
-   toolNames: ["read", "grep"],
-   settings: { "task.restrictedExtensionTools": allowlist },
-   extras: { restrictToolNames: true, preloadedPreparedExtensions: parent.preparedExtensions ?? [] },
-  });
-  await session.prompt("hello");
-  const seen = model.requests[0]!.tools.map(t => t.name);
-  const registered = session.getAllToolNames();
-  const extensionTools = registered.filter(n => n.startsWith("linear_") || n.startsWith("lq_") || n.startsWith("lm_"));
-  const onlyAllowlisted = extensionTools.every(n => allowlist.includes(n)) && allowlist.every(n => registered.includes(n));
-  record(
-   "restricted child on patched host: only allowlisted extension tools are registered",
-   onlyAllowlisted && seen.includes("read") && (parent.preparedExtensions?.length ?? 0) > 0,
-   `parent prepared extensions=${parent.preparedExtensions?.length ?? 0}; registered extension tools: ${extensionTools.join(",")}; model sees read=${seen.includes("read")}`,
-  );
-  let outside = "not thrown";
-  try {
-   await session.setActiveToolsByName(["read", "linear_tool_search", "lm_issueCreate"]);
-  } catch (error) {
-   outside = error instanceof Error ? error.message : String(error);
-  }
-  record("restricted child: activation outside the ceiling is refused", /outside its ceiling: lm_issueCreate$/.test(outside), outside);
- } finally {
-  await session?.dispose();
-  await parent.dispose();
-  model.stop();
-  parentModel.stop();
- }
-}
-
 const host = await loadHost(hostRoot);
 try {
- if (mode === "main") await runMain(host);
- else await runRestricted(host);
+ await runMain(host);
 } catch (error) {
- record(`${mode}: unexpected failure`, false, error instanceof Error ? (error.stack ?? error.message) : String(error));
+ record("unexpected failure", false, error instanceof Error ? (error.stack ?? error.message) : String(error));
 }
 console.log(JSON.stringify({ steps }));

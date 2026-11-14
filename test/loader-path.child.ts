@@ -3,11 +3,11 @@
  * `additionalExtensionPaths` -> `package.json` `omp.extensions` -> `./src/index.ts`, with the
  * extension's `@oh-my-pi/*` imports rewritten by the host to its own module tree.
  *
- * The session registers itself as `Main` only in the loading host's `AgentRegistry`, so the
- * reported author label is `OMP · Main` only when the loaded extension shares that instance.
+ * The host gives the session the top-level `ctx.agent` identity (`Main`), so the reported author
+ * label is `OMP · Main` only when the loaded extension reads it through the host's own runner.
  * Prints one JSON line (`LoaderPathProof`) on stdout; spawned by `runLoaderPathProof`.
  */
-import { getAgentDir } from "@oh-my-pi/pi-utils";
+import { getAgentDir } from "@oh-my-pi/pi-coding-agent";
 import { ROOT, fakeModelServer, loadHost, openSession } from "./harness";
 
 const hostRoot = process.argv[2];

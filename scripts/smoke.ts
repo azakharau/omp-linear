@@ -1,9 +1,9 @@
 /**
- * End-to-end smoke: real OMP sessions load this package through the host's own extension
- * loader, against a fake Linear GraphQL server and a fake OAuth issuer on loopback. Each host
- * runs in its own process (`scripts/smoke-host.ts`): the pristine 18.2.7 host for search,
- * activation, api_key call, OAuth login + actor=app attribution and native deny; the patched
- * host (`.patched-host`, see `bun run prepare-patched-host`) for the restricted child.
+ * End-to-end smoke: a real OMP session loads this package through the host's own extension
+ * loader, against a fake Linear GraphQL server and a fake OAuth issuer on loopback. The host
+ * (`@oh-my-pi/pi-coding-agent` 18.20.0 sources in node_modules) runs in its own process
+ * (`scripts/smoke-host.ts`): search, activation, api_key call, OAuth login + actor=app
+ * attribution and native deny. `scripts/smoke-binary.ts` covers the installed `omp` binary.
  * Prints a JSON summary with PASS/FAIL per step and exits non-zero when any step fails.
  * No network beyond loopback; credentials live in a throwaway agent dir.
  */
@@ -12,10 +12,7 @@ import * as path from "node:path";
 import type { SmokeStep } from "./smoke-host";
 
 const ROOT = path.resolve(import.meta.dir, "..");
-const HOSTS = {
- pristine: { root: path.join(ROOT, "node_modules", "@oh-my-pi", "pi-coding-agent", "src"), mode: "main" },
- patched: { root: path.join(ROOT, ".patched-host", "src"), mode: "restricted" },
-} as const;
+const HOST_ROOT = path.join(ROOT, "node_modules", "@oh-my-pi", "pi-coding-agent", "src");
 
 /**
  * Only these inherited variables reach the host process. HOME, XDG_* and the agent dir point
@@ -64,25 +61,24 @@ export function interpretHostResult(name: string, exitCode: number | null, stdou
  return named;
 }
 
-function runHost(name: keyof typeof HOSTS, scratch: string): SmokeStep[] {
- const { root, mode } = HOSTS[name];
- if (!fs.existsSync(path.join(root, "sdk.ts"))) {
-  return [{ step: `${name}: host present`, status: "FAIL", detail: `${root} missing (run bun run prepare-patched-host)` }];
+function runHost(scratch: string): SmokeStep[] {
+ if (!fs.existsSync(path.join(HOST_ROOT, "sdk.ts"))) {
+  return [{ step: "host: present", status: "FAIL", detail: `${HOST_ROOT} missing (run bun install)` }];
  }
- const child = Bun.spawnSync([process.execPath, "run", path.join(ROOT, "scripts", "smoke-host.ts"), root, mode], {
+ const child = Bun.spawnSync([process.execPath, "run", path.join(ROOT, "scripts", "smoke-host.ts"), HOST_ROOT], {
   cwd: ROOT,
   env: childEnv(scratch),
   stdout: "pipe",
   stderr: "pipe",
  });
- return interpretHostResult(name, child.exitCode, child.stdout.toString(), child.stderr.toString());
+ return interpretHostResult("host", child.exitCode, child.stdout.toString(), child.stderr.toString());
 }
 
 if (import.meta.main) {
  const scratch = fs.mkdtempSync(path.join(fs.realpathSync(require("node:os").tmpdir()), "omp-linear-smoke-"));
  let steps: SmokeStep[];
  try {
-  steps = [...runHost("pristine", scratch), ...runHost("patched", scratch)];
+  steps = runHost(scratch);
  } finally {
   fs.rmSync(scratch, { recursive: true, force: true });
  }

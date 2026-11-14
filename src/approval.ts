@@ -1,4 +1,4 @@
-import type { ToolApproval, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core/types";
+import type { ToolApproval, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
 import type { OperationDescriptor } from "./schema/catalog";
 import { classifyRawDocument } from "./schema/raw";
 

@@ -1,10 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
 import { type Connection, createCredentialStore } from "../src/auth/store";
 import { authorLabel, resolveAuthor } from "../src/identity/actor";
-import { discoverRoster } from "../src/identity/discovery";
 import { SEARCH_TOOL, createLinearExtension } from "../src/index";
 import { type LinearSessionState, STATE_ENTRY_TYPE } from "../src/state";
 import {
@@ -13,7 +11,6 @@ import {
 	type HostSessionManager,
 	type ModelRequest,
 	PRISTINE_HOST,
-	ROOT,
 	type ScriptedCall,
 	fakeModelServer,
 	loadHost,
@@ -117,6 +114,8 @@ interface Scenario {
 	notifications?: { message: string; level: string }[];
 	cwd?: string;
 	agentId?: string;
+	/** Opens the session as a `task` subagent (`ctx.agent.kind === "sub"`) of `parentId`. */
+	child?: { name: string; parentId: string };
 }
 
 async function withSession<T>(o: Scenario, body: (session: HostSession, model: ReturnType<typeof fakeModelServer>) => Promise<T>): Promise<T> {
@@ -141,6 +140,7 @@ async function withSession<T>(o: Scenario, body: (session: HostSession, model: R
 		notifications: o.notifications,
 		cwd: o.cwd,
 		agentId: o.agentId,
+		extras: o.child ? { taskDepth: 1, agentName: o.child.name, parentAgentId: o.child.parentId } : undefined,
 	});
 	try {
 		return await body(session, model);
@@ -280,7 +280,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("actor=app: Main and two concurrent child sessions each attribute mutations to their own author; actor=user sends none", async () => {
+	test("actor=app: Main and two concurrent subagent sessions each attribute mutations to their own ctx.agent author; actor=user sends none", async () => {
 		const linear = fakeLinear(body => {
 			const key = body.query.includes("commentCreate") ? "commentCreate" : "issueCreate";
 			return { data: { [key]: { success: true, [key === "issueCreate" ? "issue" : "comment"]: { id: "x" } } } };
@@ -294,19 +294,19 @@ describe("linear extension in a real OMP session", () => {
 			activateCall("linear_graphql"),
 			["linear_graphql", { i: "Raw", document: rawMutation, variables: { input: { issueId: "i1", body: "hi" } } }],
 		];
-		const run = async (connectionId: string, agentId: string, attribution?: boolean) => {
+		const run = async (connectionId: string, agentId: string, attribution?: boolean, child?: Scenario["child"]) => {
 			const sessionManager = host.SessionManager.inMemory();
 			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
-			return withSession({ script: scriptFor(), endpoint: `${linear.url}graphql`, sessionManager, agentId, attribution }, async (session, model) => {
-				await session.prompt("create and comment");
+			return withSession({ script: scriptFor(), endpoint: `${linear.url}graphql`, sessionManager, agentId, attribution, child }, async (_session, model) => {
+				await _session.prompt("create and comment");
 				expect(toolOutputs(model.requests[2]!)[0]).not.toMatch(/failed|error/i);
 				expect(toolOutputs(model.requests[4]!)[0]).not.toMatch(/failed|error/i);
-				return resolveAuthor(session.sessionManager.getSessionId(), host.AgentRegistry.global() as never).label;
 			});
 		};
+		const task = { name: "task", parentId: "Main" };
 		try {
-			const labels = await Promise.all([run("key-app", "Main"), run("key-app", "Main.Child1"), run("key-app", "Main.Child2")]);
-			expect(new Set(labels).size).toBe(3);
+			await Promise.all([run("key-app", "Main"), run("key-app", "0-Child1", undefined, task), run("key-app", "1-Child2", undefined, task)]);
+			const labels = ["OMP · Main", "OMP · task [0-Child1]", "OMP · task [1-Child2]"];
 			const createAsUsers = linear.requests.map(r => (r.body.variables?.input as { createAsUser?: string } | undefined)?.createAsUser);
 			expect(linear.requests.length).toBe(6);
 			expect(createAsUsers.every(value => typeof value === "string")).toBe(true);
@@ -314,12 +314,12 @@ describe("linear extension in a real OMP session", () => {
 			for (const label of labels) expect(createAsUsers.filter(v => v === label).length).toBe(2);
 
 			linear.requests.length = 0;
-			await run("key-user", "Main.UserActor");
+			await run("key-user", "2-UserActor", undefined, task);
 			expect(linear.requests.length).toBe(2);
 			expect(linear.requests.every(r => (r.body.variables?.input as { createAsUser?: string }).createAsUser === undefined)).toBe(true);
 
 			linear.requests.length = 0;
-			await run("key-app", "Main.NoAttribution", false);
+			await run("key-app", "3-NoAttribution", false, task);
 			expect(linear.requests.length).toBe(2);
 			expect(linear.requests.every(r => (r.body.variables?.input as { createAsUser?: string }).createAsUser === undefined)).toBe(true);
 		} finally {
@@ -383,12 +383,11 @@ describe("linear extension in a real OMP session", () => {
 			["linear_graphql", { i: "Raw", document, variables: { input: { teamId: "team-1", title: "Frag" } } }],
 		];
 		try {
-			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId: "Main.Frag" }, async (session, model) => {
+			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId: "0-Frag", child: { name: "reviewer", parentId: "Main" } }, async (session, model) => {
 				const output = await promptForOutput(session, model, 2);
 				expect(output).toMatch(/mutation made reported success=false/);
 				expect(linear.requests.length).toBe(1);
-				const label = resolveAuthor(session.sessionManager.getSessionId(), host.AgentRegistry.global() as never).label;
-				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe(label);
+				expect((linear.requests[0]!.body.variables?.input as { createAsUser?: string }).createAsUser).toBe("OMP · reviewer [0-Frag]");
 			});
 		} finally {
 			linear.stop();
@@ -464,23 +463,18 @@ describe("linear extension in a real OMP session", () => {
 				expect(toolNamesOf(model.requests[0]!)).toContain("lq_teams");
 				const rawOutput = toolOutputs(model.requests[2]!).find(o => o.includes('"selected"'));
 				if (!rawOutput) throw new Error(`connections output missing: ${JSON.stringify(toolOutputs(model.requests[2]!))}`);
-				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string }; roster: { source: string } };
+				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string } };
 				expect(output.selected).toBe("conn-A");
 				expect(output.activeOperation).toBe("linear_connections");
-				expect(output.author.label).toMatch(/^OMP · /);
-				expect(output.roster.source).toBe("discovery");
+				expect(output.author.label).toBe("OMP · Main");
 			});
 		} finally {
 			fs.rmSync(sessionsDir, { recursive: true, force: true });
 		}
 	});
 
-	test("real loader path: package.json omp.extensions loads src/index.ts bound to the host's AgentRegistry and agent dir", () => {
-		// In-process: the extension's static host import is the module the pristine host runs.
-		expect(Object.is(AgentRegistry, host.AgentRegistry)).toBe(true);
-		expect(Object.is(AgentRegistry.global(), host.AgentRegistry.global())).toBe(true);
-
-		// One host per process, loaded through the host's own loader: same registry, credentials under the host agent dir.
+	test("real loader path: package.json omp.extensions loads src/index.ts, reads ctx.agent from the host runner and uses the host agent dir", () => {
+		// One host per process, loaded through the host's own loader: host identity, credentials under the host agent dir.
 		const { toolNames, authorLabel, storePath } = runLoaderPathProof(PRISTINE_HOST, agentDir);
 		expect(toolNames).toContain(SEARCH_TOOL);
 		expect(toolNames).toContain("linear_connections");
@@ -489,26 +483,10 @@ describe("linear extension in a real OMP session", () => {
 		expect(storePath).toBe(path.join(agentDir, "linear", "connections.json"));
 	}, 30_000);
 
-	test("author resolution comes from the agent registry and fails for unknown sessions", async () => {
-		await withSession({ script: [] }, async session => {
-			const registry = host.AgentRegistry.global() as never;
-			const author = resolveAuthor(session.sessionManager.getSessionId(), registry);
-			expect(host.AgentRegistry.global().list().some(r => r.id === author.id)).toBe(true);
-			expect(author.label).toBe(authorLabel(author.id, author.displayName));
-			expect(() => resolveAuthor("session-that-does-not-exist", registry)).toThrow(/not registered/);
-		});
-		expect(authorLabel("Main", "Main")).toBe("OMP · Main");
-		expect(authorLabel("Build.Reviewer", "Reviewer")).toBe("OMP · Reviewer [Build.Reviewer]");
-	});
-
-	test("roster discovery on the pristine host falls back to bare discovery and reports registry peers", async () => {
-		await withSession({ script: [] }, async session => {
-			const registry = host.AgentRegistry.global() as never;
-			const roster = await discoverRoster({ cwd: ROOT }, registry);
-			expect(roster.cwd).toBe(ROOT);
-			expect(roster.source).toBe("discovery");
-			expect(roster.peers.map(p => p.id)).toContain(resolveAuthor(session.sessionManager.getSessionId(), registry).id);
-		});
+	test("author labels: main is OMP · Main, a subagent names its definition and registry id, a missing identity throws", () => {
+		expect(authorLabel({ kind: "main", id: "Main", name: "main" })).toBe("OMP · Main");
+		expect(authorLabel({ kind: "sub", id: "0-Review", name: "reviewer" })).toBe("OMP · reviewer [0-Review]");
+		expect(() => resolveAuthor(undefined)).toThrow(/OMP >= 18.20.0 is required/);
 	});
 
 	test("diagnostics: a 401 that echoes the credential is reported with status, kind, message and outcome but never the secret", async () => {

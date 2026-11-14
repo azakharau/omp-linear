@@ -1,4 +1,4 @@
-import type { ReadonlySessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import type { ReadonlySessionManager } from "@oh-my-pi/pi-coding-agent";
 
 export const STATE_ENTRY_TYPE = "linear-state";
 
@@ -8,7 +8,7 @@ export interface LinearSessionState {
 	connectionId: string | null;
 	/** Currently activated typed/ergonomic tool name, null when only the always-on tools are active. */
 	activeOperation: string | null;
-	/** Registry-derived author of this session, null when the session is not registered. */
+	/** Host-provided author of this session (`ctx.agent`), null when the host gives no identity. */
 	actor: { id: string; displayName: string; label: string } | null;
 }
 

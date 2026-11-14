@@ -8,19 +8,19 @@
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
  * activated operation are persisted as `linear-state` entries. The author of every outbound call
- * is resolved per call from the host agent registry; `actor=app` connections attribute mutations
- * to that author via `createAsUser`.
+ * is the host-provided `ctx.agent` identity (OMP >= 18.20.0); `actor=app` connections attribute
+ * mutations to that author via `createAsUser`.
  */
 import { randomUUID } from "node:crypto";
 import * as path from "node:path";
-import type { ToolApproval } from "@oh-my-pi/pi-agent-core/types";
-import { getAgentDir } from "@oh-my-pi/pi-utils";
-import type {
- ExtensionAPI,
- ExtensionCommandContext,
- ExtensionContext,
- ExtensionFactory,
-} from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
+import type { ToolApproval } from "@oh-my-pi/pi-agent-core";
+import {
+	type ExtensionAPI,
+	type ExtensionCommandContext,
+	type ExtensionContext,
+	type ExtensionFactory,
+	getAgentDir,
+} from "@oh-my-pi/pi-coding-agent";
 import { rawApproval, typedApproval } from "./approval";
 import { ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
@@ -28,7 +28,6 @@ import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./c
 import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient } from "./client/graphql";
 import { type Author, resolveAuthor } from "./identity/actor";
 import { attributeTypedArgs, attributionTargets } from "./identity/attribution";
-import { type RosterContext, type RosterTracker, createRosterTracker } from "./identity/discovery";
 import { ergonomicOps } from "./ops/index";
 import { encodeOutput } from "./output/encode";
 import { type ResolvedOAuth, readLinearSettings, resolveOAuth } from "./settings";
@@ -209,7 +208,6 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json"),
   );
   let state: LinearSessionState = emptyState();
-  let roster: RosterTracker | null = null;
   let activationChain: Promise<unknown> = Promise.resolve();
 
   function selectedConnection(): Connection {
@@ -238,9 +236,9 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    });
   }
 
-  /** Fails before any HTTP when the session is unknown to the registry or no connection is selected. */
+  /** Fails before any HTTP when the host gives no agent identity or no connection is selected. */
   function openCall(ctx: ExtensionContext): OutboundCall {
-   const author = resolveAuthor(ctx.sessionManager.getSessionId());
+   const author = resolveAuthor(ctx.agent);
    const connection = selectedConnection();
    return { connection, client: clientFor(connection, ctx.cwd), author, actor: connection.actor };
   }
@@ -277,10 +275,8 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   async function onSessionOpen(ctx: ExtensionContext): Promise<void> {
    state = restoreState(ctx.sessionManager);
-   roster ??= createRosterTracker();
-   await roster.refresh(ctx as RosterContext);
    try {
-    state = { ...state, actor: resolveAuthor(ctx.sessionManager.getSessionId()) };
+    state = { ...state, actor: resolveAuthor(ctx.agent) };
    } catch {
     state = { ...state, actor: null };
    }
@@ -292,10 +288,6 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   pi.on("session_start", async (_event, ctx) => onSessionOpen(ctx));
   pi.on("session_switch", async (_event, ctx) => onSessionOpen(ctx));
-  pi.on("session_shutdown", async () => {
-   roster?.dispose();
-   roster = null;
-  });
 
   pi.registerTool({
    name: SEARCH_TOOL,
@@ -397,20 +389,18 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
   pi.registerTool({
    name: "linear_connections",
    label: "Linear connections",
-   description: "List stored Linear connections (no secrets), the selected one, the session author and the agent roster.",
+   description: "List stored Linear connections (no secrets), the selected one and the session author.",
    parameters: objectSchema({}, []) as never,
    loadMode: "essential",
    defaultInactive: true,
    approval: "read",
    async execute() {
-    const current = roster?.current();
     const payload = {
      selected: state.connectionId,
      activeOperation: state.activeOperation,
      author: state.actor,
      storePath: store.filePath,
      connections: store.list(),
-     roster: current ? { source: current.source, agents: current.agents.map(a => a.name), peers: current.peers } : null,
     };
     return text(JSON.stringify(payload, null, 0), payload);
    },
