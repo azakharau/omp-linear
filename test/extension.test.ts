@@ -287,6 +287,72 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
+	test("linear.appCredentialsFile: main and child share one client_credentials token (scope read,write) and attribute as app; a 401 drops it", async () => {
+		const project = tempDir("omp-linear-appcreds-");
+		const userDir = tempDir("omp-linear-appcreds-user-");
+		const credsFile = path.join(userDir, "linear-app.env");
+		const clientSecret = "app_client_secret_5f1e9c";
+		fs.writeFileSync(credsFile, `LINEAR_CLIENT_ID=app-client\nLINEAR_CLIENT_SECRET=${clientSecret}\n`);
+		const tokenRequests: URLSearchParams[] = [];
+		const tokenServer = Bun.serve({
+			port: 0,
+			fetch: async req => {
+				tokenRequests.push(new URLSearchParams(await req.text()));
+				return Response.json({ access_token: `app-token-${tokenRequests.length}`, token_type: "Bearer", expires_in: 2_591_999, scope: "read write" });
+			},
+		});
+		fs.writeFileSync(
+			path.join(userDir, "config.yml"),
+			["linear:", `  appCredentialsFile: ${credsFile}`, "  oauth:", `    tokenUrl: http://127.0.0.1:${tokenServer.port}/token`, ""].join("\n"),
+		);
+		const uuid = "11111111-2222-4333-8444-555555555555";
+		let revoked: string | null = null;
+		const linear = fakeLinear((_body, authorization) =>
+			authorization === revoked
+				? Response.json({ errors: [{ message: "Authentication required" }] }, { status: 401 })
+				: { data: { issueCreate: { success: true, issue: { id: uuid } } } },
+		);
+		const create: ScriptedCall = ["linear_issue_create", { i: "Creating", team: uuid, title: "Attributed" }];
+		const run = async (script: ScriptedCall[], agentId: string, child?: Scenario["child"]) => {
+			linear.requests.length = 0;
+			const settingsInstance = await host.Settings.loadIsolated({ cwd: project, agentDir: userDir });
+			return withSession({ script, endpoint: `${linear.url}graphql`, cwd: project, settingsInstance, agentId, child }, async (session, model) => {
+				await session.prompt("create");
+				expect(model.requests.some(r => JSON.stringify(r).includes(clientSecret))).toBe(false);
+				return linear.requests
+					.filter(r => r.body.query.trimStart().startsWith("mutation"))
+					.map(r => ({
+						authorization: r.authorization,
+						author: (r.body.variables?.input as { createAsUser?: string } | undefined)?.createAsUser,
+					}));
+			});
+		};
+		try {
+			expect(await run([activateCall("linear_issue_create"), create], "Main")).toEqual([{ authorization: "Bearer app-token-1", author: "OMP · Main" }]);
+			expect(await run([activateCall("linear_issue_create"), create], "0-App", { name: "reviewer", parentId: "Main" })).toEqual([
+				{ authorization: "Bearer app-token-1", author: "OMP · reviewer [0-App]" },
+			]);
+			expect(tokenRequests.length).toBe(1);
+			expect(Object.fromEntries(tokenRequests[0]!)).toEqual({
+				grant_type: "client_credentials",
+				scope: "read,write",
+				client_id: "app-client",
+				client_secret: clientSecret,
+			});
+			revoked = "Bearer app-token-1";
+			expect((await run([activateCall("linear_issue_create"), create, create], "Main")).map(r => r.authorization)).toEqual([
+				"Bearer app-token-1",
+				"Bearer app-token-2",
+			]);
+			expect(tokenRequests.length).toBe(2);
+		} finally {
+			linear.stop();
+			tokenServer.stop(true);
+			fs.rmSync(project, { recursive: true, force: true });
+			fs.rmSync(userDir, { recursive: true, force: true });
+		}
+	}, 30_000);
+
 	test("a project config may not redirect credentials: linear.endpoint or apiKeyFile there fails the call before any request", async () => {
 		const project = tempDir("omp-linear-hostile-project-");
 		const userDir = tempDir("omp-linear-hostile-user-");

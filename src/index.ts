@@ -24,7 +24,8 @@ import {
 	getAgentDir,
 } from "@oh-my-pi/pi-coding-agent";
 import { rawApproval, typedApproval } from "./approval";
-import { ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
+import { type AppCredentials, appAccessToken, cachedAppAccessToken, forgetAppAccessToken, readAppCredentialsFile } from "./auth/app-credentials";
+import { OAUTH_DEFAULTS, ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
 import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
 import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
@@ -40,11 +41,30 @@ import { type LinearSessionState, emptyState, persistState, restoreState } from 
 
 export const LINEAR_ENDPOINT = "https://api.linear.app/graphql";
 
-/** Where the connection of a call comes from: /linear-use, `linear.defaultConnection` or `linear.apiKeyFile`. */
-type ConnectionSource = "session" | "default" | "file";
+/**
+ * Where the connection of a call comes from: /linear-use, `linear.defaultConnection`,
+ * `linear.appCredentialsFile` or `linear.apiKeyFile`.
+ */
+type ConnectionSource = "session" | "default" | "app-file" | "file";
 
 /** In-memory connection built from `linear.apiKeyFile`; it is never written to the store. */
 const API_KEY_FILE_CONNECTION = { id: "api-key-file", kind: "api_key", label: "API key file", actor: "user", workspace: null } as const;
+
+/**
+ * In-memory actor=app connection built from `linear.appCredentialsFile`: a `client_credentials`
+ * token per process, never written to the store.
+ */
+interface AppCredentialsConnection {
+ id: "app-credentials";
+ kind: "app_credentials";
+ label: string;
+ actor: "app";
+ workspace: null;
+ createdAt: string;
+ secret: AppCredentials;
+}
+
+type CallConnection = Connection | AppCredentialsConnection;
 
 /** The only always-visible Linear tool. */
 export const SEARCH_TOOL = "linear_tool_search";
@@ -203,7 +223,7 @@ function renderResult(result: LinearResult, mutationKeys: readonly string[], unp
 
 /** Everything an outbound call needs, resolved per call and never cached across sessions. */
 interface OutboundCall {
- connection: Connection;
+ connection: CallConnection;
  client: LinearClient;
  author: Author;
  actor: Actor;
@@ -227,9 +247,10 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
 
   /**
    * The connection for this call: the session choice (/linear-use), then `linear.defaultConnection`,
-   * then `linear.apiKeyFile`. The key file is read on every call and is never stored or persisted.
+   * then `linear.appCredentialsFile`, then `linear.apiKeyFile`. The files are read on every call and
+   * their values are never stored or persisted.
    */
-  function resolveConnection(cwd: string): { connection: Connection; source: ConnectionSource } {
+  function resolveConnection(cwd: string): { connection: CallConnection; source: ConnectionSource } {
    if (state.connectionId) {
     const connection = store.get(state.connectionId);
     if (!connection) {
@@ -245,6 +266,20 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     }
     return { connection, source: "default" };
    }
+   if (settings.appCredentialsFile) {
+    return {
+     connection: {
+      id: "app-credentials",
+      kind: "app_credentials",
+      label: "App credentials file",
+      actor: "app",
+      workspace: null,
+      createdAt: new Date().toISOString(),
+      secret: readAppCredentialsFile(settings.appCredentialsFile),
+     },
+     source: "app-file",
+    };
+   }
    if (settings.apiKeyFile) {
     const apiKey = readApiKeyFile(settings.apiKeyFile);
     return {
@@ -253,22 +288,46 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     };
    }
    throw new Error(
-    "No Linear connection selected. Set linear.apiKeyFile in the OMP settings, or run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
+    "No Linear connection selected. Set linear.appCredentialsFile or linear.apiKeyFile in the OMP settings, or run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
    );
   }
 
-  function clientFor(connection: Connection, cwd: string): LinearClient {
+  /** Token endpoint of `client_credentials` requests: `linear.oauth.tokenUrl` (user config only) or Linear's. */
+  function tokenUrlFor(cwd: string): string {
+   return readLinearSettings(cwd).oauth.tokenUrl ?? OAUTH_DEFAULTS.tokenUrl;
+  }
+
+  function clientFor(connection: CallConnection, cwd: string): LinearClient {
    return createLinearClient({
     endpoint: options.endpoint ?? readLinearSettings(cwd).endpoint ?? LINEAR_ENDPOINT,
     fetchImpl,
     getAuthHeaders: async () => {
+     if (connection.kind === "app_credentials") {
+      return { authorization: `Bearer ${await appAccessToken(connection.secret, tokenUrlFor(cwd), fetchImpl)}` };
+     }
      if (connection.kind !== "oauth") return authHeadersFor(connection);
      const oauth = oauthFor(cwd);
      if ("missing" in oauth) return authHeadersFor(connection);
      return authHeadersFor(await ensureFreshAccessToken(oauth.cfg, store, connection.id, fetchImpl));
     },
-    knownSecrets: () => connectionSecrets(store.get(connection.id) ?? connection, cwd),
+    knownSecrets: () =>
+     connection.kind === "app_credentials"
+      ? appCredentialsSecrets(connection.secret, cwd)
+      : connectionSecrets(store.get(connection.id) ?? connection, cwd),
+    onAuthRejected:
+     connection.kind === "app_credentials" ? () => forgetAppAccessToken(connection.secret, tokenUrlFor(cwd)) : undefined,
    });
+  }
+
+  /** Client secret and the cached app token, for scrubbing error text. */
+  function appCredentialsSecrets(credentials: AppCredentials, cwd: string): string[] {
+   let token: string | null = null;
+   try {
+    token = cachedAppAccessToken(credentials, tokenUrlFor(cwd));
+   } catch {
+    // Invalid settings: scrub the client secret that is known.
+   }
+   return [credentials.clientSecret, token].filter((value): value is string => !!value);
   }
 
   /** Every credential value tied to `connection`, for scrubbing error text. */

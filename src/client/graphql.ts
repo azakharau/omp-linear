@@ -69,6 +69,8 @@ export interface LinearClientOptions {
  headers?: Record<string, string>;
  /** Credential values to scrub from messages when building the auth headers itself fails. */
  knownSecrets?: () => string[];
+ /** Called when Linear answers HTTP 401, so a cached token can be dropped before the next call. */
+ onAuthRejected?: () => void;
 }
 
 export interface LinearExecuteOptions {
@@ -313,6 +315,7 @@ export function createLinearClient(options: LinearClientOptions): LinearClient {
    const errors = isJson ? readErrors(parsed, secrets) : null;
 
    if (status === 401 || status === 403) {
+    if (status === 401) options.onAuthRejected?.();
     return {
      ok: false,
      kind: "auth",
