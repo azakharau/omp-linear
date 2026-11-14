@@ -26,7 +26,7 @@ import { ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
 import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
 import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
-import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient } from "./client/graphql";
+import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient, safeMessage } from "./client/graphql";
 import { type Author, resolveAuthor } from "./identity/actor";
 import { attributeTypedArgs, attributionTargets } from "./identity/attribution";
 import { ergonomicOps } from "./ops/index";
@@ -259,7 +259,21 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
      if ("missing" in oauth) return authHeadersFor(connection);
      return authHeadersFor(await ensureFreshAccessToken(oauth.cfg, store, connection.id, fetchImpl));
     },
+    knownSecrets: () => connectionSecrets(store.get(connection.id) ?? connection, cwd),
    });
+  }
+
+  /** Every credential value tied to `connection`, for scrubbing error text. */
+  function connectionSecrets(connection: Connection, cwd: string): string[] {
+   if (connection.kind === "api_key") return [connection.secret.apiKey];
+   let clientSecret: string | null = null;
+   try {
+    const oauth = oauthFor(cwd);
+    if (!("missing" in oauth)) clientSecret = oauth.cfg.clientSecret;
+   } catch {
+    // Invalid OAuth settings: scrub the token values that are known.
+   }
+   return [connection.secret.accessToken, connection.secret.refreshToken, clientSecret].filter((value): value is string => !!value);
   }
 
   /** Fails before any HTTP when the host gives no agent identity or no connection is available. */
@@ -590,7 +604,8 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
       try {
        await revokeToken(oauth.cfg, connection.secret.accessToken, fetchImpl);
       } catch (error) {
-       ctx.ui.notify(`Token revocation failed (${String(error)}); removing locally.`, "warning");
+       const message = safeMessage(error instanceof Error ? error.message : String(error), connectionSecrets(connection, ctx.cwd));
+       ctx.ui.notify(`Token revocation failed (${message}); removing locally.`, "warning");
       }
      }
     }

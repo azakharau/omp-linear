@@ -67,6 +67,8 @@ export interface LinearClientOptions {
  /** Request deadline, covering the response body as well; defaults to 30s. */
  timeoutMs?: number;
  headers?: Record<string, string>;
+ /** Credential values to scrub from messages when building the auth headers itself fails. */
+ knownSecrets?: () => string[];
 }
 
 export interface LinearExecuteOptions {
@@ -120,7 +122,7 @@ function redact(text: string, secrets: string[]): string {
  return cleaned.replace(TOKEN_PATTERN, "[redacted]").replace(BEARER_PATTERN, "Bearer [redacted]");
 }
 
-function safeMessage(text: string, secrets: string[]): string {
+export function safeMessage(text: string, secrets: string[]): string {
  const cleaned = redact(text, secrets);
  return cleaned.length > MAX_MESSAGE_CHARS ? `${cleaned.slice(0, MAX_MESSAGE_CHARS)}…` : cleaned;
 }
@@ -212,7 +214,7 @@ export function createLinearClient(options: LinearClientOptions): LinearClient {
      status: null,
      message: safeMessage(
       `could not build auth headers: ${error instanceof Error ? error.message : String(error)}`,
-      [],
+      options.knownSecrets?.() ?? [],
      ),
      errors: null,
      retryAfterMs: null,
