@@ -657,7 +657,7 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("real loader path: package.json omp.extensions loads src/index.ts, reads ctx.agent from the host runner and uses the host agent dir", async () => {
+	test("real loader path: package.json omp.extensions loads dist/index.js, reads ctx.agent from the host runner and uses the host agent dir", async () => {
 		// One host per process, loaded through the host's own loader: host identity, credentials under the host agent dir.
 		const remove = await storeConnection(connection("loader-proof", "user"));
 		try {

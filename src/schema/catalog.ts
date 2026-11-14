@@ -6,7 +6,6 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
 import {
  buildSchema,
  getNamedType,
@@ -50,7 +49,15 @@ export interface OperationDescriptor {
  returnType: string;
 }
 
-const ROOT = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
+/** Package root: the nearest ancestor holding generated/catalog.json (`src/schema/` from source, `dist/` from the bundle). */
+function packageRoot(): string {
+	for (let dir = import.meta.dir; ; dir = path.dirname(dir)) {
+		if (fs.existsSync(path.join(dir, "generated", "catalog.json"))) return dir;
+		if (dir === path.dirname(dir)) throw new Error(`generated/catalog.json not found above ${import.meta.dir}`);
+	}
+}
+
+const ROOT = packageRoot();
 
 let catalogCache: OperationDescriptor[] | undefined;
 let schemaCache: GraphQLSchema | undefined;

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Marketplace catalog `.omp-plugin/marketplace.json`, so the repository installs with
   `omp plugin marketplace add` and `omp plugin install omp-linear@omp-linear`.
+- Self-contained bundle `dist/index.js` (`bun run build`) as the `omp.extensions` entry, so a
+  marketplace install loads without installing dependencies; `bun run check` fails when `dist/`
+  is stale.
 - `bun run check` script that runs the offline gate (typecheck and tests).
 - GitHub Actions CI workflow that runs `bun run check`.
 - Package metadata: keywords, author, repository, homepage, bugs and engines.

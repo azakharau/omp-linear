@@ -67,7 +67,9 @@ Then load the checkout in one of these ways:
 - for one run: `omp -e /path/to/omp-linear/src/index.ts`;
 - from code: `createAgentSession({ extensions: [createLinearExtension(options)] })`.
 
-The package manifest declares `omp.extensions: ["./src/index.ts"]`.
+The package manifest declares `omp.extensions: ["./dist/index.js"]`: a committed bundle with
+`graphql`, `@toon-format/toon` and `@oh-my-pi/omptype` inlined, so a marketplace install loads
+without `bun install`. `omp -e .../src/index.ts` runs the source and needs `bun install`.
 
 ## Configuration
 
@@ -207,7 +209,9 @@ then `bun run generate:catalog`. Introspection shows what the key's workspace ca
 
 | Script | Effect |
 | --- | --- |
-| `bun run check` | The offline gate: `typecheck`, then `bun test test`. CI runs it on every push to `main` and every pull request. |
+| `bun run check` | The offline gate: `typecheck`, `build:check`, then `bun test test`. CI runs it on every push to `main` and every pull request. |
+| `bun run build` | Rebuilds the committed bundle `dist/index.js` from `src/`. Run it after source changes and commit `dist/`. |
+| `bun run build:check` | Rebuilds and fails if `dist/` differs from the committed copy. |
 | `bun run typecheck` | `tsc --noEmit` over `src`, `scripts` and `test`. |
 | `bun test test` | Unit tests and real OMP sessions (fake model, fake Linear). |
 | `bun run smoke` | Real loader in a separate host process: search, activation, API key, OAuth, attribution, deny. |
