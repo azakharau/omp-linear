@@ -33,6 +33,11 @@ const LinearSettingsSchema = type({
  "endpoint?": "string",
  /** Env-style file with `LINEAR_API_KEY=...`; read on every call, the key never enters the session. */
  "apiKeyFile?": "string",
+ /**
+  * Env-style file with `LINEAR_CLIENT_ID` and `LINEAR_CLIENT_SECRET` of an OAuth app with client
+  * credentials on: actor=app tokens without a browser login. Read on every call.
+  */
+ "appCredentialsFile?": "string",
  /** Stored connection id used when the session has not selected one with /linear-use. */
  "defaultConnection?": "string",
  "oauth?": OAuthSettingsSchema,
@@ -42,6 +47,7 @@ const SettingsLayerSchema = type({ "linear?": LinearSettingsSchema });
 export interface LinearSettings {
  endpoint?: string;
  apiKeyFile?: string;
+ appCredentialsFile?: string;
  defaultConnection?: string;
  oauth: LinearOAuthSettings;
 }
@@ -62,12 +68,14 @@ function linearBlock(layer: unknown, source: string): typeof LinearSettingsSchem
  * repository content, so it may not set them: a cloned repository could otherwise send the
  * user's key or OAuth code to its own server.
  */
-const USER_ONLY = ["endpoint", "apiKeyFile", "oauth.authorizeUrl", "oauth.tokenUrl", "oauth.revokeUrl"] as const;
+const USER_ONLY = ["endpoint", "apiKeyFile", "appCredentialsFile", "oauth.authorizeUrl", "oauth.tokenUrl", "oauth.revokeUrl"] as const;
 
 function rejectUserOnly(project: typeof LinearSettingsSchema.infer): void {
  const oauth: Record<string, unknown> = project.oauth ?? {};
  const set = USER_ONLY.filter(key =>
-  key.startsWith("oauth.") ? oauth[key.slice("oauth.".length)] !== undefined : project[key as "endpoint" | "apiKeyFile"] !== undefined,
+  key.startsWith("oauth.")
+   ? oauth[key.slice("oauth.".length)] !== undefined
+   : project[key as "endpoint" | "apiKeyFile" | "appCredentialsFile"] !== undefined,
  );
  if (set.length > 0) {
   throw new Error(
@@ -86,6 +94,7 @@ export function readLinearSettings(cwd: string): LinearSettings {
  return {
   endpoint: global.endpoint,
   apiKeyFile: global.apiKeyFile,
+  appCredentialsFile: global.appCredentialsFile,
   defaultConnection: project.defaultConnection ?? global.defaultConnection,
   oauth: { ...global.oauth, ...project.oauth },
  };

@@ -315,6 +315,25 @@ export function refreshAccessToken(
 }
 
 /**
+ * `client_credentials` grant: an `actor=app` access token (30 days, no refresh token). Every
+ * process of one app in one workspace must request the same `scopes`: Linear revokes the existing
+ * app-actor tokens when the scope set changes.
+ */
+export function requestClientCredentialsToken(
+ config: { tokenUrl: string; clientId: string; clientSecret: string },
+ scopes: readonly string[],
+ fetchImpl: typeof fetch = fetch,
+): Promise<OAuthTokens> {
+ const form = new URLSearchParams({
+  grant_type: "client_credentials",
+  scope: scopes.join(","),
+  client_id: config.clientId,
+  client_secret: config.clientSecret,
+ });
+ return postTokenRequest(config.tokenUrl, form, fetchImpl);
+}
+
+/**
  * Linear's revocation endpoint takes the token in the form body, not in the
  * Authorization header.
  */

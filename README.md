@@ -52,14 +52,25 @@ A Linear call uses the first connection that applies:
 
 1. the connection that `/linear-use <id>` selected in this session;
 2. `linear.defaultConnection`, a stored connection id;
-3. `linear.apiKeyFile`, a file with `LINEAR_API_KEY=...`.
+3. `linear.appCredentialsFile`, a file with `LINEAR_CLIENT_ID=...` and `LINEAR_CLIENT_SECRET=...`;
+4. `linear.apiKeyFile`, a file with `LINEAR_API_KEY=...`.
 
 If none applies, the call fails before any network request. `linear_connections` shows the
-effective connection and its source (`session`, `default` or `file`), never a secret.
+effective connection and its source (`session`, `default`, `app-file` or `file`), never a secret.
 
-The extension reads the key file on every call. It does not copy the key into the credential
-store, a session entry, a tool result or the model context. A changed key applies on the next
-call. Keep the file outside the repository with mode `0600`.
+The extension reads both files on every call. It does not copy their values into the credential
+store, a session entry, a tool result or the model context. A changed value applies on the next
+call. Keep the files outside the repository with mode `0600`.
+
+`linear.appCredentialsFile` gives `actor=app` access without a browser login, so it also works in
+`omp -p` and in `task` subagents. Turn on "Client credentials" in the Linear OAuth application.
+The extension requests one `client_credentials` token with scope `read,write` per OMP process,
+keeps it in memory only, renews it one day before it expires (tokens live 30 days) and requests
+a new one after Linear answers HTTP 401. Linear revokes all app-actor tokens of the application
+in the workspace when a process requests a different scope set. Every other process that uses the
+same application must request `read,write` too.
+A `client_credentials` request also replaces an `/linear-login app` installation of the same
+application, so do not use both modes with one application.
 
 Stored connections (`/linear-key`, `/linear-login`) live in
 `<agentDir>/linear/connections.json` (directory `0700`, file `0600`).
@@ -68,17 +79,18 @@ Stored connections (`/linear-key`, `/linear-login`) live in
 
 All settings are in the `linear` block of the OMP config. The project config (`.omp/config.yml`)
 wins over the user config (`<agent dir>/config.yml`), with one exception. `endpoint`,
-`apiKeyFile`, `oauth.authorizeUrl`, `oauth.tokenUrl` and `oauth.revokeUrl` decide where
-credentials go, so only the user config may set them. A project config that sets one of them
-makes every Linear call and `/linear-login` fail with an error that names the key. A cloned
+`apiKeyFile`, `appCredentialsFile`, `oauth.authorizeUrl`, `oauth.tokenUrl` and `oauth.revokeUrl`
+decide where credentials go, so only the user config may set them. A project config that sets one
+of them makes every Linear call and `/linear-login` fail with an error that names the key. A cloned
 repository or an agent that writes `.omp/config.yml` cannot redirect your key or token.
 
 ```yaml
 linear:
   apiKeyFile: ~/linear.env          # optional; LINEAR_API_KEY=...
+  appCredentialsFile: ~/linear-app.env   # optional; LINEAR_CLIENT_ID=..., LINEAR_CLIENT_SECRET=...
   defaultConnection: key-1a2b3c4d   # optional; a stored connection id
   endpoint: https://api.linear.app/graphql   # optional override (proxies, fakes)
-  oauth:                            # only for /linear-login
+  oauth:                            # /linear-login; tokenUrl also for appCredentialsFile
     clientId: <client id of the Linear OAuth application>
     clientSecret: <optional>
     redirectPort: <port of the registered redirect URI>
@@ -148,7 +160,8 @@ Pinned-only roots can be internal operations that public introspection does not 
 
 ## Attribution (`actor=app`)
 
-With an OAuth connection created as `actor=app`, every mutation that accepts `createAsUser`
+With an `actor=app` connection (`linear.appCredentialsFile`, or OAuth created with
+`/linear-login app`), every mutation that accepts `createAsUser`
 (typed tools, raw documents, ergonomic ops) is attributed to the agent that makes the call. The
 author comes from `ctx.agent`: the main agent is `OMP · Main`, a subagent is
 `OMP · <definition name> [<agent id>]`, for example `OMP · task [0-Review]`. Parallel subagents
