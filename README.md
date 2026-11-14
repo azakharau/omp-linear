@@ -8,6 +8,8 @@ Native Oh My Pi extension for Linear. It gives OMP agents and `task` subagents:
   `linear_project_status_post`, `linear_document_create`, ...);
 - a raw `linear_graphql` tool, `linear_schema_help` and `linear_connections`.
 
+## How the tools work
+
 At start the model sees one Linear tool, the native function `linear_tool_search`. It returns
 ranked candidates from the private catalog. With `activate: <exact name>` it adds one Linear
 operation to the active tools and removes the operation that was active before. Every model
@@ -28,13 +30,33 @@ the call.
 
 ## Install
 
+### Marketplace
+
+The repository is its own marketplace (`.omp-plugin/marketplace.json`):
+
 ```sh
+omp plugin marketplace add azakharau/omp-linear
+omp plugin install omp-linear@omp-linear
+omp plugin list                 # omp-linear@omp-linear (1.0.0) (user)
+```
+
+The repository is private, so `marketplace add` needs git access to it: an SSH key that GitHub
+accepts, or `gh auth login` with HTTPS git credentials. `--scope project` installs for the
+current project only. `omp plugin upgrade omp-linear@omp-linear` installs a newer catalog
+version. Restart the session after an install so the extension loads.
+
+### From a checkout
+
+```sh
+git clone git@github.com:azakharau/omp-linear.git
+cd omp-linear
 bun install
 bun run generate:catalog      # writes generated/catalog.json from schema/linear.schema.graphql
 ```
 
-Load the package in one of these ways:
+Then load the checkout in one of these ways:
 
+- as a linked plugin: `omp plugin link /path/to/omp-linear`;
 - in the OMP config (`~/.omp/agent/config.yml` or `.omp/config.yml` of a project):
 
   ```yaml
@@ -47,7 +69,9 @@ Load the package in one of these ways:
 
 The package manifest declares `omp.extensions: ["./src/index.ts"]`.
 
-## Connections
+## Configuration
+
+### Connections
 
 A Linear call uses the first connection that applies:
 
@@ -76,7 +100,7 @@ application, so do not use both modes with one application.
 Stored connections (`/linear-key`, `/linear-login`) live in
 `<agentDir>/linear/connections.json` (directory `0700`, file `0600`).
 
-## Settings
+### Settings
 
 All settings are in the `linear` block of the OMP config. The project config (`.omp/config.yml`)
 wins over the user config (`<agent dir>/config.yml`), with one exception. `endpoint`,
@@ -108,7 +132,9 @@ compares the URI exactly, so set `redirectHost: localhost` if the application re
 credentials. Without `clientId` and `redirectPort`, `/linear-login` names the missing keys and
 does nothing. A malformed `linear` block makes the command name the bad key.
 
-## Commands
+## Usage
+
+### Commands
 
 | Command | Effect |
 | --- | --- |
@@ -117,7 +143,7 @@ does nothing. A malformed `linear` block makes the command name the bad key.
 | `/linear-use <id>` | Selects a stored connection for this session (a `linear-state` session entry). |
 | `/linear-logout [id]` | Revokes the OAuth token if possible and removes the connection. |
 
-## Ergonomic ops
+### Ergonomic ops
 
 The ops accept human references: team key, issue identifier (`ABC-12`), state, label, project
 and milestone names, user display name, name or email, or `me`. A UUID passes through without
@@ -137,7 +163,7 @@ a lookup. A reference that matches zero or many records is an error that lists t
 A write op sends one mutation and then reads the result once. If issue creation succeeds and a
 relation fails, the error names the new issue and the relations that were and were not created.
 
-## Approval
+## Approval and safety
 
 Typed queries are `read` and typed mutations are `write`. Ergonomic ops have their own tier.
 `linear_graphql` gets its tier from the document (a mutation or an unparseable document is
@@ -145,23 +171,9 @@ Typed queries are `read` and typed mutations are `write`. Ergonomic ops have the
 extension never approves a call itself. `tools.approval: { lm_issueCreate: deny }` stops the call
 before any network request.
 
-## Schema drift and outcomes
-
-`linear_graphql` sends documents that use names the pinned schema does not know. The result has
-`validation: unknown` and lists those names. Typed `lq_*`/`lm_*` selections are strict.
-
 Every failure names its outcome: `not_sent`, `rejected` (the server refused, nothing applied) or
 `unknown` (sent, no trustworthy answer). The extension reports an `unknown` mutation as possibly
 applied and never retries it.
-
-`bun run schema:check --key-file ~/linear.env` compares the pinned schema with live Linear
-introspection. It lists live-only and pinned-only root fields, changed arguments, every type whose
-definition differs, and ergonomic documents that the live schema rejects or that use a field it
-marks deprecated. Exit codes: 0 no drift, 1 drift, 2 request failed.
-
-The pinned schema comes from live introspection, not from the SDK file in linear/linear: that file
-lags behind the API. To refresh the pin, run `bun run schema:check --key-file ~/linear.env --write`,
-then `bun run generate:catalog`. Introspection shows what the key's workspace can see.
 
 ## Attribution (`actor=app`)
 
@@ -177,14 +189,31 @@ independently. A caller-supplied `createAsUser` that differs from the author is 
 main session any caller-supplied `createAsUser` is rejected. `actor=user` connections and API keys
 send no attribution. Linear history still shows the application as the actor of state changes.
 
-## Verify
+## Schema drift
 
-```sh
-bun run typecheck
-bun test test           # unit tests and real OMP sessions (fake model, fake Linear)
-bun run smoke           # real loader in a separate host process: search, activation, API key, OAuth, attribution, deny
-bun run smoke:binary    # the installed omp binary: -e and extensions: load paths, apiKeyFile, task children
-```
+`linear_graphql` sends documents that use names the pinned schema does not know. The result has
+`validation: unknown` and lists those names. Typed `lq_*`/`lm_*` selections are strict.
+
+`bun run schema:check --key-file ~/linear.env` compares the pinned schema with live Linear
+introspection. It lists live-only and pinned-only root fields, changed arguments, every type whose
+definition differs, and ergonomic documents that the live schema rejects or that use a field it
+marks deprecated. Exit codes: 0 no drift, 1 drift, 2 request failed.
+
+The pinned schema comes from live introspection, not from the SDK file in linear/linear: that file
+lags behind the API. To refresh the pin, run `bun run schema:check --key-file ~/linear.env --write`,
+then `bun run generate:catalog`. Introspection shows what the key's workspace can see.
+
+## Development
+
+| Script | Effect |
+| --- | --- |
+| `bun run check` | The offline gate: `typecheck`, then `bun test test`. CI runs it on every push to `main` and every pull request. |
+| `bun run typecheck` | `tsc --noEmit` over `src`, `scripts` and `test`. |
+| `bun test test` | Unit tests and real OMP sessions (fake model, fake Linear). |
+| `bun run smoke` | Real loader in a separate host process: search, activation, API key, OAuth, attribution, deny. |
+| `bun run smoke:binary` | The installed omp binary: `-e` and `extensions:` load paths, `apiKeyFile`, `task` children. |
+| `bun run schema:check` | Drift report against live Linear (see [Schema drift](#schema-drift)). |
+| `bun run generate:catalog` | Regenerates `generated/catalog.json` from the pinned schema. |
 
 `smoke:binary` runs `/home/agent/.local/lib/omp/bin/omp` by default (`--omp <bin>` or `OMP_BIN`
 changes it). It uses a throwaway HOME and agent dir under `.scratch/`, a fake model and a fake
@@ -192,6 +221,10 @@ Linear on loopback. It checks that `linear_tool_search` is the only Linear tool 
 native function, that `linear_issue_get` works in the main agent, in a `task` child and in a
 child restricted to `read`, that each Linear request carries the key file value, and that the
 key never reaches a model request.
+
+Design notes live in `docs/`: [`docs/research-assignment.md`](docs/research-assignment.md) and
+[`docs/research-report.md`](docs/research-report.md). Changes are listed in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Security notes
 
@@ -201,3 +234,7 @@ key never reaches a model request.
 - With no connection, tools fail before any network call.
 - Project configs cannot set the endpoint, the key file or the OAuth URLs.
 - Each typed or raw call is one HTTP request. An ergonomic write is one mutation and one read.
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
