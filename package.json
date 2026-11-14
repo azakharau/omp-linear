@@ -23,7 +23,9 @@
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "test": "bun test test",
     "test:extension": "bun test test/extension.test.ts",
-    "smoke": "bun run scripts/smoke.ts"
+    "smoke": "bun run scripts/smoke.ts",
+    "smoke:binary": "bun run scripts/smoke-binary.ts",
+    "schema:check": "bun run scripts/check-schema-drift.ts"
   },
   "dependencies": {
     "@toon-format/toon": "4.1.1",
