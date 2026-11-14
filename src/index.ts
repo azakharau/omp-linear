@@ -410,7 +410,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    name: "linear_graphql",
    label: "Linear GraphQL",
    description:
-    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation whose input accepts createAsUser is attributed to the session author.",
+    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the session author.",
    parameters: objectSchema(
     {
      document: { type: "string", minLength: 1 },
