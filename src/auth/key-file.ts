@@ -7,13 +7,25 @@ export function expandHome(file: string): string {
 	return file === "~" || file.startsWith("~/") ? path.join(os.homedir(), file.slice(1)) : file;
 }
 
+/** A credentials file is a few lines; anything larger is not one. */
+const MAX_ENV_FILE_BYTES = 64 * 1024;
+
 /**
  * Reads `keys` from an env-style file (`KEY=value`, optional `export` and quotes). Read on every
- * call so a rotated value applies without a restart. Errors name the path and the key, never the
- * file content. `what` names the file in the not-found error.
+ * call so a rotated value applies without a restart. Only a regular file up to 64 KiB is read, so a
+ * FIFO or device path cannot block or exhaust the process. Errors name the path and the key, never
+ * the file content. `what` names the file in the not-found error.
  */
 export function readEnvKeys<K extends string>(file: string, keys: readonly K[], what: string): Record<K, string> {
 	const resolved = expandHome(file);
+	let stat: fs.Stats;
+	try {
+		stat = fs.statSync(resolved);
+	} catch {
+		throw new Error(`${what} not found: ${resolved}`);
+	}
+	if (!stat.isFile()) throw new Error(`${what} is not a regular file: ${resolved}`);
+	if (stat.size > MAX_ENV_FILE_BYTES) throw new Error(`${what} is larger than ${MAX_ENV_FILE_BYTES} bytes: ${resolved}`);
 	let content: string;
 	try {
 		content = fs.readFileSync(resolved, "utf8");

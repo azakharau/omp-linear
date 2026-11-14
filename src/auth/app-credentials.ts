@@ -67,9 +67,13 @@ export function appAccessToken(
 	return entry.token;
 }
 
-/** Drops the cached token after Linear rejected it (revoked, rotated secret, cleanup). */
-export function forgetAppAccessToken(credentials: AppCredentials, tokenUrl: string): void {
-	cache.delete(cacheKey(tokenUrl, credentials));
+/**
+ * Drops the cached token after Linear rejected it (revoked, rotated secret, cleanup). Only an entry
+ * that holds `rejected` is dropped: a late 401 for an old token must not evict its replacement.
+ */
+export function forgetAppAccessToken(credentials: AppCredentials, tokenUrl: string, rejected: string): void {
+	const key = cacheKey(tokenUrl, credentials);
+	if (cache.get(key)?.accessToken === rejected) cache.delete(key);
 }
 
 /** The cached token value, if one has resolved, for scrubbing error text; never requests one. */

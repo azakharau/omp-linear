@@ -600,6 +600,18 @@ describe("graphql client", () => {
 		const result = await client.execute(QUERY);
 		expect(JSON.stringify(result)).not.toContain(SENTINELS.accessToken);
 	});
+
+	test("an error path that echoes the credential is scrubbed; indexes stay numbers", async () => {
+		const { client } = await clientFor(() => ({
+			status: 200,
+			body: JSON.stringify({ data: null, errors: [{ message: "bad", path: ["viewer", 0, `Bearer ${SENTINELS.accessToken}`] }] }),
+		}));
+		const result = await client.execute(QUERY);
+		expect(result).toMatchObject({ ok: false, kind: "graphql" });
+		if (result.ok) throw new Error("unreachable");
+		expect(result.errors).toEqual([{ message: "bad", path: ["viewer", 0, "[redacted]"] }]);
+		expect(JSON.stringify(result)).not.toContain(SENTINELS.accessToken);
+	});
 });
 
 describe("send-safety semantics", () => {

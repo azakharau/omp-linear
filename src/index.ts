@@ -315,7 +315,12 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
       ? appCredentialsSecrets(connection.secret, cwd)
       : connectionSecrets(store.get(connection.id) ?? connection, cwd),
     onAuthRejected:
-     connection.kind === "app_credentials" ? () => forgetAppAccessToken(connection.secret, tokenUrlFor(cwd)) : undefined,
+     connection.kind === "app_credentials"
+      ? sent => {
+         const token = sent.authorization?.replace(/^Bearer /, "");
+         if (token) forgetAppAccessToken(connection.secret, tokenUrlFor(cwd), token);
+        }
+      : undefined,
    });
   }
 
