@@ -269,7 +269,7 @@ The specific measured shape sets the policy, not the general word "collection": 
 
 - **SOURCE-OBSERVED:** OAuth `actor=app`, `createAsUser`, and `displayIconUrl` for issue/comment creation are documented in [OAuth actor authorization](https://linear.app/developers/oauth-actor-authorization). This is the `User (via Application)` display, not the creation of a Linear user identity.
 - **SOURCE-OBSERVED:** actor=app installation/admin and the separate app:assignable capability are described in [Linear agents](https://linear.app/developers/agents). `app:assignable` is not needed for display names alone.
-- Format: `OMP · <displayName> [<id>]`, with no repeated ID when displayName already equals the ID. The source is registry/session host identity, not a model argument. The startup scan writes nothing to Linear and sends no prompts/config.
+- Format (owner decision, 2026-11-14, replaces the original `OMP · <displayName> [<id>]`): the main session does not pass `createAsUser`, and Linear shows the application itself. A subagent passes the display name of its role from `src/identity/names.ts` (`reviewer` → `Code Reviewer`). The source is host identity, not a model argument. The startup scan writes nothing to Linear and sends no prompts/config.
 - **UNKNOWN:** the real actor/user display, workspace scopes, and entitlements were not checked without live OAuth/Linear.
 
 ### Approval and transport
