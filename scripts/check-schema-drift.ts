@@ -20,6 +20,7 @@ import {
 	validate,
 } from "graphql";
 import { readApiKeyFile } from "../src/auth/key-file";
+import { safeMessage } from "../src/client/graphql";
 import { OP_DOCUMENTS } from "../src/ops/index";
 import { LOOKUP_DOCUMENTS } from "../src/ops/resolve";
 import { getSchema } from "../src/schema/catalog";
@@ -110,16 +111,18 @@ if (import.meta.main) {
 		const index = argv.indexOf(name);
 		return index >= 0 ? argv[index + 1] : undefined;
 	};
+	let apiKey: string | undefined;
 	try {
 		const keyFile = option("--key-file");
-		const apiKey = keyFile ? readApiKeyFile(keyFile) : process.env.LINEAR_API_KEY;
+		apiKey = keyFile ? readApiKeyFile(keyFile) : process.env.LINEAR_API_KEY;
 		if (!apiKey) throw new Error("no API key: pass --key-file <path> or set LINEAR_API_KEY");
 		const live = await fetchLiveSchema(option("--endpoint") ?? "https://api.linear.app/graphql", apiKey);
 		const report = compareSchemas(getSchema(), live, { ...OP_DOCUMENTS, ...LOOKUP_DOCUMENTS });
 		console.log(argv.includes("--json") ? JSON.stringify(report, null, 2) : summary(report));
 		process.exit(report.drift ? 1 : 0);
 	} catch (error) {
-		console.error(`schema:check failed: ${error instanceof Error ? error.message : String(error)}`);
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(`schema:check failed: ${safeMessage(message, apiKey ? [apiKey] : [])}`);
 		process.exit(2);
 	}
 }

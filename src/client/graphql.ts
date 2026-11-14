@@ -9,7 +9,8 @@
 
 export interface GraphQLErrorEntry {
  message: string;
- path?: unknown[];
+ /** Response path: field names (scrubbed like the message) and list indexes. */
+ path?: (string | number)[];
 }
 
 export interface RateLimitSnapshot {
@@ -69,8 +70,11 @@ export interface LinearClientOptions {
  headers?: Record<string, string>;
  /** Credential values to scrub from messages when building the auth headers itself fails. */
  knownSecrets?: () => string[];
- /** Called when Linear answers HTTP 401, so a cached token can be dropped before the next call. */
- onAuthRejected?: () => void;
+ /**
+  * Called when Linear answers HTTP 401, with the auth headers that request sent, so a cached
+  * token can be dropped before the next call.
+  */
+ onAuthRejected?: (sentHeaders: Record<string, string>) => void;
 }
 
 export interface LinearExecuteOptions {
@@ -139,7 +143,9 @@ function readErrors(body: unknown, secrets: string[]): GraphQLErrorEntry[] | nul
   const message = typeof rawMessage === "string" ? rawMessage : JSON.stringify(entry);
   const rawPath = isObject && "path" in entry ? entry.path : undefined;
   const safe = redact(message, secrets);
-  return Array.isArray(rawPath) ? { message: safe, path: rawPath } : { message: safe };
+  if (!Array.isArray(rawPath)) return { message: safe };
+  const path = rawPath.map(part => (typeof part === "number" ? part : redact(String(part), secrets)));
+  return { message: safe, path };
  });
 }
 
@@ -315,7 +321,7 @@ export function createLinearClient(options: LinearClientOptions): LinearClient {
    const errors = isJson ? readErrors(parsed, secrets) : null;
 
    if (status === 401 || status === 403) {
-    if (status === 401) options.onAuthRejected?.();
+    if (status === 401) options.onAuthRejected?.(authHeaders);
     return {
      ok: false,
      kind: "auth",
