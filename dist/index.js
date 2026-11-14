@@ -11099,7 +11099,7 @@ var OAUTH_DEFAULTS = {
   authorizeUrl: "https://linear.app/oauth/authorize",
   tokenUrl: "https://api.linear.app/oauth/token",
   revokeUrl: "https://api.linear.app/oauth/revoke",
-  scopes: ["read", "write", "issues:create", "comments:create"]
+  scopes: ["read", "write", "issues:create", "comments:create", "initiative:write"]
 };
 function resolveOAuthConfig(partial) {
   if (!partial?.clientId)
@@ -11380,7 +11380,7 @@ async function ensureFreshAccessToken(config, store, id, fetchImpl = fetch, now 
 }
 
 // src/auth/app-credentials.ts
-var APP_CREDENTIALS_SCOPES = ["read", "write"];
+var APP_CREDENTIALS_SCOPES = ["read", "write", "initiative:write"];
 var RENEW_BEFORE_MS = 24 * 60 * 60 * 1000;
 function readAppCredentialsFile(file) {
   const values = readEnvKeys(file, ["LINEAR_CLIENT_ID", "LINEAR_CLIENT_SECRET"], "Linear app credentials file");

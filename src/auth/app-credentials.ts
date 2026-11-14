@@ -6,7 +6,7 @@ import { requestClientCredentialsToken } from "./oauth";
  * app's existing app-actor tokens in a workspace when another process asks for a different set,
  * so all processes sharing the app must use this same set.
  */
-export const APP_CREDENTIALS_SCOPES = ["read", "write"] as const;
+export const APP_CREDENTIALS_SCOPES = ["read", "write", "initiative:write"] as const;
 
 /** Renew a cached token when less than this remains (tokens live 30 days). */
 const RENEW_BEFORE_MS = 24 * 60 * 60 * 1000;
