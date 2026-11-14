@@ -1,44 +1,16 @@
 {
-  "schemaSha256": "354098d4acd5859524f0f9a77e5b29691e4b4f186b5334e97125ef8c4a2719da",
-  "linearCommit": "3addb24bdf771700da1c050742e70e645cc7e36a",
-  "queryCount": 173,
-  "mutationCount": 377,
-  "total": 550,
-  "generatedAt": "2026-09-22T14:19:55.270Z",
+  "schemaSha256": "20cadd5061b0c95acbd0ecdb2b387023b1beb3be84c10c74d22b560f61cd8730",
+  "linearCommit": "87d638c0b151575505d36822839324d2287f2e06",
+  "queryCount": 160,
+  "mutationCount": 335,
+  "total": 495,
+  "generatedAt": "2026-11-14T16:41:33.338Z",
   "roots": [
     {
       "kind": "Mutation",
       "root": "agentActivityCreate",
       "tool": "lm_agentActivityCreate",
       "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "agentActivityCreatePrompt",
-      "tool": "lm_agentActivityCreatePrompt",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "agentActivityDeleteQueued",
-      "tool": "lm_agentActivityDeleteQueued",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "agentActivitySendQueued",
-      "tool": "lm_agentActivitySendQueued",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "agentSessionCreate",
-      "tool": "lm_agentSessionCreate",
-      "argCount": 2,
       "deprecated": null
     },
     {
@@ -52,13 +24,6 @@
       "kind": "Mutation",
       "root": "agentSessionCreateOnIssue",
       "tool": "lm_agentSessionCreateOnIssue",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "agentSessionRestartWithDefaultModel",
-      "tool": "lm_agentSessionRestartWithDefaultModel",
       "argCount": 1,
       "deprecated": null
     },
@@ -253,13 +218,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "contactSalesCreate",
-      "tool": "lm_contactSalesCreate",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "createCsvExportReport",
       "tool": "lm_createCsvExportReport",
       "argCount": 2,
@@ -270,13 +228,6 @@
       "root": "createInitiativeUpdateReminder",
       "tool": "lm_createInitiativeUpdateReminder",
       "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "createOrganizationFromOnboarding",
-      "tool": "lm_createOrganizationFromOnboarding",
-      "argCount": 4,
       "deprecated": null
     },
     {
@@ -479,7 +430,7 @@
       "kind": "Mutation",
       "root": "documentDelete",
       "tool": "lm_documentDelete",
-      "argCount": 1,
+      "argCount": 2,
       "deprecated": null
     },
     {
@@ -494,6 +445,13 @@
       "root": "documentUpdate",
       "tool": "lm_documentUpdate",
       "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "documentUpdateWorkspaceAccess",
+      "tool": "lm_documentUpdateWorkspaceAccess",
+      "argCount": 4,
       "deprecated": null
     },
     {
@@ -757,13 +715,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "initiativeLeadTeamUpdate",
-      "tool": "lm_initiativeLeadTeamUpdate",
-      "argCount": 3,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "initiativeRelationCreate",
       "tool": "lm_initiativeRelationCreate",
       "argCount": 1,
@@ -869,27 +820,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationCustomerDataAttributesRefresh",
-      "tool": "lm_integrationCustomerDataAttributesRefresh",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationDatadogConnect",
-      "tool": "lm_integrationDatadogConnect",
-      "argCount": 4,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationDatadogEnvironments",
-      "tool": "lm_integrationDatadogEnvironments",
-      "argCount": 3,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "integrationDelete",
       "tool": "lm_integrationDelete",
       "argCount": 2,
@@ -974,6 +904,13 @@
     },
     {
       "kind": "Mutation",
+      "root": "integrationGitlabRotate",
+      "tool": "lm_integrationGitlabRotate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
       "root": "integrationGitlabTestConnection",
       "tool": "lm_integrationGitlabTestConnection",
       "argCount": 1,
@@ -981,16 +918,23 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationGong",
-      "tool": "lm_integrationGong",
+      "root": "integrationGitlabUpdateRotationSettings",
+      "tool": "lm_integrationGitlabUpdateRotationSettings",
       "argCount": 2,
       "deprecated": null
     },
     {
       "kind": "Mutation",
-      "root": "integrationGoogleCalendarPersonalConnect",
-      "tool": "lm_integrationGoogleCalendarPersonalConnect",
-      "argCount": 1,
+      "root": "integrationGitlabUpdateToken",
+      "tool": "lm_integrationGitlabUpdateToken",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGong",
+      "tool": "lm_integrationGong",
+      "argCount": 2,
       "deprecated": null
     },
     {
@@ -1019,41 +963,13 @@
       "root": "integrationIntercomSettingsUpdate",
       "tool": "lm_integrationIntercomSettingsUpdate",
       "argCount": 1,
-      "deprecated": "This mutation is deprecated, please use `integrationSettingsUpdate` instead"
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationJiraFetchProjectStatuses",
-      "tool": "lm_integrationJiraFetchProjectStatuses",
-      "argCount": 1,
-      "deprecated": "Use the `integrationJiraProjectStatuses` query instead."
+      "deprecated": "Manage Intercom integration settings in Linear workspace settings."
     },
     {
       "kind": "Mutation",
       "root": "integrationJiraPersonal",
       "tool": "lm_integrationJiraPersonal",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationJiraUpdate",
-      "tool": "lm_integrationJiraUpdate",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationLaunchDarklyConnect",
-      "tool": "lm_integrationLaunchDarklyConnect",
       "argCount": 3,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationLaunchDarklyPersonalConnect",
-      "tool": "lm_integrationLaunchDarklyPersonalConnect",
-      "argCount": 1,
       "deprecated": null
     },
     {
@@ -1062,20 +978,6 @@
       "tool": "lm_integrationLoom",
       "argCount": 0,
       "deprecated": "Not available."
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationMcpServerConnect",
-      "tool": "lm_integrationMcpServerConnect",
-      "argCount": 6,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationMcpServerPersonalConnect",
-      "tool": "lm_integrationMcpServerPersonalConnect",
-      "argCount": 3,
-      "deprecated": null
     },
     {
       "kind": "Mutation",
@@ -1089,41 +991,6 @@
       "root": "integrationMicrosoftTeams",
       "tool": "lm_integrationMicrosoftTeams",
       "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationMicrosoftTeamsProjectPost",
-      "tool": "lm_integrationMicrosoftTeamsProjectPost",
-      "argCount": 6,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationOpsgenieConnect",
-      "tool": "lm_integrationOpsgenieConnect",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationOpsgenieRefreshScheduleMappings",
-      "tool": "lm_integrationOpsgenieRefreshScheduleMappings",
-      "argCount": 0,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationPagerDutyConnect",
-      "tool": "lm_integrationPagerDutyConnect",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationPagerDutyRefreshScheduleMappings",
-      "tool": "lm_integrationPagerDutyRefreshScheduleMappings",
-      "argCount": 0,
       "deprecated": null
     },
     {
@@ -1142,24 +1009,10 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationSalesforceMetadataRefresh",
-      "tool": "lm_integrationSalesforceMetadataRefresh",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "integrationSentryConnect",
       "tool": "lm_integrationSentryConnect",
       "argCount": 3,
       "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationSettingsUpdate",
-      "tool": "lm_integrationSettingsUpdate",
-      "argCount": 2,
-      "deprecated": "Use integrationUpdate instead."
     },
     {
       "kind": "Mutation",
@@ -1198,23 +1051,9 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationSlackInitiativePost",
-      "tool": "lm_integrationSlackInitiativePost",
-      "argCount": 3,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "integrationSlackOrAsksUpdateSlackTeamName",
       "tool": "lm_integrationSlackOrAsksUpdateSlackTeamName",
       "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "integrationSlackOrgInitiativeUpdatesPost",
-      "tool": "lm_integrationSlackOrgInitiativeUpdatesPost",
-      "argCount": 2,
       "deprecated": null
     },
     {
@@ -1247,13 +1086,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationSlackWorkflowAccessUpdate",
-      "tool": "lm_integrationSlackWorkflowAccessUpdate",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "integrationTemplateCreate",
       "tool": "lm_integrationTemplateCreate",
       "argCount": 1,
@@ -1268,16 +1100,9 @@
     },
     {
       "kind": "Mutation",
-      "root": "integrationUpdate",
-      "tool": "lm_integrationUpdate",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "integrationZendesk",
       "tool": "lm_integrationZendesk",
-      "argCount": 7,
+      "argCount": 8,
       "deprecated": null
     },
     {
@@ -1338,13 +1163,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "issueDescriptionUpdateFromFront",
-      "tool": "lm_issueDescriptionUpdateFromFront",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "issueExternalSyncDisable",
       "tool": "lm_issueExternalSyncDisable",
       "argCount": 1,
@@ -1354,7 +1172,7 @@
       "kind": "Mutation",
       "root": "issueImportCreateAsana",
       "tool": "lm_issueImportCreateAsana",
-      "argCount": 7,
+      "argCount": 8,
       "deprecated": null
     },
     {
@@ -1383,13 +1201,6 @@
       "root": "issueImportCreateJira",
       "tool": "lm_issueImportCreateJira",
       "argCount": 10,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "issueImportCreateLinearV2",
-      "tool": "lm_issueImportCreateLinearV2",
-      "argCount": 2,
       "deprecated": null
     },
     {
@@ -1548,22 +1359,8 @@
     },
     {
       "kind": "Mutation",
-      "root": "jiraIntegrationConnect",
-      "tool": "lm_jiraIntegrationConnect",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "joinOrganizationFromOnboarding",
-      "tool": "lm_joinOrganizationFromOnboarding",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "leaveOrganization",
-      "tool": "lm_leaveOrganization",
+      "root": "jiraProjectBatchMigrate",
+      "tool": "lm_jiraProjectBatchMigrate",
       "argCount": 1,
       "deprecated": null
     },
@@ -1737,36 +1534,8 @@
     },
     {
       "kind": "Mutation",
-      "root": "organizationDomainClaim",
-      "tool": "lm_organizationDomainClaim",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "organizationDomainCreate",
-      "tool": "lm_organizationDomainCreate",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "organizationDomainDelete",
       "tool": "lm_organizationDomainDelete",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "organizationDomainUpdate",
-      "tool": "lm_organizationDomainUpdate",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "organizationDomainVerify",
-      "tool": "lm_organizationDomainVerify",
       "argCount": 1,
       "deprecated": null
     },
@@ -1814,34 +1583,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "partnerApplicationCreate",
-      "tool": "lm_partnerApplicationCreate",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "partnerOfferRedeem",
-      "tool": "lm_partnerOfferRedeem",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "passkeyLoginFinish",
-      "tool": "lm_passkeyLoginFinish",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "passkeyLoginStart",
-      "tool": "lm_passkeyLoginStart",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "projectAddLabel",
       "tool": "lm_projectAddLabel",
       "argCount": 2,
@@ -1863,22 +1604,8 @@
     },
     {
       "kind": "Mutation",
-      "root": "projectCreateSlackChannel",
-      "tool": "lm_projectCreateSlackChannel",
-      "argCount": 3,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "projectDelete",
       "tool": "lm_projectDelete",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "projectDismissSlackChannelCreationFailure",
-      "tool": "lm_projectDismissSlackChannelCreationFailure",
       "argCount": 1,
       "deprecated": null
     },
@@ -1940,22 +1667,8 @@
     },
     {
       "kind": "Mutation",
-      "root": "projectMilestoneMove",
-      "tool": "lm_projectMilestoneMove",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "projectMilestoneUpdate",
       "tool": "lm_projectMilestoneUpdate",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
-      "root": "projectReassignStatus",
-      "tool": "lm_projectReassignStatus",
       "argCount": 2,
       "deprecated": null
     },
@@ -2486,13 +2199,6 @@
     },
     {
       "kind": "Mutation",
-      "root": "updateIntegrationSlackScopes",
-      "tool": "lm_updateIntegrationSlackScopes",
-      "argCount": 4,
-      "deprecated": null
-    },
-    {
-      "kind": "Mutation",
       "root": "userChangeRole",
       "tool": "lm_userChangeRole",
       "argCount": 2,
@@ -2509,7 +2215,7 @@
       "kind": "Mutation",
       "root": "userExternalUserDisconnect",
       "tool": "lm_userExternalUserDisconnect",
-      "argCount": 1,
+      "argCount": 2,
       "deprecated": null
     },
     {
@@ -2682,20 +2388,6 @@
     },
     {
       "kind": "Query",
-      "root": "agentSessionSandbox",
-      "tool": "lq_agentSessionSandbox",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "agentSessionSshAddress",
-      "tool": "lq_agentSessionSshAddress",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
       "root": "agentSessions",
       "tool": "lq_agentSessions",
       "argCount": 6,
@@ -2726,13 +2418,6 @@
       "kind": "Query",
       "root": "archivedIntegrations",
       "tool": "lq_archivedIntegrations",
-      "argCount": 0,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "archivedTeams",
-      "tool": "lq_archivedTeams",
       "argCount": 0,
       "deprecated": null
     },
@@ -2787,13 +2472,6 @@
     },
     {
       "kind": "Query",
-      "root": "auditLogWebhookFailureEvents",
-      "tool": "lq_auditLogWebhookFailureEvents",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
       "root": "authenticationSessions",
       "tool": "lq_authenticationSessions",
       "argCount": 0,
@@ -2825,13 +2503,6 @@
       "root": "customView",
       "tool": "lq_customView",
       "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "customViewDetailsSuggestion",
-      "tool": "lq_customViewDetailsSuggestion",
-      "argCount": 2,
       "deprecated": null
     },
     {
@@ -2920,8 +2591,8 @@
     },
     {
       "kind": "Query",
-      "root": "diff",
-      "tool": "lq_diff",
+      "root": "dependencyPackageMetadata",
+      "tool": "lq_dependencyPackageMetadata",
       "argCount": 1,
       "deprecated": null
     },
@@ -2941,20 +2612,6 @@
     },
     {
       "kind": "Query",
-      "root": "documentContentHistoryEntries",
-      "tool": "lq_documentContentHistoryEntries",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "documentContentHistoryTimeline",
-      "tool": "lq_documentContentHistoryTimeline",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
       "root": "documents",
       "tool": "lq_documents",
       "argCount": 8,
@@ -2965,6 +2622,13 @@
       "root": "emailIntakeAddress",
       "tool": "lq_emailIntakeAddress",
       "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "emailIntakeAddresses",
+      "tool": "lq_emailIntakeAddresses",
+      "argCount": 6,
       "deprecated": null
     },
     {
@@ -3000,13 +2664,6 @@
       "root": "externalUsers",
       "tool": "lq_externalUsers",
       "argCount": 6,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "failuresForOauthWebhooks",
-      "tool": "lq_failuresForOauthWebhooks",
-      "argCount": 1,
       "deprecated": null
     },
     {
@@ -3056,13 +2713,6 @@
       "root": "initiativeLabels",
       "tool": "lq_initiativeLabels",
       "argCount": 7,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "initiativeLeadTeamChangeImpact",
-      "tool": "lq_initiativeLeadTeamChangeImpact",
-      "argCount": 2,
       "deprecated": null
     },
     {
@@ -3125,13 +2775,6 @@
       "kind": "Query",
       "root": "integrationHasScopes",
       "tool": "lq_integrationHasScopes",
-      "argCount": 2,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "integrationJiraProjectStatuses",
-      "tool": "lq_integrationJiraProjectStatuses",
       "argCount": 2,
       "deprecated": null
     },
@@ -3291,15 +2934,22 @@
     },
     {
       "kind": "Query",
-      "root": "latestReleaseByAccessKey",
-      "tool": "lq_latestReleaseByAccessKey",
-      "argCount": 0,
+      "root": "jiraProject",
+      "tool": "lq_jiraProject",
+      "argCount": 1,
       "deprecated": null
     },
     {
       "kind": "Query",
-      "root": "microsoftTeamsChannels",
-      "tool": "lq_microsoftTeamsChannels",
+      "root": "jiraProjects",
+      "tool": "lq_jiraProjects",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "latestReleaseByAccessKey",
+      "tool": "lq_latestReleaseByAccessKey",
       "argCount": 0,
       "deprecated": null
     },
@@ -3333,16 +2983,16 @@
     },
     {
       "kind": "Query",
-      "root": "notificationsUnreadCount",
-      "tool": "lq_notificationsUnreadCount",
-      "argCount": 0,
+      "root": "oauthApplication",
+      "tool": "lq_oauthApplication",
+      "argCount": 1,
       "deprecated": null
     },
     {
       "kind": "Query",
-      "root": "oauthApplication",
-      "tool": "lq_oauthApplication",
-      "argCount": 1,
+      "root": "oauthApplicationCodingSessionTrustedSource",
+      "tool": "lq_oauthApplicationCodingSessionTrustedSource",
+      "argCount": 0,
       "deprecated": null
     },
     {
@@ -3357,13 +3007,6 @@
       "root": "organization",
       "tool": "lq_organization",
       "argCount": 0,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "organizationDomainClaimRequest",
-      "tool": "lq_organizationDomainClaimRequest",
-      "argCount": 1,
       "deprecated": null
     },
     {
@@ -3392,34 +3035,6 @@
       "root": "organizationInvites",
       "tool": "lq_organizationInvites",
       "argCount": 6,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "organizationMeta",
-      "tool": "lq_organizationMeta",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "partnerOfferDetails",
-      "tool": "lq_partnerOfferDetails",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "partnerOfferWorkspaces",
-      "tool": "lq_partnerOfferWorkspaces",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
-      "root": "partnerProgramPartners",
-      "tool": "lq_partnerProgramPartners",
-      "argCount": 0,
       "deprecated": null
     },
     {
@@ -3487,13 +3102,6 @@
     },
     {
       "kind": "Query",
-      "root": "projectStatusProjectCount",
-      "tool": "lq_projectStatusProjectCount",
-      "argCount": 1,
-      "deprecated": null
-    },
-    {
-      "kind": "Query",
       "root": "projectStatuses",
       "tool": "lq_projectStatuses",
       "argCount": 6,
@@ -3525,6 +3133,13 @@
       "root": "pushSubscriptionTest",
       "tool": "lq_pushSubscriptionTest",
       "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "quotas",
+      "tool": "lq_quotas",
+      "argCount": 5,
       "deprecated": null
     },
     {

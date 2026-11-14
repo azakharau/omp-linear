@@ -106,7 +106,8 @@ async function runMain(host: Host): Promise<void> {
  const rawMutation = "mutation Smoke($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier } } }";
  // Prompt 1 plays requests 0-3 and ends its turn at 4; the raw prompt resumes at request 5.
  const script: ScriptedCall[] = [
-  ["linear_tool_search", { i: "Searching", query: "create issue" }],
+  // "create issue" ranks the ergonomic linear_issue_create first; the typed lm_issueCreate sits lower.
+  ["linear_tool_search", { i: "Searching", query: "create issue", limit: 10 }],
   ["linear_tool_search", { i: "Activating", activate: "lm_issueCreate" }],
   ["lm_issueCreate", { i: "Creating", input }],
   null,
@@ -143,7 +144,7 @@ async function runMain(host: Host): Promise<void> {
  try {
   const registered = session.getAllToolNames();
   const operations = registered.filter(n => n.startsWith("lq_") || n.startsWith("lm_")).length;
-  record("loader: package loaded through the real extension loader", operations === 550 && registered.includes("linear_tool_search"), `${operations} typed operations registered, linear_tool_search ${registered.includes("linear_tool_search") ? "present" : "missing"}`);
+  record("loader: package loaded through the real extension loader", operations === 495 && registered.includes("linear_tool_search"), `${operations} typed operations registered, linear_tool_search ${registered.includes("linear_tool_search") ? "present" : "missing"}`);
 
   await session.prompt("/linear-use key-smoke");
   await session.prompt("search, activate, create");

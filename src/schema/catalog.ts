@@ -55,7 +55,7 @@ const ROOT = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 let catalogCache: OperationDescriptor[] | undefined;
 let schemaCache: GraphQLSchema | undefined;
 
-/** All 550 generated Query/Mutation descriptors, read once from generated/catalog.json. */
+/** All 495 generated Query/Mutation descriptors, read once from generated/catalog.json. */
 export function loadCatalog(): OperationDescriptor[] {
  if (!catalogCache) {
   const raw = fs.readFileSync(path.join(ROOT, "generated", "catalog.json"), "utf8");

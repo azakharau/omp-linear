@@ -163,7 +163,7 @@ describe("linear extension in a real OMP session", () => {
 			expect(seen.filter(name => name.startsWith("linear_") || isLinearOperation(name))).toEqual([]);
 			expect(JSON.stringify(model.requests[0]!)).toContain(`- ${SEARCH_TOOL} — Search the private Linear catalog`);
 			const all = session.getAllToolNames();
-			expect(all.filter(isLinearOperation).length).toBe(550);
+			expect(all.filter(isLinearOperation).length).toBe(495);
 			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "linear_issue_create"]) {
 				expect(all).toContain(name);
 				expect(seen).not.toContain(name);
@@ -652,7 +652,7 @@ describe("linear extension in a real OMP session", () => {
 			const { toolNames, authorLabel, connectionIds } = runLoaderPathProof(PRISTINE_HOST, agentDir);
 			expect(toolNames).toContain(SEARCH_TOOL);
 			expect(toolNames).toContain("linear_connections");
-			expect(toolNames.filter(isLinearOperation).length).toBe(550);
+			expect(toolNames.filter(isLinearOperation).length).toBe(495);
 			expect(authorLabel).toBe("OMP · Main");
 			expect(connectionIds).toContain("loader-proof");
 		} finally {

@@ -15,19 +15,19 @@
 		"scalar": null
 	},
 	"summary": {
-		"operations": 550,
+		"operations": 495,
 		"byFormat": {
-			"json": 546,
+			"json": 491,
 			"toon": 4
 		},
 		"byShape": {
-			"nested": 415,
-			"object": 109,
-			"keyed-table": 19,
-			"scalar": 3,
+			"nested": 375,
+			"object": 101,
+			"keyed-table": 14,
+			"scalar": 1,
 			"table": 4
 		},
-		"encodedBytesTotal": 259106
+		"encodedBytesTotal": 227916
 	},
 	"rows": [
 		{
@@ -37,30 +37,6 @@
 			"bytes": 66
 		},
 		{
-			"tool": "lm_agentActivityCreatePrompt",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 66
-		},
-		{
-			"tool": "lm_agentActivityDeleteQueued",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 66
-		},
-		{
-			"tool": "lm_agentActivitySendQueued",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 66
-		},
-		{
-			"tool": "lm_agentSessionCreate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 65
-		},
-		{
 			"tool": "lm_agentSessionCreateOnComment",
 			"shape": "nested",
 			"format": "json",
@@ -68,12 +44,6 @@
 		},
 		{
 			"tool": "lm_agentSessionCreateOnIssue",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 65
-		},
-		{
-			"tool": "lm_agentSessionRestartWithDefaultModel",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 65
@@ -241,12 +211,6 @@
 			"bytes": 17
 		},
 		{
-			"tool": "lm_contactSalesCreate",
-			"shape": "object",
-			"format": "json",
-			"bytes": 17
-		},
-		{
 			"tool": "lm_createCsvExportReport",
 			"shape": "object",
 			"format": "json",
@@ -257,12 +221,6 @@
 			"shape": "object",
 			"format": "json",
 			"bytes": 32
-		},
-		{
-			"tool": "lm_createOrganizationFromOnboarding",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 99
 		},
 		{
 			"tool": "lm_createProjectUpdateReminder",
@@ -446,6 +404,12 @@
 		},
 		{
 			"tool": "lm_documentUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_documentUpdateWorkspaceAccess",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 61
@@ -673,12 +637,6 @@
 			"bytes": 88
 		},
 		{
-			"tool": "lm_initiativeLeadTeamUpdate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 221
-		},
-		{
 			"tool": "lm_initiativeRelationCreate",
 			"shape": "nested",
 			"format": "json",
@@ -769,24 +727,6 @@
 			"bytes": 126
 		},
 		{
-			"tool": "lm_integrationCustomerDataAttributesRefresh",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationDatadogConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationDatadogEnvironments",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 132
-		},
-		{
 			"tool": "lm_integrationDelete",
 			"shape": "object",
 			"format": "json",
@@ -859,19 +799,31 @@
 			"bytes": 258
 		},
 		{
+			"tool": "lm_integrationGitlabRotate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
 			"tool": "lm_integrationGitlabTestConnection",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 220
 		},
 		{
-			"tool": "lm_integrationGong",
+			"tool": "lm_integrationGitlabUpdateRotationSettings",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationGoogleCalendarPersonalConnect",
+			"tool": "lm_integrationGitlabUpdateToken",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGong",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
@@ -901,49 +853,13 @@
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationJiraFetchProjectStatuses",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 252
-		},
-		{
 			"tool": "lm_integrationJiraPersonal",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationJiraUpdate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationLaunchDarklyConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationLaunchDarklyPersonalConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
 			"tool": "lm_integrationLoom",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationMcpServerConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationMcpServerPersonalConnect",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
@@ -961,36 +877,6 @@
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationMicrosoftTeamsProjectPost",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationOpsgenieConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationOpsgenieRefreshScheduleMappings",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationPagerDutyConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationPagerDutyRefreshScheduleMappings",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
 			"tool": "lm_integrationRequest",
 			"shape": "object",
 			"format": "json",
@@ -1003,19 +889,7 @@
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationSalesforceMetadataRefresh",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
 			"tool": "lm_integrationSentryConnect",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_integrationSettingsUpdate",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
@@ -1051,22 +925,10 @@
 			"bytes": 64
 		},
 		{
-			"tool": "lm_integrationSlackInitiativePost",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 162
-		},
-		{
 			"tool": "lm_integrationSlackOrAsksUpdateSlackTeamName",
 			"shape": "object",
 			"format": "json",
 			"bytes": 37
-		},
-		{
-			"tool": "lm_integrationSlackOrgInitiativeUpdatesPost",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 162
 		},
 		{
 			"tool": "lm_integrationSlackOrgProjectUpdatesPost",
@@ -1093,12 +955,6 @@
 			"bytes": 162
 		},
 		{
-			"tool": "lm_integrationSlackWorkflowAccessUpdate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
 			"tool": "lm_integrationTemplateCreate",
 			"shape": "nested",
 			"format": "json",
@@ -1109,12 +965,6 @@
 			"shape": "object",
 			"format": "json",
 			"bytes": 60
-		},
-		{
-			"tool": "lm_integrationUpdate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
 		},
 		{
 			"tool": "lm_integrationZendesk",
@@ -1171,12 +1021,6 @@
 			"bytes": 59
 		},
 		{
-			"tool": "lm_issueDescriptionUpdateFromFront",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 58
-		},
-		{
 			"tool": "lm_issueExternalSyncDisable",
 			"shape": "nested",
 			"format": "json",
@@ -1208,12 +1052,6 @@
 		},
 		{
 			"tool": "lm_issueImportCreateJira",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_issueImportCreateLinearV2",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 64
@@ -1351,22 +1189,10 @@
 			"bytes": 58
 		},
 		{
-			"tool": "lm_jiraIntegrationConnect",
-			"shape": "nested",
+			"tool": "lm_jiraProjectBatchMigrate",
+			"shape": "keyed-table",
 			"format": "json",
-			"bytes": 64
-		},
-		{
-			"tool": "lm_joinOrganizationFromOnboarding",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 99
-		},
-		{
-			"tool": "lm_leaveOrganization",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 99
+			"bytes": 111
 		},
 		{
 			"tool": "lm_logout",
@@ -1513,34 +1339,10 @@
 			"bytes": 17
 		},
 		{
-			"tool": "lm_organizationDomainClaim",
-			"shape": "object",
-			"format": "json",
-			"bytes": 17
-		},
-		{
-			"tool": "lm_organizationDomainCreate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 91
-		},
-		{
 			"tool": "lm_organizationDomainDelete",
 			"shape": "object",
 			"format": "json",
 			"bytes": 60
-		},
-		{
-			"tool": "lm_organizationDomainUpdate",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 91
-		},
-		{
-			"tool": "lm_organizationDomainVerify",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 91
 		},
 		{
 			"tool": "lm_organizationInviteCreate",
@@ -1579,30 +1381,6 @@
 			"bytes": 85
 		},
 		{
-			"tool": "lm_partnerApplicationCreate",
-			"shape": "object",
-			"format": "json",
-			"bytes": 17
-		},
-		{
-			"tool": "lm_partnerOfferRedeem",
-			"shape": "object",
-			"format": "json",
-			"bytes": 17
-		},
-		{
-			"tool": "lm_passkeyLoginFinish",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 680
-		},
-		{
-			"tool": "lm_passkeyLoginStart",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 45
-		},
-		{
 			"tool": "lm_projectAddLabel",
 			"shape": "nested",
 			"format": "json",
@@ -1621,22 +1399,10 @@
 			"bytes": 80
 		},
 		{
-			"tool": "lm_projectCreateSlackChannel",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 80
-		},
-		{
 			"tool": "lm_projectDelete",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 79
-		},
-		{
-			"tool": "lm_projectDismissSlackChannelCreationFailure",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 80
 		},
 		{
 			"tool": "lm_projectExternalSyncDisable",
@@ -1687,22 +1453,10 @@
 			"bytes": 60
 		},
 		{
-			"tool": "lm_projectMilestoneMove",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 89
-		},
-		{
 			"tool": "lm_projectMilestoneUpdate",
 			"shape": "nested",
 			"format": "json",
 			"bytes": 89
-		},
-		{
-			"tool": "lm_projectReassignStatus",
-			"shape": "object",
-			"format": "json",
-			"bytes": 32
 		},
 		{
 			"tool": "lm_projectRelationCreate",
@@ -2155,12 +1909,6 @@
 			"bytes": 73
 		},
 		{
-			"tool": "lm_updateIntegrationSlackScopes",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 64
-		},
-		{
 			"tool": "lm_userChangeRole",
 			"shape": "object",
 			"format": "json",
@@ -2302,43 +2050,31 @@
 			"tool": "lq_administrableTeams",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8453
+			"bytes": 6152
 		},
 		{
 			"tool": "lq_agentActivities",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1595
+			"bytes": 1331
 		},
 		{
 			"tool": "lq_agentActivity",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 506
+			"bytes": 418
 		},
 		{
 			"tool": "lq_agentSession",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 798
-		},
-		{
-			"tool": "lq_agentSessionSandbox",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 201
-		},
-		{
-			"tool": "lq_agentSessionSshAddress",
-			"shape": "scalar",
-			"format": "json",
-			"bytes": 30
+			"bytes": 666
 		},
 		{
 			"tool": "lq_agentSessions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2471
+			"bytes": 2075
 		},
 		{
 			"tool": "lq_agentSkill",
@@ -2365,12 +2101,6 @@
 			"bytes": 481
 		},
 		{
-			"tool": "lq_archivedTeams",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 8380
-		},
-		{
 			"tool": "lq_attachment",
 			"shape": "nested",
 			"format": "json",
@@ -2380,7 +2110,7 @@
 			"tool": "lq_attachmentIssue",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2667
+			"bytes": 2483
 		},
 		{
 			"tool": "lq_attachmentSources",
@@ -2413,12 +2143,6 @@
 			"bytes": 115
 		},
 		{
-			"tool": "lq_auditLogWebhookFailureEvents",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 583
-		},
-		{
 			"tool": "lq_authenticationSessions",
 			"shape": "nested",
 			"format": "json",
@@ -2434,25 +2158,19 @@
 			"tool": "lq_comment",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1547
+			"bytes": 1398
 		},
 		{
 			"tool": "lq_comments",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 4718
+			"bytes": 4271
 		},
 		{
 			"tool": "lq_customView",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 841
-		},
-		{
-			"tool": "lq_customViewDetailsSuggestion",
-			"shape": "object",
-			"format": "json",
-			"bytes": 75
+			"bytes": 815
 		},
 		{
 			"tool": "lq_customViewHasSubscribers",
@@ -2464,7 +2182,7 @@
 			"tool": "lq_customViews",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2600
+			"bytes": 2522
 		},
 		{
 			"tool": "lq_customer",
@@ -2476,13 +2194,13 @@
 			"tool": "lq_customerNeed",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 542
+			"bytes": 514
 		},
 		{
 			"tool": "lq_customerNeeds",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1703
+			"bytes": 1619
 		},
 		{
 			"tool": "lq_customerStatus",
@@ -2518,25 +2236,25 @@
 			"tool": "lq_cycle",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 811
+			"bytes": 723
 		},
 		{
 			"tool": "lq_cycles",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2510
+			"bytes": 2246
 		},
 		{
-			"tool": "lq_diff",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 425
+			"tool": "lq_dependencyPackageMetadata",
+			"shape": "table",
+			"format": "toon",
+			"bytes": 270
 		},
 		{
 			"tool": "lq_document",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 913
+			"bytes": 788
 		},
 		{
 			"tool": "lq_documentContentHistory",
@@ -2545,28 +2263,22 @@
 			"bytes": 83
 		},
 		{
-			"tool": "lq_documentContentHistoryEntries",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 83
-		},
-		{
-			"tool": "lq_documentContentHistoryTimeline",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 153
-		},
-		{
 			"tool": "lq_documents",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2816
+			"bytes": 2441
 		},
 		{
 			"tool": "lq_emailIntakeAddress",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 938
+			"bytes": 974
+		},
+		{
+			"tool": "lq_emailIntakeAddresses",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2999
 		},
 		{
 			"tool": "lq_emoji",
@@ -2599,34 +2311,28 @@
 			"bytes": 1073
 		},
 		{
-			"tool": "lq_failuresForOauthWebhooks",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 583
-		},
-		{
 			"tool": "lq_favorite",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1603
+			"bytes": 1316
 		},
 		{
 			"tool": "lq_favorites",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 4886
+			"bytes": 4025
 		},
 		{
 			"tool": "lq_inboxNotifications",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 3230
+			"bytes": 1835
 		},
 		{
 			"tool": "lq_initiative",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1454
+			"bytes": 1203
 		},
 		{
 			"tool": "lq_initiativeFilterSuggestion",
@@ -2638,19 +2344,13 @@
 			"tool": "lq_initiativeLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 507
+			"bytes": 494
 		},
 		{
 			"tool": "lq_initiativeLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1598
-		},
-		{
-			"tool": "lq_initiativeLeadTeamChangeImpact",
-			"shape": "object",
-			"format": "json",
-			"bytes": 59
+			"bytes": 1559
 		},
 		{
 			"tool": "lq_initiativeRelation",
@@ -2680,19 +2380,19 @@
 			"tool": "lq_initiativeUpdate",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 633
+			"bytes": 567
 		},
 		{
 			"tool": "lq_initiativeUpdates",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1976
+			"bytes": 1778
 		},
 		{
 			"tool": "lq_initiatives",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 4439
+			"bytes": 3686
 		},
 		{
 			"tool": "lq_integration",
@@ -2705,12 +2405,6 @@
 			"shape": "nested",
 			"format": "json",
 			"bytes": 111
-		},
-		{
-			"tool": "lq_integrationJiraProjectStatuses",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 189
 		},
 		{
 			"tool": "lq_integrationTemplate",
@@ -2734,19 +2428,19 @@
 			"tool": "lq_integrationsSettings",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 727
+			"bytes": 799
 		},
 		{
 			"tool": "lq_issue",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2667
+			"bytes": 2483
 		},
 		{
 			"tool": "lq_issueFigmaFileKeySearch",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8078
+			"bytes": 7526
 		},
 		{
 			"tool": "lq_issueFilterSuggestion",
@@ -2776,13 +2470,13 @@
 			"tool": "lq_issueLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 579
+			"bytes": 540
 		},
 		{
 			"tool": "lq_issueLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1814
+			"bytes": 1697
 		},
 		{
 			"tool": "lq_issuePriorityValues",
@@ -2812,13 +2506,13 @@
 			"tool": "lq_issueSearch",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8078
+			"bytes": 7526
 		},
 		{
 			"tool": "lq_issueTitleSuggestionFromCustomerRequest",
 			"shape": "object",
 			"format": "json",
-			"bytes": 60
+			"bytes": 38
 		},
 		{
 			"tool": "lq_issueToRelease",
@@ -2836,13 +2530,25 @@
 			"tool": "lq_issueVcsBranchSearch",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2667
+			"bytes": 2483
 		},
 		{
 			"tool": "lq_issues",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8078
+			"bytes": 7526
+		},
+		{
+			"tool": "lq_jiraProject",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 633
+		},
+		{
+			"tool": "lq_jiraProjects",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1976
 		},
 		{
 			"tool": "lq_latestReleaseByAccessKey",
@@ -2851,64 +2557,52 @@
 			"bytes": 261
 		},
 		{
-			"tool": "lq_microsoftTeamsChannels",
-			"shape": "keyed-table",
-			"format": "json",
-			"bytes": 81
-		},
-		{
 			"tool": "lq_notification",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1051
+			"bytes": 586
 		},
 		{
 			"tool": "lq_notificationSubscription",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 696
+			"bytes": 732
 		},
 		{
 			"tool": "lq_notificationSubscriptions",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2165
+			"bytes": 2273
 		},
 		{
 			"tool": "lq_notifications",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 3230
-		},
-		{
-			"tool": "lq_notificationsUnreadCount",
-			"shape": "scalar",
-			"format": "json",
-			"bytes": 3
+			"bytes": 1835
 		},
 		{
 			"tool": "lq_oauthApplication",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 599
+			"bytes": 627
+		},
+		{
+			"tool": "lq_oauthApplicationCodingSessionTrustedSource",
+			"shape": "object",
+			"format": "json",
+			"bytes": 52
 		},
 		{
 			"tool": "lq_oauthApplications",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1801
+			"bytes": 1885
 		},
 		{
 			"tool": "lq_organization",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2726
-		},
-		{
-			"tool": "lq_organizationDomainClaimRequest",
-			"shape": "object",
-			"format": "json",
-			"bytes": 49
+			"bytes": 2055
 		},
 		{
 			"tool": "lq_organizationExists",
@@ -2935,34 +2629,10 @@
 			"bytes": 1415
 		},
 		{
-			"tool": "lq_organizationMeta",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 139
-		},
-		{
-			"tool": "lq_partnerOfferDetails",
-			"shape": "object",
-			"format": "json",
-			"bytes": 174
-		},
-		{
-			"tool": "lq_partnerOfferWorkspaces",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 27
-		},
-		{
-			"tool": "lq_partnerProgramPartners",
-			"shape": "table",
-			"format": "toon",
-			"bytes": 122
-		},
-		{
 			"tool": "lq_project",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2196
+			"bytes": 1812
 		},
 		{
 			"tool": "lq_projectFilterSuggestion",
@@ -2974,25 +2644,25 @@
 			"tool": "lq_projectLabel",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 606
+			"bytes": 593
 		},
 		{
 			"tool": "lq_projectLabels",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1895
+			"bytes": 1856
 		},
 		{
 			"tool": "lq_projectMilestone",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 482
+			"bytes": 350
 		},
 		{
 			"tool": "lq_projectMilestones",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1523
+			"bytes": 1127
 		},
 		{
 			"tool": "lq_projectRelation",
@@ -3008,45 +2678,45 @@
 		},
 		{
 			"tool": "lq_projectStatus",
-			"shape": "nested",
-			"format": "json",
-			"bytes": 358
-		},
-		{
-			"tool": "lq_projectStatusProjectCount",
 			"shape": "object",
 			"format": "json",
-			"bytes": 54
+			"bytes": 259
 		},
 		{
 			"tool": "lq_projectStatuses",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1151
+			"bytes": 854
 		},
 		{
 			"tool": "lq_projectUpdate",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 666
+			"bytes": 600
 		},
 		{
 			"tool": "lq_projectUpdates",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2075
+			"bytes": 1877
 		},
 		{
 			"tool": "lq_projects",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 6665
+			"bytes": 5513
 		},
 		{
 			"tool": "lq_pushSubscriptionTest",
 			"shape": "object",
 			"format": "json",
 			"bytes": 17
+		},
+		{
+			"tool": "lq_quotas",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 443
 		},
 		{
 			"tool": "lq_rateLimitStatus",
@@ -3064,7 +2734,7 @@
 			"tool": "lq_release",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 879
+			"bytes": 847
 		},
 		{
 			"tool": "lq_releaseNote",
@@ -3100,7 +2770,7 @@
 			"tool": "lq_releaseSearch",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2641
+			"bytes": 2545
 		},
 		{
 			"tool": "lq_releaseStage",
@@ -3118,7 +2788,7 @@
 			"tool": "lq_releases",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2714
+			"bytes": 2618
 		},
 		{
 			"tool": "lq_roadmap",
@@ -3148,19 +2818,19 @@
 			"tool": "lq_searchDocuments",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2906
+			"bytes": 2531
 		},
 		{
 			"tool": "lq_searchIssues",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8168
+			"bytes": 7616
 		},
 		{
 			"tool": "lq_searchProjects",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 6755
+			"bytes": 5603
 		},
 		{
 			"tool": "lq_semanticSearch",
@@ -3184,7 +2854,7 @@
 			"tool": "lq_team",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 2792
+			"bytes": 2025
 		},
 		{
 			"tool": "lq_teamMembership",
@@ -3202,7 +2872,7 @@
 			"tool": "lq_teams",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 8453
+			"bytes": 6152
 		},
 		{
 			"tool": "lq_template",
@@ -3268,7 +2938,7 @@
 			"tool": "lq_user",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1008
+			"bytes": 943
 		},
 		{
 			"tool": "lq_userSessions",
@@ -3280,7 +2950,7 @@
 			"tool": "lq_userSettings",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 515
+			"bytes": 502
 		},
 		{
 			"tool": "lq_userViewPreferences",
@@ -3292,7 +2962,7 @@
 			"tool": "lq_users",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 3101
+			"bytes": 2906
 		},
 		{
 			"tool": "lq_verifyGitHubEnterpriseServerInstallation",
@@ -3304,19 +2974,19 @@
 			"tool": "lq_viewer",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1008
+			"bytes": 943
 		},
 		{
 			"tool": "lq_webhook",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 553
+			"bytes": 420
 		},
 		{
 			"tool": "lq_webhooks",
 			"shape": "nested",
 			"format": "json",
-			"bytes": 1736
+			"bytes": 1337
 		},
 		{
 			"tool": "lq_workflowState",

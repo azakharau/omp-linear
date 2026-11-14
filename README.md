@@ -2,7 +2,7 @@
 
 Native Oh My Pi extension for Linear. It gives OMP agents and `task` subagents:
 
-- 550 typed GraphQL operations (`lq_*` queries, `lm_*` mutations), generated from the pinned
+- 495 typed GraphQL operations (`lq_*` queries, `lm_*` mutations), generated from the pinned
   Linear schema;
 - 17 ergonomic ops for daily work (`linear_issue_create`, `linear_issue_search`,
   `linear_project_status_post`, `linear_document_create`, ...);
