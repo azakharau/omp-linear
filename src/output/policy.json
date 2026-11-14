@@ -1,0 +1,31 @@
+{
+	"source": "test/fixtures/toon-token-policy.json",
+	"minMedianSaving": 0.15,
+	"tokenizers": [
+		"o200k_base",
+		"cl100k_base"
+	],
+	"pageSizes": [
+		1,
+		2,
+		3,
+		5,
+		10,
+		25,
+		50
+	],
+	"decisions": {
+		"table": "toon",
+		"keyed-table": "toon",
+		"object": "json",
+		"nested": "json",
+		"scalar": "json"
+	},
+	"minRows": {
+		"table": 2,
+		"keyed-table": 25,
+		"object": null,
+		"nested": null,
+		"scalar": null
+	}
+}

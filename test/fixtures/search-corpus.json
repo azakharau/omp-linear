@@ -1,0 +1,212 @@
+{
+  "source": "research intent corpus, English intents only",
+  "counts": {
+    "en": 20,
+    "ambiguous": 10,
+    "raw": 5,
+    "schema-help": 5,
+    "total": 40
+  },
+  "intents": [
+    {
+      "intent": "create issue",
+      "expected": "linear_issue_create",
+      "group": "en"
+    },
+    {
+      "intent": "create task",
+      "expected": "linear_issue_create",
+      "group": "en"
+    },
+    {
+      "intent": "create ticket",
+      "expected": "linear_issue_create",
+      "group": "en"
+    },
+    {
+      "intent": "create work item",
+      "expected": "linear_issue_create",
+      "group": "en"
+    },
+    {
+      "intent": "create new issue",
+      "expected": "linear_issue_create",
+      "group": "en"
+    },
+    {
+      "intent": "update issue",
+      "expected": "linear_issue_update",
+      "group": "en"
+    },
+    {
+      "intent": "update task title",
+      "expected": "linear_issue_update",
+      "group": "en"
+    },
+    {
+      "intent": "update description",
+      "expected": "linear_issue_update",
+      "group": "en"
+    },
+    {
+      "intent": "update ticket",
+      "expected": "linear_issue_update",
+      "group": "en"
+    },
+    {
+      "intent": "update issue title",
+      "expected": "linear_issue_update",
+      "group": "en"
+    },
+    {
+      "intent": "comment issue",
+      "expected": "linear_issue_comment_add",
+      "group": "en"
+    },
+    {
+      "intent": "comment reply",
+      "expected": "linear_issue_comment_add",
+      "group": "en"
+    },
+    {
+      "intent": "comment post",
+      "expected": "linear_issue_comment_add",
+      "group": "en"
+    },
+    {
+      "intent": "comment task",
+      "expected": "linear_issue_comment_add",
+      "group": "en"
+    },
+    {
+      "intent": "comment ticket",
+      "expected": "linear_issue_comment_add",
+      "group": "en"
+    },
+    {
+      "intent": "transition issue",
+      "expected": "linear_issue_transition",
+      "group": "en"
+    },
+    {
+      "intent": "transition task done",
+      "expected": "linear_issue_transition",
+      "group": "en"
+    },
+    {
+      "intent": "transition status",
+      "expected": "linear_issue_transition",
+      "group": "en"
+    },
+    {
+      "intent": "transition state",
+      "expected": "linear_issue_transition",
+      "group": "en"
+    },
+    {
+      "intent": "transition workflow",
+      "expected": "linear_issue_transition",
+      "group": "en"
+    },
+    {
+      "intent": "write issue",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "change linear",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "update",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "create",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "comment or description",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "state milestone",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "change task",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "move project",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "new item",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "edit status or title",
+      "expected": null,
+      "group": "ambiguous"
+    },
+    {
+      "intent": "raw graphql",
+      "expected": "linear_graphql",
+      "group": "raw"
+    },
+    {
+      "intent": "custom graphql",
+      "expected": "linear_graphql",
+      "group": "raw"
+    },
+    {
+      "intent": "unsupported graphql",
+      "expected": "linear_graphql",
+      "group": "raw"
+    },
+    {
+      "intent": "execute graphql document",
+      "expected": "linear_graphql",
+      "group": "raw"
+    },
+    {
+      "intent": "arbitrary graphql",
+      "expected": "linear_graphql",
+      "group": "raw"
+    },
+    {
+      "intent": "schema help",
+      "expected": "linear_schema_help",
+      "group": "schema-help"
+    },
+    {
+      "intent": "show API arguments",
+      "expected": "linear_schema_help",
+      "group": "schema-help"
+    },
+    {
+      "intent": "inspect field schema",
+      "expected": "linear_schema_help",
+      "group": "schema-help"
+    },
+    {
+      "intent": "schema reference",
+      "expected": "linear_schema_help",
+      "group": "schema-help"
+    },
+    {
+      "intent": "which API arguments",
+      "expected": "linear_schema_help",
+      "group": "schema-help"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+node_modules/
+.patched-host/
+.acceptance/
+traces/
+secret.env
+.scratch/
+.worktrees/

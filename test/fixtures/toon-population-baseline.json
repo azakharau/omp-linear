@@ -1,0 +1,3334 @@
+{
+	"listRows": 3,
+	"policy": {
+		"table": "toon",
+		"keyed-table": "toon",
+		"object": "json",
+		"nested": "json",
+		"scalar": "json"
+	},
+	"minRows": {
+		"table": 2,
+		"keyed-table": 25,
+		"object": null,
+		"nested": null,
+		"scalar": null
+	},
+	"summary": {
+		"operations": 550,
+		"byFormat": {
+			"json": 546,
+			"toon": 4
+		},
+		"byShape": {
+			"nested": 415,
+			"object": 109,
+			"keyed-table": 19,
+			"scalar": 3,
+			"table": 4
+		},
+		"encodedBytesTotal": 259106
+	},
+	"rows": [
+		{
+			"tool": "lm_agentActivityCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_agentActivityCreatePrompt",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_agentActivityDeleteQueued",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_agentActivitySendQueued",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_agentSessionCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSessionCreateOnComment",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSessionCreateOnIssue",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSessionRestartWithDefaultModel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSessionUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSessionUpdateExternalUrl",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_agentSkillCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_agentSkillDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_agentSkillUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_airbyteIntegrationConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_attachmentCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_attachmentLinkDiscord",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkFront",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkGitHubIssue",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkGitHubPR",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkGitLabMR",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkIntercom",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkJiraIssue",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkSalesforce",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkSlack",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkURL",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentLinkZendesk",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentSyncToSlack",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_attachmentUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_commentCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_commentDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_commentResolve",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_commentUnresolve",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_commentUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_contactCreate",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_contactSalesCreate",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_createCsvExportReport",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_createInitiativeUpdateReminder",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_createOrganizationFromOnboarding",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 99
+		},
+		{
+			"tool": "lm_createProjectUpdateReminder",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_customViewCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_customViewDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_customViewUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_customerCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_customerDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_customerMerge",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_customerNeedArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_customerNeedCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 57
+		},
+		{
+			"tool": "lm_customerNeedCreateFromAttachment",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 57
+		},
+		{
+			"tool": "lm_customerNeedDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_customerNeedUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_customerNeedUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 135
+		},
+		{
+			"tool": "lm_customerStatusCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_customerStatusDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_customerStatusUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_customerTierCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_customerTierDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_customerTierUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_customerUnsync",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_customerUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_customerUpsert",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_cycleArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_cycleCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 78
+		},
+		{
+			"tool": "lm_cycleShiftAll",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 78
+		},
+		{
+			"tool": "lm_cycleStartUpcomingCycleToday",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 78
+		},
+		{
+			"tool": "lm_cycleUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 78
+		},
+		{
+			"tool": "lm_documentCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_documentDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_documentUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_documentUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_emailIntakeAddressCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_emailIntakeAddressDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_emailIntakeAddressRefreshSesDomainStatus",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_emailIntakeAddressRotate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_emailIntakeAddressUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_emailTokenUserAccountAuth",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 680
+		},
+		{
+			"tool": "lm_emailUnsubscribe",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_emailUserAccountAuthChallenge",
+			"shape": "object",
+			"format": "json",
+			"bytes": 45
+		},
+		{
+			"tool": "lm_emojiCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 78
+		},
+		{
+			"tool": "lm_emojiDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_entityExternalLinkCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_entityExternalLinkDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_entityExternalLinkUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_favoriteCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_favoriteDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_favoriteUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_fileUpload",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_fileUploadDangerouslyDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_gitAutomationStateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_gitAutomationStateDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_gitAutomationStateUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_gitAutomationTargetBranchCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_gitAutomationTargetBranchDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_gitAutomationTargetBranchUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_googleUserAccountAuth",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 680
+		},
+		{
+			"tool": "lm_imageUploadFromUrl",
+			"shape": "object",
+			"format": "json",
+			"bytes": 50
+		},
+		{
+			"tool": "lm_importFileUpload",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_inboxNotificationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 144
+		},
+		{
+			"tool": "lm_initiativeAddLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_initiativeArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_initiativeCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_initiativeDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_initiativeLabelCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_initiativeLabelDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_initiativeLabelRestore",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_initiativeLabelRetire",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_initiativeLabelUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_initiativeLeadTeamUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 221
+		},
+		{
+			"tool": "lm_initiativeRelationCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_initiativeRelationDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_initiativeRelationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_initiativeRemoveLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_initiativeToProjectCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 72
+		},
+		{
+			"tool": "lm_initiativeToProjectDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_initiativeToProjectUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 72
+		},
+		{
+			"tool": "lm_initiativeUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_initiativeUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_initiativeUpdateArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_initiativeUpdateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 69
+		},
+		{
+			"tool": "lm_initiativeUpdateUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_initiativeUpdateUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 69
+		},
+		{
+			"tool": "lm_integrationArchive",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_integrationAsksConnectChannel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 126
+		},
+		{
+			"tool": "lm_integrationCustomerDataAttributesRefresh",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationDatadogConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationDatadogEnvironments",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 132
+		},
+		{
+			"tool": "lm_integrationDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_integrationDiscord",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationFigma",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationFront",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGitHubEnterpriseServerConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationGitHubPersonal",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGithubCommitCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 102
+		},
+		{
+			"tool": "lm_integrationGithubConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGithubImportConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGithubImportRefresh",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGithubRemoveCodeAccess",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_integrationGitlabConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 258
+		},
+		{
+			"tool": "lm_integrationGitlabTestConnection",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 220
+		},
+		{
+			"tool": "lm_integrationGong",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGoogleCalendarPersonalConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationGoogleSheets",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationIntercom",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationIntercomDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationIntercomSettingsUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationJiraFetchProjectStatuses",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 252
+		},
+		{
+			"tool": "lm_integrationJiraPersonal",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationJiraUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationLaunchDarklyConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationLaunchDarklyPersonalConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationLoom",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationMcpServerConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationMcpServerPersonalConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationMicrosoftPersonalConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationMicrosoftTeams",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationMicrosoftTeamsProjectPost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationOpsgenieConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationOpsgenieRefreshScheduleMappings",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationPagerDutyConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationPagerDutyRefreshScheduleMappings",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationRequest",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_integrationSalesforce",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSalesforceMetadataRefresh",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSentryConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSettingsUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSlack",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSlackAsks",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSlackCustomViewNotifications",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackCustomerChannelLink",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_integrationSlackImportEmojis",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSlackInitiativePost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackOrAsksUpdateSlackTeamName",
+			"shape": "object",
+			"format": "json",
+			"bytes": 37
+		},
+		{
+			"tool": "lm_integrationSlackOrgInitiativeUpdatesPost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackOrgProjectUpdatesPost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackPersonal",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationSlackPost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackProjectPost",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 162
+		},
+		{
+			"tool": "lm_integrationSlackWorkflowAccessUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationTemplateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 72
+		},
+		{
+			"tool": "lm_integrationTemplateDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_integrationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationZendesk",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_integrationsSettingsCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 73
+		},
+		{
+			"tool": "lm_integrationsSettingsUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 73
+		},
+		{
+			"tool": "lm_issueAddLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_issueBatchCreate",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 97
+		},
+		{
+			"tool": "lm_issueBatchUpdate",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 97
+		},
+		{
+			"tool": "lm_issueCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_issueDescriptionUpdateFromFront",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueExternalSyncDisable",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueImportCreateAsana",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportCreateCSVJira",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportCreateClubhouse",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportCreateGithub",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportCreateJira",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportCreateLinearV2",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportProcess",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueImportUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_issueLabelCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_issueLabelDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_issueLabelRestore",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_issueLabelRetire",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_issueLabelUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lm_issueRelationCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_issueRelationDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_issueRelationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_issueReminder",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueRemoveLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueShare",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueSubscribe",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueToReleaseCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 67
+		},
+		{
+			"tool": "lm_issueToReleaseDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_issueToReleaseDeleteByIssueAndRelease",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_issueUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_issueUnshare",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueUnsubscribe",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_issueUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 58
+		},
+		{
+			"tool": "lm_jiraIntegrationConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_joinOrganizationFromOnboarding",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 99
+		},
+		{
+			"tool": "lm_leaveOrganization",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 99
+		},
+		{
+			"tool": "lm_logout",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_logoutAllSessions",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_logoutOtherSessions",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_logoutSession",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_notificationArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_notificationArchiveAll",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 104
+		},
+		{
+			"tool": "lm_notificationCategoryChannelSubscriptionUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_notificationMarkReadAll",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 104
+		},
+		{
+			"tool": "lm_notificationMarkUnreadAll",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 104
+		},
+		{
+			"tool": "lm_notificationSnoozeAll",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 104
+		},
+		{
+			"tool": "lm_notificationSubscriptionCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_notificationSubscriptionDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_notificationSubscriptionUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_notificationUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_notificationUnsnoozeAll",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 104
+		},
+		{
+			"tool": "lm_notificationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_oauthApplicationArchive",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_oauthApplicationCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 143
+		},
+		{
+			"tool": "lm_oauthApplicationRotateSecret",
+			"shape": "object",
+			"format": "json",
+			"bytes": 53
+		},
+		{
+			"tool": "lm_oauthApplicationRotateWebhookSecret",
+			"shape": "object",
+			"format": "json",
+			"bytes": 55
+		},
+		{
+			"tool": "lm_oauthApplicationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 69
+		},
+		{
+			"tool": "lm_organizationCancelDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationDeleteChallenge",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationDomainClaim",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationDomainCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 91
+		},
+		{
+			"tool": "lm_organizationDomainDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_organizationDomainUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 91
+		},
+		{
+			"tool": "lm_organizationDomainVerify",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 91
+		},
+		{
+			"tool": "lm_organizationInviteCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_organizationInviteDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_organizationInviteUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 71
+		},
+		{
+			"tool": "lm_organizationStartTrial",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationStartTrialForPlan",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_organizationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_partnerApplicationCreate",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_partnerOfferRedeem",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_passkeyLoginFinish",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 680
+		},
+		{
+			"tool": "lm_passkeyLoginStart",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 45
+		},
+		{
+			"tool": "lm_projectAddLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectCreateSlackChannel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectDismissSlackChannelCreationFailure",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectExternalSyncDisable",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectLabelCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_projectLabelDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_projectLabelRestore",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_projectLabelRetire",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_projectLabelUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_projectMilestoneCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 89
+		},
+		{
+			"tool": "lm_projectMilestoneDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_projectMilestoneMove",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 89
+		},
+		{
+			"tool": "lm_projectMilestoneUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 89
+		},
+		{
+			"tool": "lm_projectReassignStatus",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_projectRelationCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 68
+		},
+		{
+			"tool": "lm_projectRelationDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_projectRelationUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 68
+		},
+		{
+			"tool": "lm_projectRemoveLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectStatusArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectStatusCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectStatusUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectStatusUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_projectUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_projectUpdateArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_projectUpdateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_projectUpdateDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_projectUpdateUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_projectUpdateUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 66
+		},
+		{
+			"tool": "lm_pushSubscriptionCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_pushSubscriptionDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lm_reactionCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 61
+		},
+		{
+			"tool": "lm_reactionDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_refreshGoogleSheetsData",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_releaseArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releaseComplete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseCompleteByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releaseNoteCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_releaseNoteDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_releaseNoteUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_releasePipelineArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releasePipelineCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_releasePipelineDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releasePipelineUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releasePipelineUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 88
+		},
+		{
+			"tool": "lm_releaseStageArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releaseStageCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_releaseStageUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releaseStageUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_releaseSync",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseSyncByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_releaseUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseUpdateByPipeline",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_releaseUpdateByPipelineByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_resendOrganizationInvite",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_resendOrganizationInviteByEmail",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_roadmapArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_roadmapCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_roadmapDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_roadmapToProjectCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 69
+		},
+		{
+			"tool": "lm_roadmapToProjectDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_roadmapToProjectUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 69
+		},
+		{
+			"tool": "lm_roadmapUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_roadmapUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 80
+		},
+		{
+			"tool": "lm_samlTokenUserAccountAuth",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 680
+		},
+		{
+			"tool": "lm_teamCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_teamCyclesDelete",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_teamDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_teamKeyDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_teamMembershipCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 67
+		},
+		{
+			"tool": "lm_teamMembershipDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_teamMembershipUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 67
+		},
+		{
+			"tool": "lm_teamUnarchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_teamUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_templateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_templateDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_templateUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lm_timeScheduleCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_timeScheduleDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_timeScheduleRefreshIntegrationSchedule",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_timeScheduleUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_timeScheduleUpsertExternal",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 85
+		},
+		{
+			"tool": "lm_trackAnonymousEvent",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_triageResponsibilityCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 73
+		},
+		{
+			"tool": "lm_triageResponsibilityDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_triageResponsibilityUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 73
+		},
+		{
+			"tool": "lm_updateIntegrationSlackScopes",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 64
+		},
+		{
+			"tool": "lm_userChangeRole",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userDiscordConnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_userExternalUserDisconnect",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_userFlagUpdate",
+			"shape": "object",
+			"format": "json",
+			"bytes": 63
+		},
+		{
+			"tool": "lm_userRevokeAllSessions",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userRevokeSession",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userSettingsFlagsReset",
+			"shape": "object",
+			"format": "json",
+			"bytes": 32
+		},
+		{
+			"tool": "lm_userSettingsUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 65
+		},
+		{
+			"tool": "lm_userSuspend",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userUnlinkFromIdentityProvider",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userUnsuspend",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lm_userUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 77
+		},
+		{
+			"tool": "lm_viewPreferencesCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 68
+		},
+		{
+			"tool": "lm_viewPreferencesDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_viewPreferencesUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 68
+		},
+		{
+			"tool": "lm_webhookCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_webhookDelete",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_webhookRotateSecret",
+			"shape": "object",
+			"format": "json",
+			"bytes": 56
+		},
+		{
+			"tool": "lm_webhookUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lm_workflowStateArchive",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 79
+		},
+		{
+			"tool": "lm_workflowStateCreate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 86
+		},
+		{
+			"tool": "lm_workflowStateUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 86
+		},
+		{
+			"tool": "lq__dummy",
+			"shape": "scalar",
+			"format": "json",
+			"bytes": 14
+		},
+		{
+			"tool": "lq_administrableTeams",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8453
+		},
+		{
+			"tool": "lq_agentActivities",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1595
+		},
+		{
+			"tool": "lq_agentActivity",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 506
+		},
+		{
+			"tool": "lq_agentSession",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 798
+		},
+		{
+			"tool": "lq_agentSessionSandbox",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 201
+		},
+		{
+			"tool": "lq_agentSessionSshAddress",
+			"shape": "scalar",
+			"format": "json",
+			"bytes": 30
+		},
+		{
+			"tool": "lq_agentSessions",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2471
+		},
+		{
+			"tool": "lq_agentSkill",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 558
+		},
+		{
+			"tool": "lq_agentSkills",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1751
+		},
+		{
+			"tool": "lq_applicationInfo",
+			"shape": "object",
+			"format": "json",
+			"bytes": 193
+		},
+		{
+			"tool": "lq_archivedIntegrations",
+			"shape": "table",
+			"format": "toon",
+			"bytes": 481
+		},
+		{
+			"tool": "lq_archivedTeams",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8380
+		},
+		{
+			"tool": "lq_attachment",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 509
+		},
+		{
+			"tool": "lq_attachmentIssue",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2667
+		},
+		{
+			"tool": "lq_attachmentSources",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 29
+		},
+		{
+			"tool": "lq_attachments",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1604
+		},
+		{
+			"tool": "lq_attachmentsForURL",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1604
+		},
+		{
+			"tool": "lq_auditEntries",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1307
+		},
+		{
+			"tool": "lq_auditEntryTypes",
+			"shape": "table",
+			"format": "toon",
+			"bytes": 115
+		},
+		{
+			"tool": "lq_auditLogWebhookFailureEvents",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 583
+		},
+		{
+			"tool": "lq_authenticationSessions",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2092
+		},
+		{
+			"tool": "lq_availableUsers",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 680
+		},
+		{
+			"tool": "lq_comment",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1547
+		},
+		{
+			"tool": "lq_comments",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 4718
+		},
+		{
+			"tool": "lq_customView",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 841
+		},
+		{
+			"tool": "lq_customViewDetailsSuggestion",
+			"shape": "object",
+			"format": "json",
+			"bytes": 75
+		},
+		{
+			"tool": "lq_customViewHasSubscribers",
+			"shape": "object",
+			"format": "json",
+			"bytes": 23
+		},
+		{
+			"tool": "lq_customViews",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2600
+		},
+		{
+			"tool": "lq_customer",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 729
+		},
+		{
+			"tool": "lq_customerNeed",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 542
+		},
+		{
+			"tool": "lq_customerNeeds",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1703
+		},
+		{
+			"tool": "lq_customerStatus",
+			"shape": "object",
+			"format": "json",
+			"bytes": 258
+		},
+		{
+			"tool": "lq_customerStatuses",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 851
+		},
+		{
+			"tool": "lq_customerTier",
+			"shape": "object",
+			"format": "json",
+			"bytes": 258
+		},
+		{
+			"tool": "lq_customerTiers",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 851
+		},
+		{
+			"tool": "lq_customers",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2264
+		},
+		{
+			"tool": "lq_cycle",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 811
+		},
+		{
+			"tool": "lq_cycles",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2510
+		},
+		{
+			"tool": "lq_diff",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 425
+		},
+		{
+			"tool": "lq_document",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 913
+		},
+		{
+			"tool": "lq_documentContentHistory",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lq_documentContentHistoryEntries",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 83
+		},
+		{
+			"tool": "lq_documentContentHistoryTimeline",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 153
+		},
+		{
+			"tool": "lq_documents",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2816
+		},
+		{
+			"tool": "lq_emailIntakeAddress",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 938
+		},
+		{
+			"tool": "lq_emoji",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 298
+		},
+		{
+			"tool": "lq_emojis",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 971
+		},
+		{
+			"tool": "lq_entityExternalLink",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 338
+		},
+		{
+			"tool": "lq_externalUser",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 332
+		},
+		{
+			"tool": "lq_externalUsers",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1073
+		},
+		{
+			"tool": "lq_failuresForOauthWebhooks",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 583
+		},
+		{
+			"tool": "lq_favorite",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1603
+		},
+		{
+			"tool": "lq_favorites",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 4886
+		},
+		{
+			"tool": "lq_inboxNotifications",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 3230
+		},
+		{
+			"tool": "lq_initiative",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1454
+		},
+		{
+			"tool": "lq_initiativeFilterSuggestion",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 49
+		},
+		{
+			"tool": "lq_initiativeLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 507
+		},
+		{
+			"tool": "lq_initiativeLabels",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1598
+		},
+		{
+			"tool": "lq_initiativeLeadTeamChangeImpact",
+			"shape": "object",
+			"format": "json",
+			"bytes": 59
+		},
+		{
+			"tool": "lq_initiativeRelation",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 305
+		},
+		{
+			"tool": "lq_initiativeRelations",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 992
+		},
+		{
+			"tool": "lq_initiativeToProject",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 264
+		},
+		{
+			"tool": "lq_initiativeToProjects",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 869
+		},
+		{
+			"tool": "lq_initiativeUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 633
+		},
+		{
+			"tool": "lq_initiativeUpdates",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1976
+		},
+		{
+			"tool": "lq_initiatives",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 4439
+		},
+		{
+			"tool": "lq_integration",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 307
+		},
+		{
+			"tool": "lq_integrationHasScopes",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 111
+		},
+		{
+			"tool": "lq_integrationJiraProjectStatuses",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 189
+		},
+		{
+			"tool": "lq_integrationTemplate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 258
+		},
+		{
+			"tool": "lq_integrationTemplates",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 851
+		},
+		{
+			"tool": "lq_integrations",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 998
+		},
+		{
+			"tool": "lq_integrationsSettings",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 727
+		},
+		{
+			"tool": "lq_issue",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2667
+		},
+		{
+			"tool": "lq_issueFigmaFileKeySearch",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8078
+		},
+		{
+			"tool": "lq_issueFilterSuggestion",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 49
+		},
+		{
+			"tool": "lq_issueImportCheckCSV",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lq_issueImportCheckSync",
+			"shape": "object",
+			"format": "json",
+			"bytes": 39
+		},
+		{
+			"tool": "lq_issueImportJqlCheck",
+			"shape": "object",
+			"format": "json",
+			"bytes": 51
+		},
+		{
+			"tool": "lq_issueLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 579
+		},
+		{
+			"tool": "lq_issueLabels",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1814
+		},
+		{
+			"tool": "lq_issuePriorityValues",
+			"shape": "table",
+			"format": "toon",
+			"bytes": 71
+		},
+		{
+			"tool": "lq_issueRelation",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 214
+		},
+		{
+			"tool": "lq_issueRelations",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 719
+		},
+		{
+			"tool": "lq_issueRepositorySuggestions",
+			"shape": "object",
+			"format": "json",
+			"bytes": 45
+		},
+		{
+			"tool": "lq_issueSearch",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8078
+		},
+		{
+			"tool": "lq_issueTitleSuggestionFromCustomerRequest",
+			"shape": "object",
+			"format": "json",
+			"bytes": 60
+		},
+		{
+			"tool": "lq_issueToRelease",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 209
+		},
+		{
+			"tool": "lq_issueToReleases",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 704
+		},
+		{
+			"tool": "lq_issueVcsBranchSearch",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2667
+		},
+		{
+			"tool": "lq_issues",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8078
+		},
+		{
+			"tool": "lq_latestReleaseByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 261
+		},
+		{
+			"tool": "lq_microsoftTeamsChannels",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 81
+		},
+		{
+			"tool": "lq_notification",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1051
+		},
+		{
+			"tool": "lq_notificationSubscription",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 696
+		},
+		{
+			"tool": "lq_notificationSubscriptions",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2165
+		},
+		{
+			"tool": "lq_notifications",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 3230
+		},
+		{
+			"tool": "lq_notificationsUnreadCount",
+			"shape": "scalar",
+			"format": "json",
+			"bytes": 3
+		},
+		{
+			"tool": "lq_oauthApplication",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 599
+		},
+		{
+			"tool": "lq_oauthApplications",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1801
+		},
+		{
+			"tool": "lq_organization",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2726
+		},
+		{
+			"tool": "lq_organizationDomainClaimRequest",
+			"shape": "object",
+			"format": "json",
+			"bytes": 49
+		},
+		{
+			"tool": "lq_organizationExists",
+			"shape": "object",
+			"format": "json",
+			"bytes": 31
+		},
+		{
+			"tool": "lq_organizationInvite",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 446
+		},
+		{
+			"tool": "lq_organizationInviteDetails",
+			"shape": "object",
+			"format": "json",
+			"bytes": 86
+		},
+		{
+			"tool": "lq_organizationInvites",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1415
+		},
+		{
+			"tool": "lq_organizationMeta",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 139
+		},
+		{
+			"tool": "lq_partnerOfferDetails",
+			"shape": "object",
+			"format": "json",
+			"bytes": 174
+		},
+		{
+			"tool": "lq_partnerOfferWorkspaces",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 27
+		},
+		{
+			"tool": "lq_partnerProgramPartners",
+			"shape": "table",
+			"format": "toon",
+			"bytes": 122
+		},
+		{
+			"tool": "lq_project",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2196
+		},
+		{
+			"tool": "lq_projectFilterSuggestion",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 49
+		},
+		{
+			"tool": "lq_projectLabel",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 606
+		},
+		{
+			"tool": "lq_projectLabels",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1895
+		},
+		{
+			"tool": "lq_projectMilestone",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 482
+		},
+		{
+			"tool": "lq_projectMilestones",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1523
+		},
+		{
+			"tool": "lq_projectRelation",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 502
+		},
+		{
+			"tool": "lq_projectRelations",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1583
+		},
+		{
+			"tool": "lq_projectStatus",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 358
+		},
+		{
+			"tool": "lq_projectStatusProjectCount",
+			"shape": "object",
+			"format": "json",
+			"bytes": 54
+		},
+		{
+			"tool": "lq_projectStatuses",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1151
+		},
+		{
+			"tool": "lq_projectUpdate",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 666
+		},
+		{
+			"tool": "lq_projectUpdates",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2075
+		},
+		{
+			"tool": "lq_projects",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 6665
+		},
+		{
+			"tool": "lq_pushSubscriptionTest",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lq_rateLimitStatus",
+			"shape": "object",
+			"format": "json",
+			"bytes": 53
+		},
+		{
+			"tool": "lq_recentReleasesByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 787
+		},
+		{
+			"tool": "lq_release",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 879
+		},
+		{
+			"tool": "lq_releaseNote",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 565
+		},
+		{
+			"tool": "lq_releaseNotes",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1772
+		},
+		{
+			"tool": "lq_releasePipeline",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 573
+		},
+		{
+			"tool": "lq_releasePipelineByAccessKey",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 131
+		},
+		{
+			"tool": "lq_releasePipelines",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1796
+		},
+		{
+			"tool": "lq_releaseSearch",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2641
+		},
+		{
+			"tool": "lq_releaseStage",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 271
+		},
+		{
+			"tool": "lq_releaseStages",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 890
+		},
+		{
+			"tool": "lq_releases",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2714
+		},
+		{
+			"tool": "lq_roadmap",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 416
+		},
+		{
+			"tool": "lq_roadmapToProject",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 261
+		},
+		{
+			"tool": "lq_roadmapToProjects",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 860
+		},
+		{
+			"tool": "lq_roadmaps",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1325
+		},
+		{
+			"tool": "lq_searchDocuments",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2906
+		},
+		{
+			"tool": "lq_searchIssues",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8168
+		},
+		{
+			"tool": "lq_searchProjects",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 6755
+		},
+		{
+			"tool": "lq_semanticSearch",
+			"shape": "keyed-table",
+			"format": "json",
+			"bytes": 67
+		},
+		{
+			"tool": "lq_slaConfigurations",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 433
+		},
+		{
+			"tool": "lq_ssoUrlFromEmail",
+			"shape": "object",
+			"format": "json",
+			"bytes": 49
+		},
+		{
+			"tool": "lq_team",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2792
+		},
+		{
+			"tool": "lq_teamMembership",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 255
+		},
+		{
+			"tool": "lq_teamMemberships",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 842
+		},
+		{
+			"tool": "lq_teams",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 8453
+		},
+		{
+			"tool": "lq_template",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 699
+		},
+		{
+			"tool": "lq_templateSearch",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2101
+		},
+		{
+			"tool": "lq_templates",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2101
+		},
+		{
+			"tool": "lq_templatesForIntegration",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2101
+		},
+		{
+			"tool": "lq_timeSchedule",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 306
+		},
+		{
+			"tool": "lq_timeSchedules",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 995
+		},
+		{
+			"tool": "lq_triageResponsibilities",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 986
+		},
+		{
+			"tool": "lq_triageResponsibility",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 303
+		},
+		{
+			"tool": "lq_usageAlert",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 225
+		},
+		{
+			"tool": "lq_usageAlerts",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 752
+		},
+		{
+			"tool": "lq_user",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1008
+		},
+		{
+			"tool": "lq_userSessions",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 2092
+		},
+		{
+			"tool": "lq_userSettings",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 515
+		},
+		{
+			"tool": "lq_userViewPreferences",
+			"shape": "object",
+			"format": "json",
+			"bytes": 183
+		},
+		{
+			"tool": "lq_users",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 3101
+		},
+		{
+			"tool": "lq_verifyGitHubEnterpriseServerInstallation",
+			"shape": "object",
+			"format": "json",
+			"bytes": 17
+		},
+		{
+			"tool": "lq_viewer",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1008
+		},
+		{
+			"tool": "lq_webhook",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 553
+		},
+		{
+			"tool": "lq_webhooks",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1736
+		},
+		{
+			"tool": "lq_workflowState",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 343
+		},
+		{
+			"tool": "lq_workflowStates",
+			"shape": "nested",
+			"format": "json",
+			"bytes": 1106
+		}
+	]
+}

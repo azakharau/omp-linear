@@ -1,0 +1,12 @@
+{
+  "note": "Measured baseline for src/catalog/search.ts over the frozen 40-intent corpus (30 labeled, 10 ambiguous). The ergonomic alias texts in test/search-encode.test.ts were curated against this corpus, so these numbers are fitted, not held-out.",
+  "corpus": {
+    "total": 40,
+    "labeled": 30,
+    "ambiguous": 10
+  },
+  "measured": {
+    "top1": 30,
+    "top3": 30
+  }
+}

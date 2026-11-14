@@ -1,0 +1,280 @@
+diff -r a/src/config/settings-schema.ts b/src/config/settings-schema.ts
+--- a/src/config/settings-schema.ts
++++ b/src/config/settings-schema.ts
+@@ -5203,6 +5203,17 @@
+ 		default: [] as string[],
+ 	},
+ 
++	/**
++	 * Extension tool names admitted into restricted child sessions (plan-mode and
++	 * other `restrictToolNames` spawns). Restricted children otherwise drop every
++	 * extension-registered tool; names listed here stay registered and become part
++	 * of the child's tool ceiling. Nothing else can be activated inside the child.
++	 */
++	"task.restrictedExtensionTools": {
++		type: "array",
++		default: [] as string[],
++	},
++
+ 	"task.agentModelOverrides": {
+ 		type: "record",
+ 		default: DEFAULT_AGENT_MODEL_OVERRIDES,
+diff -r a/src/extensibility/extensions/runner.ts b/src/extensibility/extensions/runner.ts
+--- a/src/extensibility/extensions/runner.ts
++++ b/src/extensibility/extensions/runner.ts
+@@ -26,6 +26,7 @@
+ import type { AsyncJobSnapshot } from "../../session/agent-session";
+ import type { SessionManager } from "../../session/session-manager";
+ import { addFileDeleteFallback, addFileWriteFallback } from "../../tools/file-write-fallback";
++import type { AgentDefinition } from "../../task/types";
+ import type { BranchHandler, NavigateTreeHandler, NewSessionHandler } from "../session-handler-types";
+ import { ManagedTimers } from "./managed-timers";
+ import { createExtensionModelQuery } from "./model-api";
+@@ -550,6 +551,14 @@
+ 	 */
+ 	#nativeToolResolver?: (name: string) => { tool: AgentTool; makeContext: () => AgentToolContext } | undefined;
+ 
++	/** Resolves the task tool's effective agent roster; wired by the SDK once the tool session exists. */
++	#effectiveAgentsResolver?: () => Promise<AgentDefinition[]>;
++
++	/** Wires the resolver behind `ExtensionContext.getEffectiveAgents`. */
++	setEffectiveAgentsResolver(resolve: () => Promise<AgentDefinition[]>): void {
++		this.#effectiveAgentsResolver = resolve;
++	}
++
+ 	/** Wires the native-tool resolver used by {@link invokeNativeTool}. */
+ 	setNativeToolResolver(
+ 		resolve: (name: string) => { tool: AgentTool; makeContext: () => AgentToolContext } | undefined,
+@@ -1193,6 +1202,12 @@
+ 			sessionManager: this.sessionManager,
+ 			modelRegistry: this.modelRegistry,
+ 			isProjectTrusted: () => true,
++			getEffectiveAgents: () => {
++				if (!this.#effectiveAgentsResolver) {
++					throw new Error("getEffectiveAgents: no resolver wired for this session");
++				}
++				return this.#effectiveAgentsResolver();
++			},
+ 			get model() {
+ 				return getModel();
+ 			},
+diff -r a/src/extensibility/extensions/types.ts b/src/extensibility/extensions/types.ts
+--- a/src/extensibility/extensions/types.ts
++++ b/src/extensibility/extensions/types.ts
+@@ -8,6 +8,7 @@
+  * - Interact with the user via UI primitives
+  */
+ 
++import type { AgentDefinition } from "../../task/types";
+ import {
+ 	type ExtensionUiComponent,
+ 	type ExtensionUiComponentFactory,
+@@ -466,6 +467,12 @@
+ 	 * `SettingsManager` accepts a `projectTrusted` flag.
+ 	 */
+ 	isProjectTrusted(): boolean;
++	/**
++	 * Agent definitions the task tool offers from this session: discovered for the
++	 * effective extension roots plus session-scoped agents, minus `task.disabledAgents`,
++	 * clamped by the parent spawn policy.
++	 */
++	getEffectiveAgents(): Promise<AgentDefinition[]>;
+ 	/** Get the current effective system prompt. */
+ 	getSystemPrompt(): string[];
+ 	/** Structured memory runtime for status/search/save across the configured backend. */
+diff -r a/src/sdk.ts b/src/sdk.ts
+--- a/src/sdk.ts
++++ b/src/sdk.ts
+@@ -188,6 +188,7 @@
+ 	loadProjectContextFiles as loadContextFilesInternal,
+ 	projectSystemPromptToolMetadata,
+ } from "./system-prompt";
++import { discoverEffectiveAgents } from "./task";
+ import { AgentOutputManager } from "./task/output-manager";
+ import { wrapStreamFnWithProviderConcurrency } from "./task/provider-concurrency";
+ import { sessionDelegationBias } from "./task/prompt-policy";
+@@ -2899,7 +2900,14 @@
+ 		// stay unwrapped. The extension runner exposes it to re-registered tools via createContext.
+ 		const nativeToolsByName = new Map<string, Tool>(toolSession.xdev?.tools ?? undefined);
+ 
+-		const registeredTools = restrictToolNames ? [] : extensionRunner.getAllRegisteredTools();
++		// Restricted children drop extension tools unless `task.restrictedExtensionTools`
++		// admits them by name; admitted tools become part of the child's ceiling below.
++		const restrictedExtensionToolNames = new Set(
++			restrictToolNames ? ((settings.get("task.restrictedExtensionTools") as string[] | undefined) ?? []) : [],
++		);
++		const registeredTools = restrictToolNames
++			? extensionRunner.getAllRegisteredTools().filter(tool => restrictedExtensionToolNames.has(tool.definition.name))
++			: extensionRunner.getAllRegisteredTools();
+ 		const initialRegisteredTools = new WeakSet(registeredTools);
+ 		const sdkCustomTools =
+ 			restrictToolNames && options.allowRestrictedCustomTools !== true
+@@ -2955,6 +2963,7 @@
+ 		// Expose the native built-ins to same-tool `ctx.invokeTool` on re-registered tools. Set after
+ 		// the override loop so the map holds the natives, not the extension replacements. The context
+ 		// factory is the loop's own tool context, so a delegated native call sees ordinary session state.
++		extensionRunner.setEffectiveAgentsResolver(() => discoverEffectiveAgents(toolSession));
+ 		extensionRunner.setNativeToolResolver(name => {
+ 			const tool = nativeToolsByName.get(name);
+ 			return tool ? { tool, makeContext: () => toolContextStore.getContext() } : undefined;
+@@ -3414,17 +3423,26 @@
+ 		let initialToolNames = [...initialRequestedActiveToolNames];
+ 
+ 		// Custom tools and extension-registered tools are always included
+-		// unless the effective registry winner is hidden / defaultInactive. Restricted callers own the list.
+-		const alwaysInclude: string[] = restrictToolNames
+-			? []
+-			: [...sdkCustomTools.map(t => t.name), ...registeredTools.map(t => t.definition.name)].filter(
+-					name => !defaultInactiveToolNames.has(name),
+-				);
++		// unless the effective registry winner is hidden / defaultInactive. Restricted callers own
++		// the list; only extension tools admitted via `task.restrictedExtensionTools` join it.
++		const alwaysInclude: string[] = (
++			restrictToolNames
++				? registeredTools.map(t => t.definition.name)
++				: [...sdkCustomTools.map(t => t.name), ...registeredTools.map(t => t.definition.name)]
++		).filter(name => !defaultInactiveToolNames.has(name));
+ 		for (const name of alwaysInclude) {
+ 			if (toolRegistry.has(name) && !initialToolNames.includes(name)) {
+ 				initialToolNames.push(name);
+ 			}
+ 		}
++		// Restricted ceiling: the explicitly requested names plus admitted extension tools.
++		// Runtime `setActiveTools` calls inside the child cannot reach beyond it.
++		const restrictedToolCeiling = restrictToolNames
++			? new Set([
++					...normalizedRequested,
++					...registeredTools.map(t => t.definition.name).filter(name => toolRegistry.has(name)),
++				])
++			: undefined;
+ 
+ 		// Pre-register in the global agent registry BEFORE building the system prompt,
+ 		// so that subagents launched in the same parallel batch can see each other in
+@@ -3931,6 +3949,7 @@
+ 			getXdevToolEntries: () => (toolSession.xdev ? xdevEntries(toolSession.xdev) : []),
+ 			xdev: toolSession.xdev,
+ 			presentationPinnedToolNames: explicitlyRequestedToolNameSet,
++			restrictedToolCeiling,
+ 			setActiveToolNames: setSessionActiveToolNames,
+ 			ensureWriteRegistered,
+ 			isDeviceOnlyWrite: () => toolSession.deviceOnlyWrite === true,
+diff -r a/src/session/agent-session-types.ts b/src/session/agent-session-types.ts
+--- a/src/session/agent-session-types.ts
++++ b/src/session/agent-session-types.ts
+@@ -259,6 +259,8 @@
+ 	xdev?: XdevState;
+ 	/** Names pinned top-level during runtime repartitioning. */
+ 	presentationPinnedToolNames?: ReadonlySet<string>;
++	/** Restricted sessions: every name `setActiveTools` may select. Undefined when unrestricted. */
++	restrictedToolCeiling?: ReadonlySet<string>;
+ 	/** Accessor for live MCP server instructions. */
+ 	getMcpServerInstructions?: () => Map<string, string> | undefined;
+ 	/** Time-traveling stream-rule manager. */
+diff -r a/src/session/agent-session.ts b/src/session/agent-session.ts
+--- a/src/session/agent-session.ts
++++ b/src/session/agent-session.ts
+@@ -1684,6 +1684,7 @@
+ 			builtInToolNames: config.builtInToolNames,
+ 			mcpManagerToolNames: config.mcpManagerToolNames,
+ 			presentationPinnedToolNames: config.presentationPinnedToolNames,
++			restrictedToolCeiling: config.restrictedToolCeiling,
+ 			ensureWriteRegistered: config.ensureWriteRegistered,
+ 			isDeviceOnlyWrite: config.isDeviceOnlyWrite,
+ 			setDeviceOnlyWrite: config.setDeviceOnlyWrite,
+diff -r a/src/session/session-tools.ts b/src/session/session-tools.ts
+--- a/src/session/session-tools.ts
++++ b/src/session/session-tools.ts
+@@ -80,6 +80,8 @@
+ 	createThinkTool?: () => Promise<AgentTool | null>;
+ 	builtInToolNames?: Iterable<string>;
+ 	presentationPinnedToolNames?: ReadonlySet<string>;
++	/** Restricted sessions: the only names a runtime selection may contain. */
++	restrictedToolCeiling?: ReadonlySet<string>;
+ 	/** MCP tool names whose current registry entries came from the manager snapshot. */
+ 	mcpManagerToolNames?: Iterable<string>;
+ 	ensureWriteRegistered?: () => Promise<boolean>;
+@@ -250,6 +252,7 @@
+ 	#announcedMounts = new Set<string>();
+ 	#announcedMountsSeeded = false;
+ 	#presentationPinnedToolNames: ReadonlySet<string> | undefined;
++	#restrictedToolCeiling: ReadonlySet<string> | undefined;
+ 	#runtimeSelectedToolNames: ReadonlySet<string> | undefined;
+ 	#baseSystemPrompt: string[];
+ 	/**
+@@ -336,6 +339,7 @@
+ 			}
+ 		}
+ 		this.#presentationPinnedToolNames = options.presentationPinnedToolNames;
++		this.#restrictedToolCeiling = options.restrictedToolCeiling;
+ 		this.#ensureWriteRegistered = options.ensureWriteRegistered;
+ 		this.#isDeviceOnlyWrite = options.isDeviceOnlyWrite;
+ 		this.#deviceOnlyWriteTransportAvailable = this.#isDeviceOnlyWrite?.() === true;
+@@ -1572,6 +1576,13 @@
+ 		forcePromptRefresh = false,
+ 		signal?: AbortSignal,
+ 	): Promise<void> {
++		if (this.#restrictedToolCeiling !== undefined) {
++			const ceiling = this.#restrictedToolCeiling;
++			const outside = normalized.filter(name => !ceiling.has(name));
++			if (outside.length > 0) {
++				throw new Error(`Restricted session cannot activate tools outside its ceiling: ${outside.join(", ")}`);
++			}
++		}
+ 		const retainedMountedDevice = [...mounted].some(name => normalized.includes(name));
+ 		const retainedDeferrableTool = normalized.some(name => this.#toolRegistry.get(name)?.deferrable === true);
+ 		const deviceOnlyWriteActive = this.#isDeviceOnlyWrite?.() === true;
+diff -r a/src/task/index.ts b/src/task/index.ts
+--- a/src/task/index.ts
++++ b/src/task/index.ts
+@@ -128,19 +128,42 @@
+ 	parentSpawns: string;
+ }
+ 
++/** Inputs that decide which agents the task tool offers. */
++export interface EffectiveAgentsInput {
++	agents: readonly AgentDefinition[];
++	sessionAgents: readonly AgentDefinition[];
++	disabledAgents: readonly string[];
++	parentSpawns: string;
++}
++
++/** Discovered plus session agents, minus `task.disabledAgents`, clamped by the parent spawn policy. */
++export function resolveEffectiveAgents(input: EffectiveAgentsInput): AgentDefinition[] {
++	const spawnPolicy = resolveSpawnPolicy(input.parentSpawns);
++	if (!spawnPolicy.enabled) return [];
++	const agents = [...input.agents, ...input.sessionAgents];
++	const disabled = new Set(input.disabledAgents);
++	const allowed = spawnPolicy.allowedAgents === null ? null : new Set(spawnPolicy.allowedAgents);
++	return agents.filter(agent => !disabled.has(agent.name) && (allowed === null || allowed.has(agent.name)));
++}
++
++/** The task tool's roster for `session`: same discovery memo and filters as the tool itself. */
++export async function discoverEffectiveAgents(
++	session: Pick<ToolSession, "cwd" | "settings" | "effectiveExtensionRoots" | "getSessionAgents" | "getSessionSpawns">,
++): Promise<AgentDefinition[]> {
++	const { agents } = await discoverAgentsForCreate(session.cwd, session.effectiveExtensionRoots?.());
++	return resolveEffectiveAgents({
++		agents,
++		sessionAgents: session.getSessionAgents?.() ?? [],
++		disabledAgents: (session.settings.get("task.disabledAgents") as string[] | undefined) ?? [],
++		parentSpawns: session.getSessionSpawns() ?? "*",
++	});
++}
++
+ /** Render the tool description from a cached agent list and current settings. */
+ function renderDescription(options: TaskDescriptionOptions): string {
+ 	const spawnPolicy = resolveSpawnPolicy(options.parentSpawns);
+ 	const spawningDisabled = !spawnPolicy.enabled;
+-	const agents = [...options.agents, ...options.sessionAgents];
+-	let filteredAgents =
+-		options.disabledAgents.length > 0 ? agents.filter(agent => !options.disabledAgents.includes(agent.name)) : agents;
+-	if (spawningDisabled) {
+-		filteredAgents = [];
+-	} else if (spawnPolicy.allowedAgents !== null) {
+-		const allowed = new Set(spawnPolicy.allowedAgents);
+-		filteredAgents = filteredAgents.filter(agent => allowed.has(agent.name));
+-	}
++	const filteredAgents = resolveEffectiveAgents(options);
+ 	const renderedAgents = filteredAgents.map(agent => ({
+ 		name: agent.name,
+ 		description: agent.description,

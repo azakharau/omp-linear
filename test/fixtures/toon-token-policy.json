@@ -1,0 +1,755 @@
+{
+	"generatedFrom": "scripts/measure-toon-policy.ts",
+	"tokenizers": [
+		"o200k_base",
+		"cl100k_base"
+	],
+	"minMedianSaving": 0.15,
+	"pageSizes": [
+		1,
+		2,
+		3,
+		5,
+		10,
+		25,
+		50
+	],
+	"operations": 550,
+	"classes": {
+		"table": {
+			"byPageSize": {
+				"1": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 109,
+							"toonTokens": 110,
+							"medianSaving": 0,
+							"totalSaving": -0.00917431192660545
+						},
+						"cl100k_base": {
+							"jsonTokens": 109,
+							"toonTokens": 110,
+							"medianSaving": 0,
+							"totalSaving": -0.00917431192660545
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"2": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 207,
+							"toonTokens": 172,
+							"medianSaving": 0.18018383346850503,
+							"totalSaving": 0.1690821256038647
+						},
+						"cl100k_base": {
+							"jsonTokens": 207,
+							"toonTokens": 172,
+							"medianSaving": 0.18018383346850503,
+							"totalSaving": 0.1690821256038647
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"3": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 305,
+							"toonTokens": 234,
+							"medianSaving": 0.24585218702865763,
+							"totalSaving": 0.23278688524590163
+						},
+						"cl100k_base": {
+							"jsonTokens": 305,
+							"toonTokens": 234,
+							"medianSaving": 0.24585218702865763,
+							"totalSaving": 0.23278688524590163
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"5": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 501,
+							"toonTokens": 358,
+							"medianSaving": 0.30074199304968535,
+							"totalSaving": 0.28542914171656686
+						},
+						"cl100k_base": {
+							"jsonTokens": 501,
+							"toonTokens": 358,
+							"medianSaving": 0.30074199304968535,
+							"totalSaving": 0.28542914171656686
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"10": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 991,
+							"toonTokens": 668,
+							"medianSaving": 0.3400871333977697,
+							"totalSaving": 0.32593340060544906
+						},
+						"cl100k_base": {
+							"jsonTokens": 991,
+							"toonTokens": 668,
+							"medianSaving": 0.3400871333977697,
+							"totalSaving": 0.32593340060544906
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"25": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 2461,
+							"toonTokens": 1598,
+							"medianSaving": 0.36333250104820813,
+							"totalSaving": 0.3506704591629419
+						},
+						"cl100k_base": {
+							"jsonTokens": 2461,
+							"toonTokens": 1598,
+							"medianSaving": 0.36333250104820813,
+							"totalSaving": 0.3506704591629419
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"50": {
+					"samples": 4,
+					"lossless": 4,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 4911,
+							"toonTokens": 3148,
+							"medianSaving": 0.37119039416943017,
+							"totalSaving": 0.3589900223986968
+						},
+						"cl100k_base": {
+							"jsonTokens": 4911,
+							"toonTokens": 3148,
+							"medianSaving": 0.37119039416943017,
+							"totalSaving": 0.3589900223986968
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				}
+			},
+			"decision": "toon",
+			"minRows": 2,
+			"reason": "wins from 2 row(s) per table upwards on both tokenizers, losslessly"
+		},
+		"keyed-table": {
+			"byPageSize": {
+				"1": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 738,
+							"toonTokens": 734,
+							"medianSaving": 0,
+							"totalSaving": 0.005420054200542035
+						},
+						"cl100k_base": {
+							"jsonTokens": 712,
+							"toonTokens": 743,
+							"medianSaving": -0.07692307692307687,
+							"totalSaving": -0.0435393258426966
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"2": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1018,
+							"toonTokens": 916,
+							"medianSaving": 0.052631578947368474,
+							"totalSaving": 0.10019646365422397
+						},
+						"cl100k_base": {
+							"jsonTokens": 992,
+							"toonTokens": 925,
+							"medianSaving": 0,
+							"totalSaving": 0.06754032258064513
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"3": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1298,
+							"toonTokens": 1098,
+							"medianSaving": 0.08333333333333337,
+							"totalSaving": 0.15408320493066252
+						},
+						"cl100k_base": {
+							"jsonTokens": 1272,
+							"toonTokens": 1107,
+							"medianSaving": 0.04347826086956519,
+							"totalSaving": 0.12971698113207553
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"5": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1858,
+							"toonTokens": 1462,
+							"medianSaving": 0.11764705882352944,
+							"totalSaving": 0.21313240043057047
+						},
+						"cl100k_base": {
+							"jsonTokens": 1832,
+							"toonTokens": 1471,
+							"medianSaving": 0.09090909090909094,
+							"totalSaving": 0.1970524017467249
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"10": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 3258,
+							"toonTokens": 2372,
+							"medianSaving": 0.15254237288135597,
+							"totalSaving": 0.27194597912829954
+						},
+						"cl100k_base": {
+							"jsonTokens": 3232,
+							"toonTokens": 2381,
+							"medianSaving": 0.13793103448275867,
+							"totalSaving": 0.2633044554455446
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on cl100k_base"
+				},
+				"25": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 7458,
+							"toonTokens": 5102,
+							"medianSaving": 0.17910447761194026,
+							"totalSaving": 0.31590238669884685
+						},
+						"cl100k_base": {
+							"jsonTokens": 7432,
+							"toonTokens": 5111,
+							"medianSaving": 0.17293233082706772,
+							"totalSaving": 0.3122981700753499
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"50": {
+					"samples": 19,
+					"lossless": 19,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 14458,
+							"toonTokens": 9652,
+							"medianSaving": 0.18918918918918914,
+							"totalSaving": 0.3324111218702448
+						},
+						"cl100k_base": {
+							"jsonTokens": 14432,
+							"toonTokens": 9661,
+							"medianSaving": 0.18604651162790697,
+							"totalSaving": 0.33058481152993346
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				}
+			},
+			"decision": "toon",
+			"minRows": 25,
+			"reason": "wins from 25 row(s) per table upwards on both tokenizers, losslessly"
+		},
+		"object": {
+			"byPageSize": {
+				"1": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"2": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"3": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"5": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"10": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"25": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"50": {
+					"samples": 109,
+					"lossless": 109,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1678,
+							"toonTokens": 1538,
+							"medianSaving": 0.0625,
+							"totalSaving": 0.08343265792610255
+						},
+						"cl100k_base": {
+							"jsonTokens": 1665,
+							"toonTokens": 1478,
+							"medianSaving": 0.11111111111111116,
+							"totalSaving": 0.11231231231231231
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				}
+			},
+			"decision": "json",
+			"minRows": null,
+			"reason": "1 rows: median token saving below 0.15 on o200k_base, cl100k_base; 2 rows: median token saving below 0.15 on o200k_base, cl100k_base; 3 rows: median token saving below 0.15 on o200k_base, cl100k_base; 5 rows: median token saving below 0.15 on o200k_base, cl100k_base; 10 rows: median token saving below 0.15 on o200k_base, cl100k_base; 25 rows: median token saving below 0.15 on o200k_base, cl100k_base; 50 rows: median token saving below 0.15 on o200k_base, cl100k_base"
+		},
+		"nested": {
+			"byPageSize": {
+				"1": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 38677,
+							"toonTokens": 39471,
+							"medianSaving": 0.045454545454545414,
+							"totalSaving": -0.020528996561263835
+						},
+						"cl100k_base": {
+							"jsonTokens": 37263,
+							"toonTokens": 39158,
+							"medianSaving": 0,
+							"totalSaving": -0.050854735260177586
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"2": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 56998,
+							"toonTokens": 55808,
+							"medianSaving": 0.045454545454545414,
+							"totalSaving": 0.02087792554124701
+						},
+						"cl100k_base": {
+							"jsonTokens": 54995,
+							"toonTokens": 55461,
+							"medianSaving": 0,
+							"totalSaving": -0.00847349759069016
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"3": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 76151,
+							"toonTokens": 72841,
+							"medianSaving": 0.045454545454545414,
+							"totalSaving": 0.04346627096164202
+						},
+						"cl100k_base": {
+							"jsonTokens": 73575,
+							"toonTokens": 72476,
+							"medianSaving": 0,
+							"totalSaving": 0.014937138973836195
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"5": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 116953,
+							"toonTokens": 108995,
+							"medianSaving": 0.045454545454545414,
+							"totalSaving": 0.06804442810359712
+						},
+						"cl100k_base": {
+							"jsonTokens": 113279,
+							"toonTokens": 108642,
+							"medianSaving": 0,
+							"totalSaving": 0.040934330281870435
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"10": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 233518,
+							"toonTokens": 211560,
+							"medianSaving": 0.04761904761904767,
+							"totalSaving": 0.09403129523205922
+						},
+						"cl100k_base": {
+							"jsonTokens": 227379,
+							"toonTokens": 211517,
+							"medianSaving": 0,
+							"totalSaving": 0.06976018013976659
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"25": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 710293,
+							"toonTokens": 625935,
+							"medianSaving": 0.04761904761904767,
+							"totalSaving": 0.11876507300508377
+						},
+						"cl100k_base": {
+							"jsonTokens": 699159,
+							"toonTokens": 629222,
+							"medianSaving": 0,
+							"totalSaving": 0.10003017911519407
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				},
+				"50": {
+					"samples": 415,
+					"lossless": 415,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 1926918,
+							"toonTokens": 1670560,
+							"medianSaving": 0.050000000000000044,
+							"totalSaving": 0.1330404303660041
+						},
+						"cl100k_base": {
+							"jsonTokens": 1915459,
+							"toonTokens": 1687397,
+							"medianSaving": 0,
+							"totalSaving": 0.11906389016940588
+						}
+					},
+					"qualifies": false,
+					"note": "median token saving below 0.15 on o200k_base, cl100k_base"
+				}
+			},
+			"decision": "json",
+			"minRows": null,
+			"reason": "1 rows: median token saving below 0.15 on o200k_base, cl100k_base; 2 rows: median token saving below 0.15 on o200k_base, cl100k_base; 3 rows: median token saving below 0.15 on o200k_base, cl100k_base; 5 rows: median token saving below 0.15 on o200k_base, cl100k_base; 10 rows: median token saving below 0.15 on o200k_base, cl100k_base; 25 rows: median token saving below 0.15 on o200k_base, cl100k_base; 50 rows: median token saving below 0.15 on o200k_base, cl100k_base"
+		},
+		"scalar": {
+			"byPageSize": {
+				"1": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"2": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"3": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"5": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"10": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"25": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				},
+				"50": {
+					"samples": 3,
+					"lossless": 3,
+					"tokenizers": {
+						"o200k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						},
+						"cl100k_base": {
+							"jsonTokens": 13,
+							"toonTokens": 9,
+							"medianSaving": 0.25,
+							"totalSaving": 0.3076923076923077
+						}
+					},
+					"qualifies": true,
+					"note": "median token saving >= 0.15 on both tokenizers"
+				}
+			},
+			"decision": "json",
+			"minRows": null,
+			"reason": "a bare scalar carries no structure; JSON keeps the value type unambiguous"
+		}
+	}
+}

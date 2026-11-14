@@ -1,0 +1,3860 @@
+{
+  "schemaSha256": "354098d4acd5859524f0f9a77e5b29691e4b4f186b5334e97125ef8c4a2719da",
+  "linearCommit": "3addb24bdf771700da1c050742e70e645cc7e36a",
+  "queryCount": 173,
+  "mutationCount": 377,
+  "total": 550,
+  "generatedAt": "2026-09-22T14:19:55.270Z",
+  "roots": [
+    {
+      "kind": "Mutation",
+      "root": "agentActivityCreate",
+      "tool": "lm_agentActivityCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentActivityCreatePrompt",
+      "tool": "lm_agentActivityCreatePrompt",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentActivityDeleteQueued",
+      "tool": "lm_agentActivityDeleteQueued",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentActivitySendQueued",
+      "tool": "lm_agentActivitySendQueued",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionCreate",
+      "tool": "lm_agentSessionCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionCreateOnComment",
+      "tool": "lm_agentSessionCreateOnComment",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionCreateOnIssue",
+      "tool": "lm_agentSessionCreateOnIssue",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionRestartWithDefaultModel",
+      "tool": "lm_agentSessionRestartWithDefaultModel",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionUpdate",
+      "tool": "lm_agentSessionUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSessionUpdateExternalUrl",
+      "tool": "lm_agentSessionUpdateExternalUrl",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSkillCreate",
+      "tool": "lm_agentSkillCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSkillDelete",
+      "tool": "lm_agentSkillDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "agentSkillUpdate",
+      "tool": "lm_agentSkillUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "airbyteIntegrationConnect",
+      "tool": "lm_airbyteIntegrationConnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentCreate",
+      "tool": "lm_attachmentCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentDelete",
+      "tool": "lm_attachmentDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkDiscord",
+      "tool": "lm_attachmentLinkDiscord",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkFront",
+      "tool": "lm_attachmentLinkFront",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkGitHubIssue",
+      "tool": "lm_attachmentLinkGitHubIssue",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkGitHubPR",
+      "tool": "lm_attachmentLinkGitHubPR",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkGitLabMR",
+      "tool": "lm_attachmentLinkGitLabMR",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkIntercom",
+      "tool": "lm_attachmentLinkIntercom",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkJiraIssue",
+      "tool": "lm_attachmentLinkJiraIssue",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkSalesforce",
+      "tool": "lm_attachmentLinkSalesforce",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkSlack",
+      "tool": "lm_attachmentLinkSlack",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkURL",
+      "tool": "lm_attachmentLinkURL",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentLinkZendesk",
+      "tool": "lm_attachmentLinkZendesk",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentSyncToSlack",
+      "tool": "lm_attachmentSyncToSlack",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "attachmentUpdate",
+      "tool": "lm_attachmentUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "commentCreate",
+      "tool": "lm_commentCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "commentDelete",
+      "tool": "lm_commentDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "commentResolve",
+      "tool": "lm_commentResolve",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "commentUnresolve",
+      "tool": "lm_commentUnresolve",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "commentUpdate",
+      "tool": "lm_commentUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "contactCreate",
+      "tool": "lm_contactCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "contactSalesCreate",
+      "tool": "lm_contactSalesCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "createCsvExportReport",
+      "tool": "lm_createCsvExportReport",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "createInitiativeUpdateReminder",
+      "tool": "lm_createInitiativeUpdateReminder",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "createOrganizationFromOnboarding",
+      "tool": "lm_createOrganizationFromOnboarding",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "createProjectUpdateReminder",
+      "tool": "lm_createProjectUpdateReminder",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customViewCreate",
+      "tool": "lm_customViewCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customViewDelete",
+      "tool": "lm_customViewDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customViewUpdate",
+      "tool": "lm_customViewUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerCreate",
+      "tool": "lm_customerCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerDelete",
+      "tool": "lm_customerDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerMerge",
+      "tool": "lm_customerMerge",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedArchive",
+      "tool": "lm_customerNeedArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedCreate",
+      "tool": "lm_customerNeedCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedCreateFromAttachment",
+      "tool": "lm_customerNeedCreateFromAttachment",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedDelete",
+      "tool": "lm_customerNeedDelete",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedUnarchive",
+      "tool": "lm_customerNeedUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerNeedUpdate",
+      "tool": "lm_customerNeedUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerStatusCreate",
+      "tool": "lm_customerStatusCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerStatusDelete",
+      "tool": "lm_customerStatusDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerStatusUpdate",
+      "tool": "lm_customerStatusUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerTierCreate",
+      "tool": "lm_customerTierCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerTierDelete",
+      "tool": "lm_customerTierDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerTierUpdate",
+      "tool": "lm_customerTierUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerUnsync",
+      "tool": "lm_customerUnsync",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerUpdate",
+      "tool": "lm_customerUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "customerUpsert",
+      "tool": "lm_customerUpsert",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "cycleArchive",
+      "tool": "lm_cycleArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "cycleCreate",
+      "tool": "lm_cycleCreate",
+      "argCount": 1,
+      "deprecated": "Cycle creation is not supported."
+    },
+    {
+      "kind": "Mutation",
+      "root": "cycleShiftAll",
+      "tool": "lm_cycleShiftAll",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "cycleStartUpcomingCycleToday",
+      "tool": "lm_cycleStartUpcomingCycleToday",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "cycleUpdate",
+      "tool": "lm_cycleUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "documentCreate",
+      "tool": "lm_documentCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "documentDelete",
+      "tool": "lm_documentDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "documentUnarchive",
+      "tool": "lm_documentUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "documentUpdate",
+      "tool": "lm_documentUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailIntakeAddressCreate",
+      "tool": "lm_emailIntakeAddressCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailIntakeAddressDelete",
+      "tool": "lm_emailIntakeAddressDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailIntakeAddressRefreshSesDomainStatus",
+      "tool": "lm_emailIntakeAddressRefreshSesDomainStatus",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailIntakeAddressRotate",
+      "tool": "lm_emailIntakeAddressRotate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailIntakeAddressUpdate",
+      "tool": "lm_emailIntakeAddressUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailTokenUserAccountAuth",
+      "tool": "lm_emailTokenUserAccountAuth",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailUnsubscribe",
+      "tool": "lm_emailUnsubscribe",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emailUserAccountAuthChallenge",
+      "tool": "lm_emailUserAccountAuthChallenge",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emojiCreate",
+      "tool": "lm_emojiCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "emojiDelete",
+      "tool": "lm_emojiDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "entityExternalLinkCreate",
+      "tool": "lm_entityExternalLinkCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "entityExternalLinkDelete",
+      "tool": "lm_entityExternalLinkDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "entityExternalLinkUpdate",
+      "tool": "lm_entityExternalLinkUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "favoriteCreate",
+      "tool": "lm_favoriteCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "favoriteDelete",
+      "tool": "lm_favoriteDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "favoriteUpdate",
+      "tool": "lm_favoriteUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "fileUpload",
+      "tool": "lm_fileUpload",
+      "argCount": 5,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "fileUploadDangerouslyDelete",
+      "tool": "lm_fileUploadDangerouslyDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationStateCreate",
+      "tool": "lm_gitAutomationStateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationStateDelete",
+      "tool": "lm_gitAutomationStateDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationStateUpdate",
+      "tool": "lm_gitAutomationStateUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationTargetBranchCreate",
+      "tool": "lm_gitAutomationTargetBranchCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationTargetBranchDelete",
+      "tool": "lm_gitAutomationTargetBranchDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "gitAutomationTargetBranchUpdate",
+      "tool": "lm_gitAutomationTargetBranchUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "googleUserAccountAuth",
+      "tool": "lm_googleUserAccountAuth",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "imageUploadFromUrl",
+      "tool": "lm_imageUploadFromUrl",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "importFileUpload",
+      "tool": "lm_importFileUpload",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "inboxNotificationUpdate",
+      "tool": "lm_inboxNotificationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeAddLabel",
+      "tool": "lm_initiativeAddLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeArchive",
+      "tool": "lm_initiativeArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeCreate",
+      "tool": "lm_initiativeCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeDelete",
+      "tool": "lm_initiativeDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLabelCreate",
+      "tool": "lm_initiativeLabelCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLabelDelete",
+      "tool": "lm_initiativeLabelDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLabelRestore",
+      "tool": "lm_initiativeLabelRestore",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLabelRetire",
+      "tool": "lm_initiativeLabelRetire",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLabelUpdate",
+      "tool": "lm_initiativeLabelUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeLeadTeamUpdate",
+      "tool": "lm_initiativeLeadTeamUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeRelationCreate",
+      "tool": "lm_initiativeRelationCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeRelationDelete",
+      "tool": "lm_initiativeRelationDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeRelationUpdate",
+      "tool": "lm_initiativeRelationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeRemoveLabel",
+      "tool": "lm_initiativeRemoveLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeToProjectCreate",
+      "tool": "lm_initiativeToProjectCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeToProjectDelete",
+      "tool": "lm_initiativeToProjectDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeToProjectUpdate",
+      "tool": "lm_initiativeToProjectUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUnarchive",
+      "tool": "lm_initiativeUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUpdate",
+      "tool": "lm_initiativeUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUpdateArchive",
+      "tool": "lm_initiativeUpdateArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUpdateCreate",
+      "tool": "lm_initiativeUpdateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUpdateUnarchive",
+      "tool": "lm_initiativeUpdateUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "initiativeUpdateUpdate",
+      "tool": "lm_initiativeUpdateUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationArchive",
+      "tool": "lm_integrationArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationAsksConnectChannel",
+      "tool": "lm_integrationAsksConnectChannel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationCustomerDataAttributesRefresh",
+      "tool": "lm_integrationCustomerDataAttributesRefresh",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationDatadogConnect",
+      "tool": "lm_integrationDatadogConnect",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationDatadogEnvironments",
+      "tool": "lm_integrationDatadogEnvironments",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationDelete",
+      "tool": "lm_integrationDelete",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationDiscord",
+      "tool": "lm_integrationDiscord",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationFigma",
+      "tool": "lm_integrationFigma",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationFront",
+      "tool": "lm_integrationFront",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGitHubEnterpriseServerConnect",
+      "tool": "lm_integrationGitHubEnterpriseServerConnect",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGitHubPersonal",
+      "tool": "lm_integrationGitHubPersonal",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGithubCommitCreate",
+      "tool": "lm_integrationGithubCommitCreate",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGithubConnect",
+      "tool": "lm_integrationGithubConnect",
+      "argCount": 5,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGithubImportConnect",
+      "tool": "lm_integrationGithubImportConnect",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGithubImportRefresh",
+      "tool": "lm_integrationGithubImportRefresh",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGithubRemoveCodeAccess",
+      "tool": "lm_integrationGithubRemoveCodeAccess",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGitlabConnect",
+      "tool": "lm_integrationGitlabConnect",
+      "argCount": 5,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGitlabTestConnection",
+      "tool": "lm_integrationGitlabTestConnection",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGong",
+      "tool": "lm_integrationGong",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGoogleCalendarPersonalConnect",
+      "tool": "lm_integrationGoogleCalendarPersonalConnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationGoogleSheets",
+      "tool": "lm_integrationGoogleSheets",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationIntercom",
+      "tool": "lm_integrationIntercom",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationIntercomDelete",
+      "tool": "lm_integrationIntercomDelete",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationIntercomSettingsUpdate",
+      "tool": "lm_integrationIntercomSettingsUpdate",
+      "argCount": 1,
+      "deprecated": "This mutation is deprecated, please use `integrationSettingsUpdate` instead"
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationJiraFetchProjectStatuses",
+      "tool": "lm_integrationJiraFetchProjectStatuses",
+      "argCount": 1,
+      "deprecated": "Use the `integrationJiraProjectStatuses` query instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationJiraPersonal",
+      "tool": "lm_integrationJiraPersonal",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationJiraUpdate",
+      "tool": "lm_integrationJiraUpdate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationLaunchDarklyConnect",
+      "tool": "lm_integrationLaunchDarklyConnect",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationLaunchDarklyPersonalConnect",
+      "tool": "lm_integrationLaunchDarklyPersonalConnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationLoom",
+      "tool": "lm_integrationLoom",
+      "argCount": 0,
+      "deprecated": "Not available."
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationMcpServerConnect",
+      "tool": "lm_integrationMcpServerConnect",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationMcpServerPersonalConnect",
+      "tool": "lm_integrationMcpServerPersonalConnect",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationMicrosoftPersonalConnect",
+      "tool": "lm_integrationMicrosoftPersonalConnect",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationMicrosoftTeams",
+      "tool": "lm_integrationMicrosoftTeams",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationMicrosoftTeamsProjectPost",
+      "tool": "lm_integrationMicrosoftTeamsProjectPost",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationOpsgenieConnect",
+      "tool": "lm_integrationOpsgenieConnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationOpsgenieRefreshScheduleMappings",
+      "tool": "lm_integrationOpsgenieRefreshScheduleMappings",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationPagerDutyConnect",
+      "tool": "lm_integrationPagerDutyConnect",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationPagerDutyRefreshScheduleMappings",
+      "tool": "lm_integrationPagerDutyRefreshScheduleMappings",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationRequest",
+      "tool": "lm_integrationRequest",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSalesforce",
+      "tool": "lm_integrationSalesforce",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSalesforceMetadataRefresh",
+      "tool": "lm_integrationSalesforceMetadataRefresh",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSentryConnect",
+      "tool": "lm_integrationSentryConnect",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSettingsUpdate",
+      "tool": "lm_integrationSettingsUpdate",
+      "argCount": 2,
+      "deprecated": "Use integrationUpdate instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlack",
+      "tool": "lm_integrationSlack",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackAsks",
+      "tool": "lm_integrationSlackAsks",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackCustomViewNotifications",
+      "tool": "lm_integrationSlackCustomViewNotifications",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackCustomerChannelLink",
+      "tool": "lm_integrationSlackCustomerChannelLink",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackImportEmojis",
+      "tool": "lm_integrationSlackImportEmojis",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackInitiativePost",
+      "tool": "lm_integrationSlackInitiativePost",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackOrAsksUpdateSlackTeamName",
+      "tool": "lm_integrationSlackOrAsksUpdateSlackTeamName",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackOrgInitiativeUpdatesPost",
+      "tool": "lm_integrationSlackOrgInitiativeUpdatesPost",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackOrgProjectUpdatesPost",
+      "tool": "lm_integrationSlackOrgProjectUpdatesPost",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackPersonal",
+      "tool": "lm_integrationSlackPersonal",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackPost",
+      "tool": "lm_integrationSlackPost",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackProjectPost",
+      "tool": "lm_integrationSlackProjectPost",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationSlackWorkflowAccessUpdate",
+      "tool": "lm_integrationSlackWorkflowAccessUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationTemplateCreate",
+      "tool": "lm_integrationTemplateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationTemplateDelete",
+      "tool": "lm_integrationTemplateDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationUpdate",
+      "tool": "lm_integrationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationZendesk",
+      "tool": "lm_integrationZendesk",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationsSettingsCreate",
+      "tool": "lm_integrationsSettingsCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "integrationsSettingsUpdate",
+      "tool": "lm_integrationsSettingsUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueAddLabel",
+      "tool": "lm_issueAddLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueArchive",
+      "tool": "lm_issueArchive",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueBatchCreate",
+      "tool": "lm_issueBatchCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueBatchUpdate",
+      "tool": "lm_issueBatchUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueCreate",
+      "tool": "lm_issueCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueDelete",
+      "tool": "lm_issueDelete",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueDescriptionUpdateFromFront",
+      "tool": "lm_issueDescriptionUpdateFromFront",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueExternalSyncDisable",
+      "tool": "lm_issueExternalSyncDisable",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateAsana",
+      "tool": "lm_issueImportCreateAsana",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateCSVJira",
+      "tool": "lm_issueImportCreateCSVJira",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateClubhouse",
+      "tool": "lm_issueImportCreateClubhouse",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateGithub",
+      "tool": "lm_issueImportCreateGithub",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateJira",
+      "tool": "lm_issueImportCreateJira",
+      "argCount": 10,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportCreateLinearV2",
+      "tool": "lm_issueImportCreateLinearV2",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportDelete",
+      "tool": "lm_issueImportDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportProcess",
+      "tool": "lm_issueImportProcess",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueImportUpdate",
+      "tool": "lm_issueImportUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueLabelCreate",
+      "tool": "lm_issueLabelCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueLabelDelete",
+      "tool": "lm_issueLabelDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueLabelRestore",
+      "tool": "lm_issueLabelRestore",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueLabelRetire",
+      "tool": "lm_issueLabelRetire",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueLabelUpdate",
+      "tool": "lm_issueLabelUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueRelationCreate",
+      "tool": "lm_issueRelationCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueRelationDelete",
+      "tool": "lm_issueRelationDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueRelationUpdate",
+      "tool": "lm_issueRelationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueReminder",
+      "tool": "lm_issueReminder",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueRemoveLabel",
+      "tool": "lm_issueRemoveLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueShare",
+      "tool": "lm_issueShare",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueSubscribe",
+      "tool": "lm_issueSubscribe",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueToReleaseCreate",
+      "tool": "lm_issueToReleaseCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueToReleaseDelete",
+      "tool": "lm_issueToReleaseDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueToReleaseDeleteByIssueAndRelease",
+      "tool": "lm_issueToReleaseDeleteByIssueAndRelease",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueUnarchive",
+      "tool": "lm_issueUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueUnshare",
+      "tool": "lm_issueUnshare",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueUnsubscribe",
+      "tool": "lm_issueUnsubscribe",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "issueUpdate",
+      "tool": "lm_issueUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "jiraIntegrationConnect",
+      "tool": "lm_jiraIntegrationConnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "joinOrganizationFromOnboarding",
+      "tool": "lm_joinOrganizationFromOnboarding",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "leaveOrganization",
+      "tool": "lm_leaveOrganization",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "logout",
+      "tool": "lm_logout",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "logoutAllSessions",
+      "tool": "lm_logoutAllSessions",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "logoutOtherSessions",
+      "tool": "lm_logoutOtherSessions",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "logoutSession",
+      "tool": "lm_logoutSession",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationArchive",
+      "tool": "lm_notificationArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationArchiveAll",
+      "tool": "lm_notificationArchiveAll",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationCategoryChannelSubscriptionUpdate",
+      "tool": "lm_notificationCategoryChannelSubscriptionUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationMarkReadAll",
+      "tool": "lm_notificationMarkReadAll",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationMarkUnreadAll",
+      "tool": "lm_notificationMarkUnreadAll",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationSnoozeAll",
+      "tool": "lm_notificationSnoozeAll",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationSubscriptionCreate",
+      "tool": "lm_notificationSubscriptionCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationSubscriptionDelete",
+      "tool": "lm_notificationSubscriptionDelete",
+      "argCount": 1,
+      "deprecated": "Update `notificationSubscription.active` to `false` instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationSubscriptionUpdate",
+      "tool": "lm_notificationSubscriptionUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationUnarchive",
+      "tool": "lm_notificationUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationUnsnoozeAll",
+      "tool": "lm_notificationUnsnoozeAll",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "notificationUpdate",
+      "tool": "lm_notificationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "oauthApplicationArchive",
+      "tool": "lm_oauthApplicationArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "oauthApplicationCreate",
+      "tool": "lm_oauthApplicationCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "oauthApplicationRotateSecret",
+      "tool": "lm_oauthApplicationRotateSecret",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "oauthApplicationRotateWebhookSecret",
+      "tool": "lm_oauthApplicationRotateWebhookSecret",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "oauthApplicationUpdate",
+      "tool": "lm_oauthApplicationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationCancelDelete",
+      "tool": "lm_organizationCancelDelete",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDelete",
+      "tool": "lm_organizationDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDeleteChallenge",
+      "tool": "lm_organizationDeleteChallenge",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDomainClaim",
+      "tool": "lm_organizationDomainClaim",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDomainCreate",
+      "tool": "lm_organizationDomainCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDomainDelete",
+      "tool": "lm_organizationDomainDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDomainUpdate",
+      "tool": "lm_organizationDomainUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationDomainVerify",
+      "tool": "lm_organizationDomainVerify",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationInviteCreate",
+      "tool": "lm_organizationInviteCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationInviteDelete",
+      "tool": "lm_organizationInviteDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationInviteUpdate",
+      "tool": "lm_organizationInviteUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationStartTrial",
+      "tool": "lm_organizationStartTrial",
+      "argCount": 0,
+      "deprecated": "Use organizationStartTrialForPlan"
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationStartTrialForPlan",
+      "tool": "lm_organizationStartTrialForPlan",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "organizationUpdate",
+      "tool": "lm_organizationUpdate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "partnerApplicationCreate",
+      "tool": "lm_partnerApplicationCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "partnerOfferRedeem",
+      "tool": "lm_partnerOfferRedeem",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "passkeyLoginFinish",
+      "tool": "lm_passkeyLoginFinish",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "passkeyLoginStart",
+      "tool": "lm_passkeyLoginStart",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectAddLabel",
+      "tool": "lm_projectAddLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectArchive",
+      "tool": "lm_projectArchive",
+      "argCount": 2,
+      "deprecated": "Deprecated in favor of projectDelete."
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectCreate",
+      "tool": "lm_projectCreate",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectCreateSlackChannel",
+      "tool": "lm_projectCreateSlackChannel",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectDelete",
+      "tool": "lm_projectDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectDismissSlackChannelCreationFailure",
+      "tool": "lm_projectDismissSlackChannelCreationFailure",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectExternalSyncDisable",
+      "tool": "lm_projectExternalSyncDisable",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectLabelCreate",
+      "tool": "lm_projectLabelCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectLabelDelete",
+      "tool": "lm_projectLabelDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectLabelRestore",
+      "tool": "lm_projectLabelRestore",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectLabelRetire",
+      "tool": "lm_projectLabelRetire",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectLabelUpdate",
+      "tool": "lm_projectLabelUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectMilestoneCreate",
+      "tool": "lm_projectMilestoneCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectMilestoneDelete",
+      "tool": "lm_projectMilestoneDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectMilestoneMove",
+      "tool": "lm_projectMilestoneMove",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectMilestoneUpdate",
+      "tool": "lm_projectMilestoneUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectReassignStatus",
+      "tool": "lm_projectReassignStatus",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectRelationCreate",
+      "tool": "lm_projectRelationCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectRelationDelete",
+      "tool": "lm_projectRelationDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectRelationUpdate",
+      "tool": "lm_projectRelationUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectRemoveLabel",
+      "tool": "lm_projectRemoveLabel",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectStatusArchive",
+      "tool": "lm_projectStatusArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectStatusCreate",
+      "tool": "lm_projectStatusCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectStatusUnarchive",
+      "tool": "lm_projectStatusUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectStatusUpdate",
+      "tool": "lm_projectStatusUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUnarchive",
+      "tool": "lm_projectUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdate",
+      "tool": "lm_projectUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdateArchive",
+      "tool": "lm_projectUpdateArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdateCreate",
+      "tool": "lm_projectUpdateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdateDelete",
+      "tool": "lm_projectUpdateDelete",
+      "argCount": 1,
+      "deprecated": "Use `projectUpdateArchive` instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdateUnarchive",
+      "tool": "lm_projectUpdateUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "projectUpdateUpdate",
+      "tool": "lm_projectUpdateUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "pushSubscriptionCreate",
+      "tool": "lm_pushSubscriptionCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "pushSubscriptionDelete",
+      "tool": "lm_pushSubscriptionDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "reactionCreate",
+      "tool": "lm_reactionCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "reactionDelete",
+      "tool": "lm_reactionDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "refreshGoogleSheetsData",
+      "tool": "lm_refreshGoogleSheetsData",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseArchive",
+      "tool": "lm_releaseArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseComplete",
+      "tool": "lm_releaseComplete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseCompleteByAccessKey",
+      "tool": "lm_releaseCompleteByAccessKey",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseCreate",
+      "tool": "lm_releaseCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseDelete",
+      "tool": "lm_releaseDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseNoteCreate",
+      "tool": "lm_releaseNoteCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseNoteDelete",
+      "tool": "lm_releaseNoteDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseNoteUpdate",
+      "tool": "lm_releaseNoteUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releasePipelineArchive",
+      "tool": "lm_releasePipelineArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releasePipelineCreate",
+      "tool": "lm_releasePipelineCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releasePipelineDelete",
+      "tool": "lm_releasePipelineDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releasePipelineUnarchive",
+      "tool": "lm_releasePipelineUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releasePipelineUpdate",
+      "tool": "lm_releasePipelineUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseStageArchive",
+      "tool": "lm_releaseStageArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseStageCreate",
+      "tool": "lm_releaseStageCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseStageUnarchive",
+      "tool": "lm_releaseStageUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseStageUpdate",
+      "tool": "lm_releaseStageUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseSync",
+      "tool": "lm_releaseSync",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseSyncByAccessKey",
+      "tool": "lm_releaseSyncByAccessKey",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseUnarchive",
+      "tool": "lm_releaseUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseUpdate",
+      "tool": "lm_releaseUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseUpdateByPipeline",
+      "tool": "lm_releaseUpdateByPipeline",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "releaseUpdateByPipelineByAccessKey",
+      "tool": "lm_releaseUpdateByPipelineByAccessKey",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "resendOrganizationInvite",
+      "tool": "lm_resendOrganizationInvite",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "resendOrganizationInviteByEmail",
+      "tool": "lm_resendOrganizationInviteByEmail",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapArchive",
+      "tool": "lm_roadmapArchive",
+      "argCount": 1,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapCreate",
+      "tool": "lm_roadmapCreate",
+      "argCount": 1,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapDelete",
+      "tool": "lm_roadmapDelete",
+      "argCount": 1,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapToProjectCreate",
+      "tool": "lm_roadmapToProjectCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapToProjectDelete",
+      "tool": "lm_roadmapToProjectDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapToProjectUpdate",
+      "tool": "lm_roadmapToProjectUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapUnarchive",
+      "tool": "lm_roadmapUnarchive",
+      "argCount": 1,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "roadmapUpdate",
+      "tool": "lm_roadmapUpdate",
+      "argCount": 2,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Mutation",
+      "root": "samlTokenUserAccountAuth",
+      "tool": "lm_samlTokenUserAccountAuth",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamCreate",
+      "tool": "lm_teamCreate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamCyclesDelete",
+      "tool": "lm_teamCyclesDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamDelete",
+      "tool": "lm_teamDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamKeyDelete",
+      "tool": "lm_teamKeyDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamMembershipCreate",
+      "tool": "lm_teamMembershipCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamMembershipDelete",
+      "tool": "lm_teamMembershipDelete",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamMembershipUpdate",
+      "tool": "lm_teamMembershipUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamUnarchive",
+      "tool": "lm_teamUnarchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "teamUpdate",
+      "tool": "lm_teamUpdate",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "templateCreate",
+      "tool": "lm_templateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "templateDelete",
+      "tool": "lm_templateDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "templateUpdate",
+      "tool": "lm_templateUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "timeScheduleCreate",
+      "tool": "lm_timeScheduleCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "timeScheduleDelete",
+      "tool": "lm_timeScheduleDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "timeScheduleRefreshIntegrationSchedule",
+      "tool": "lm_timeScheduleRefreshIntegrationSchedule",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "timeScheduleUpdate",
+      "tool": "lm_timeScheduleUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "timeScheduleUpsertExternal",
+      "tool": "lm_timeScheduleUpsertExternal",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "trackAnonymousEvent",
+      "tool": "lm_trackAnonymousEvent",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "triageResponsibilityCreate",
+      "tool": "lm_triageResponsibilityCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "triageResponsibilityDelete",
+      "tool": "lm_triageResponsibilityDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "triageResponsibilityUpdate",
+      "tool": "lm_triageResponsibilityUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "updateIntegrationSlackScopes",
+      "tool": "lm_updateIntegrationSlackScopes",
+      "argCount": 4,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userChangeRole",
+      "tool": "lm_userChangeRole",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userDiscordConnect",
+      "tool": "lm_userDiscordConnect",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userExternalUserDisconnect",
+      "tool": "lm_userExternalUserDisconnect",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userFlagUpdate",
+      "tool": "lm_userFlagUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userRevokeAllSessions",
+      "tool": "lm_userRevokeAllSessions",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userRevokeSession",
+      "tool": "lm_userRevokeSession",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userSettingsFlagsReset",
+      "tool": "lm_userSettingsFlagsReset",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userSettingsUpdate",
+      "tool": "lm_userSettingsUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userSuspend",
+      "tool": "lm_userSuspend",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userUnlinkFromIdentityProvider",
+      "tool": "lm_userUnlinkFromIdentityProvider",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userUnsuspend",
+      "tool": "lm_userUnsuspend",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "userUpdate",
+      "tool": "lm_userUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "viewPreferencesCreate",
+      "tool": "lm_viewPreferencesCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "viewPreferencesDelete",
+      "tool": "lm_viewPreferencesDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "viewPreferencesUpdate",
+      "tool": "lm_viewPreferencesUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "webhookCreate",
+      "tool": "lm_webhookCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "webhookDelete",
+      "tool": "lm_webhookDelete",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "webhookRotateSecret",
+      "tool": "lm_webhookRotateSecret",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "webhookUpdate",
+      "tool": "lm_webhookUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "workflowStateArchive",
+      "tool": "lm_workflowStateArchive",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "workflowStateCreate",
+      "tool": "lm_workflowStateCreate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Mutation",
+      "root": "workflowStateUpdate",
+      "tool": "lm_workflowStateUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "_dummy",
+      "tool": "lq__dummy",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "administrableTeams",
+      "tool": "lq_administrableTeams",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentActivities",
+      "tool": "lq_agentActivities",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentActivity",
+      "tool": "lq_agentActivity",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSession",
+      "tool": "lq_agentSession",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSessionSandbox",
+      "tool": "lq_agentSessionSandbox",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSessionSshAddress",
+      "tool": "lq_agentSessionSshAddress",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSessions",
+      "tool": "lq_agentSessions",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSkill",
+      "tool": "lq_agentSkill",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "agentSkills",
+      "tool": "lq_agentSkills",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "applicationInfo",
+      "tool": "lq_applicationInfo",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "archivedIntegrations",
+      "tool": "lq_archivedIntegrations",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "archivedTeams",
+      "tool": "lq_archivedTeams",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "attachment",
+      "tool": "lq_attachment",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "attachmentIssue",
+      "tool": "lq_attachmentIssue",
+      "argCount": 1,
+      "deprecated": "Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead."
+    },
+    {
+      "kind": "Query",
+      "root": "attachmentSources",
+      "tool": "lq_attachmentSources",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "attachments",
+      "tool": "lq_attachments",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "attachmentsForURL",
+      "tool": "lq_attachmentsForURL",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "auditEntries",
+      "tool": "lq_auditEntries",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "auditEntryTypes",
+      "tool": "lq_auditEntryTypes",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "auditLogWebhookFailureEvents",
+      "tool": "lq_auditLogWebhookFailureEvents",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "authenticationSessions",
+      "tool": "lq_authenticationSessions",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "availableUsers",
+      "tool": "lq_availableUsers",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "comment",
+      "tool": "lq_comment",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "comments",
+      "tool": "lq_comments",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customView",
+      "tool": "lq_customView",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customViewDetailsSuggestion",
+      "tool": "lq_customViewDetailsSuggestion",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customViewHasSubscribers",
+      "tool": "lq_customViewHasSubscribers",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customViews",
+      "tool": "lq_customViews",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customer",
+      "tool": "lq_customer",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerNeed",
+      "tool": "lq_customerNeed",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerNeeds",
+      "tool": "lq_customerNeeds",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerStatus",
+      "tool": "lq_customerStatus",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerStatuses",
+      "tool": "lq_customerStatuses",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerTier",
+      "tool": "lq_customerTier",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customerTiers",
+      "tool": "lq_customerTiers",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "customers",
+      "tool": "lq_customers",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "cycle",
+      "tool": "lq_cycle",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "cycles",
+      "tool": "lq_cycles",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "diff",
+      "tool": "lq_diff",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "document",
+      "tool": "lq_document",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "documentContentHistory",
+      "tool": "lq_documentContentHistory",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "documentContentHistoryEntries",
+      "tool": "lq_documentContentHistoryEntries",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "documentContentHistoryTimeline",
+      "tool": "lq_documentContentHistoryTimeline",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "documents",
+      "tool": "lq_documents",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "emailIntakeAddress",
+      "tool": "lq_emailIntakeAddress",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "emoji",
+      "tool": "lq_emoji",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "emojis",
+      "tool": "lq_emojis",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "entityExternalLink",
+      "tool": "lq_entityExternalLink",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "externalUser",
+      "tool": "lq_externalUser",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "externalUsers",
+      "tool": "lq_externalUsers",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "failuresForOauthWebhooks",
+      "tool": "lq_failuresForOauthWebhooks",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "favorite",
+      "tool": "lq_favorite",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "favorites",
+      "tool": "lq_favorites",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "inboxNotifications",
+      "tool": "lq_inboxNotifications",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiative",
+      "tool": "lq_initiative",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeFilterSuggestion",
+      "tool": "lq_initiativeFilterSuggestion",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeLabel",
+      "tool": "lq_initiativeLabel",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeLabels",
+      "tool": "lq_initiativeLabels",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeLeadTeamChangeImpact",
+      "tool": "lq_initiativeLeadTeamChangeImpact",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeRelation",
+      "tool": "lq_initiativeRelation",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeRelations",
+      "tool": "lq_initiativeRelations",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeToProject",
+      "tool": "lq_initiativeToProject",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeToProjects",
+      "tool": "lq_initiativeToProjects",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeUpdate",
+      "tool": "lq_initiativeUpdate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiativeUpdates",
+      "tool": "lq_initiativeUpdates",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "initiatives",
+      "tool": "lq_initiatives",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integration",
+      "tool": "lq_integration",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrationHasScopes",
+      "tool": "lq_integrationHasScopes",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrationJiraProjectStatuses",
+      "tool": "lq_integrationJiraProjectStatuses",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrationTemplate",
+      "tool": "lq_integrationTemplate",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrationTemplates",
+      "tool": "lq_integrationTemplates",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrations",
+      "tool": "lq_integrations",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "integrationsSettings",
+      "tool": "lq_integrationsSettings",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issue",
+      "tool": "lq_issue",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueFigmaFileKeySearch",
+      "tool": "lq_issueFigmaFileKeySearch",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueFilterSuggestion",
+      "tool": "lq_issueFilterSuggestion",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueImportCheckCSV",
+      "tool": "lq_issueImportCheckCSV",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueImportCheckSync",
+      "tool": "lq_issueImportCheckSync",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueImportJqlCheck",
+      "tool": "lq_issueImportJqlCheck",
+      "argCount": 5,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueLabel",
+      "tool": "lq_issueLabel",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueLabels",
+      "tool": "lq_issueLabels",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issuePriorityValues",
+      "tool": "lq_issuePriorityValues",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueRelation",
+      "tool": "lq_issueRelation",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueRelations",
+      "tool": "lq_issueRelations",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueRepositorySuggestions",
+      "tool": "lq_issueRepositorySuggestions",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueSearch",
+      "tool": "lq_issueSearch",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueTitleSuggestionFromCustomerRequest",
+      "tool": "lq_issueTitleSuggestionFromCustomerRequest",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueToRelease",
+      "tool": "lq_issueToRelease",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueToReleases",
+      "tool": "lq_issueToReleases",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issueVcsBranchSearch",
+      "tool": "lq_issueVcsBranchSearch",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "issues",
+      "tool": "lq_issues",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "latestReleaseByAccessKey",
+      "tool": "lq_latestReleaseByAccessKey",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "microsoftTeamsChannels",
+      "tool": "lq_microsoftTeamsChannels",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "notification",
+      "tool": "lq_notification",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "notificationSubscription",
+      "tool": "lq_notificationSubscription",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "notificationSubscriptions",
+      "tool": "lq_notificationSubscriptions",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "notifications",
+      "tool": "lq_notifications",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "notificationsUnreadCount",
+      "tool": "lq_notificationsUnreadCount",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "oauthApplication",
+      "tool": "lq_oauthApplication",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "oauthApplications",
+      "tool": "lq_oauthApplications",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organization",
+      "tool": "lq_organization",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationDomainClaimRequest",
+      "tool": "lq_organizationDomainClaimRequest",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationExists",
+      "tool": "lq_organizationExists",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationInvite",
+      "tool": "lq_organizationInvite",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationInviteDetails",
+      "tool": "lq_organizationInviteDetails",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationInvites",
+      "tool": "lq_organizationInvites",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "organizationMeta",
+      "tool": "lq_organizationMeta",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "partnerOfferDetails",
+      "tool": "lq_partnerOfferDetails",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "partnerOfferWorkspaces",
+      "tool": "lq_partnerOfferWorkspaces",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "partnerProgramPartners",
+      "tool": "lq_partnerProgramPartners",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "project",
+      "tool": "lq_project",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectFilterSuggestion",
+      "tool": "lq_projectFilterSuggestion",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectLabel",
+      "tool": "lq_projectLabel",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectLabels",
+      "tool": "lq_projectLabels",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectMilestone",
+      "tool": "lq_projectMilestone",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectMilestones",
+      "tool": "lq_projectMilestones",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectRelation",
+      "tool": "lq_projectRelation",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectRelations",
+      "tool": "lq_projectRelations",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectStatus",
+      "tool": "lq_projectStatus",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectStatusProjectCount",
+      "tool": "lq_projectStatusProjectCount",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectStatuses",
+      "tool": "lq_projectStatuses",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectUpdate",
+      "tool": "lq_projectUpdate",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projectUpdates",
+      "tool": "lq_projectUpdates",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "projects",
+      "tool": "lq_projects",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "pushSubscriptionTest",
+      "tool": "lq_pushSubscriptionTest",
+      "argCount": 2,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "rateLimitStatus",
+      "tool": "lq_rateLimitStatus",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "recentReleasesByAccessKey",
+      "tool": "lq_recentReleasesByAccessKey",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "release",
+      "tool": "lq_release",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releaseNote",
+      "tool": "lq_releaseNote",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releaseNotes",
+      "tool": "lq_releaseNotes",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releasePipeline",
+      "tool": "lq_releasePipeline",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releasePipelineByAccessKey",
+      "tool": "lq_releasePipelineByAccessKey",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releasePipelines",
+      "tool": "lq_releasePipelines",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releaseSearch",
+      "tool": "lq_releaseSearch",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releaseStage",
+      "tool": "lq_releaseStage",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releaseStages",
+      "tool": "lq_releaseStages",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "releases",
+      "tool": "lq_releases",
+      "argCount": 8,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "roadmap",
+      "tool": "lq_roadmap",
+      "argCount": 1,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Query",
+      "root": "roadmapToProject",
+      "tool": "lq_roadmapToProject",
+      "argCount": 1,
+      "deprecated": "RoadmapToProject is deprecated, use InitiativeToProject instead."
+    },
+    {
+      "kind": "Query",
+      "root": "roadmapToProjects",
+      "tool": "lq_roadmapToProjects",
+      "argCount": 6,
+      "deprecated": "RoadmapToProject is deprecated, use InitiativeToProject instead."
+    },
+    {
+      "kind": "Query",
+      "root": "roadmaps",
+      "tool": "lq_roadmaps",
+      "argCount": 6,
+      "deprecated": "Roadmaps are deprecated, use initiatives instead."
+    },
+    {
+      "kind": "Query",
+      "root": "searchDocuments",
+      "tool": "lq_searchDocuments",
+      "argCount": 9,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "searchIssues",
+      "tool": "lq_searchIssues",
+      "argCount": 10,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "searchProjects",
+      "tool": "lq_searchProjects",
+      "argCount": 9,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "semanticSearch",
+      "tool": "lq_semanticSearch",
+      "argCount": 5,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "slaConfigurations",
+      "tool": "lq_slaConfigurations",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "ssoUrlFromEmail",
+      "tool": "lq_ssoUrlFromEmail",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "team",
+      "tool": "lq_team",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "teamMembership",
+      "tool": "lq_teamMembership",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "teamMemberships",
+      "tool": "lq_teamMemberships",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "teams",
+      "tool": "lq_teams",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "template",
+      "tool": "lq_template",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "templateSearch",
+      "tool": "lq_templateSearch",
+      "argCount": 3,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "templates",
+      "tool": "lq_templates",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "templatesForIntegration",
+      "tool": "lq_templatesForIntegration",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "timeSchedule",
+      "tool": "lq_timeSchedule",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "timeSchedules",
+      "tool": "lq_timeSchedules",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "triageResponsibilities",
+      "tool": "lq_triageResponsibilities",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "triageResponsibility",
+      "tool": "lq_triageResponsibility",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "usageAlert",
+      "tool": "lq_usageAlert",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "usageAlerts",
+      "tool": "lq_usageAlerts",
+      "argCount": 7,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "user",
+      "tool": "lq_user",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "userSessions",
+      "tool": "lq_userSessions",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "userSettings",
+      "tool": "lq_userSettings",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "userViewPreferences",
+      "tool": "lq_userViewPreferences",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "users",
+      "tool": "lq_users",
+      "argCount": 9,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "verifyGitHubEnterpriseServerInstallation",
+      "tool": "lq_verifyGitHubEnterpriseServerInstallation",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "viewer",
+      "tool": "lq_viewer",
+      "argCount": 0,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "webhook",
+      "tool": "lq_webhook",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "webhooks",
+      "tool": "lq_webhooks",
+      "argCount": 6,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "workflowState",
+      "tool": "lq_workflowState",
+      "argCount": 1,
+      "deprecated": null
+    },
+    {
+      "kind": "Query",
+      "root": "workflowStates",
+      "tool": "lq_workflowStates",
+      "argCount": 7,
+      "deprecated": null
+    }
+  ]
+}
