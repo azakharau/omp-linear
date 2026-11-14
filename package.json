@@ -1,16 +1,39 @@
 {
   "name": "omp-linear",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Native Oh My Pi extension for Linear (private typed catalog, OAuth/API-key connections, native approvals)",
+  "keywords": [
+    "omp",
+    "oh-my-pi",
+    "omp-plugin",
+    "omp-extension",
+    "linear",
+    "graphql",
+    "issue-tracker",
+    "agent"
+  ],
+  "author": "Alaksiej Zacharau (https://github.com/azakharau)",
+  "homepage": "https://github.com/azakharau/omp-linear#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azakharau/omp-linear.git"
+  },
+  "bugs": {
+    "url": "https://github.com/azakharau/omp-linear/issues"
+  },
   "license": "MIT",
   "type": "module",
   "private": true,
+  "engines": {
+    "bun": ">=1.3.0",
+    "omp": ">=18.20.0"
+  },
   "files": [
     "src",
     "generated",
     "schema",
-    "scripts",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "omp": {
@@ -19,6 +42,7 @@
     ]
   },
   "scripts": {
+    "check": "bun run typecheck && bun test test",
     "generate:catalog": "bun run scripts/generate-catalog.ts",
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "test": "bun test test",

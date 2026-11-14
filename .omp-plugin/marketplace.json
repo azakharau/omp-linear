@@ -1,0 +1,36 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "omp-linear",
+  "owner": {
+    "name": "Alaksiej Zacharau"
+  },
+  "metadata": {
+    "description": "Native Oh My Pi extension for Linear",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "omp-linear",
+      "description": "Native Oh My Pi extension for Linear (private typed catalog, OAuth/API-key connections, native approvals)",
+      "source": "./",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alaksiej Zacharau"
+      },
+      "homepage": "https://github.com/azakharau/omp-linear",
+      "repository": "https://github.com/azakharau/omp-linear",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "omp",
+        "oh-my-pi",
+        "omp-plugin",
+        "omp-extension",
+        "linear",
+        "graphql",
+        "issue-tracker",
+        "agent"
+      ]
+    }
+  ]
+}
