@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-14
+
+### Changed
+
+- Dependencies on their latest releases: OMP packages 18.20.1, graphql 17.1.0,
+  @toon-format/toon 4.4.0, TypeScript 7.0.2. Code adapted to graphql 17: argument and
+  input-field defaults, drift detection messages, `print` spacing. Behavior is unchanged.
+- Host package peer dependencies accept `>=18.20.0`. `@oh-my-pi/omptype` is no longer a peer:
+  the bundle includes it.
+- CI uses the latest bun. The stale-bundle check compares a hash of the build inputs
+  (`dist/index.js.inputs`), so a new bun version does not fail it.
+
 ## [1.0.0] - 2026-11-14
 
 ### Added
@@ -61,5 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
-[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/azakharau/omp-linear/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/azakharau/omp-linear/releases/tag/v1.0.0

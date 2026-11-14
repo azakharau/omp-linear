@@ -8,6 +8,8 @@ import {
 	isInputObjectType,
 	isListType,
 	isNonNullType,
+	isRequiredArgument,
+	isRequiredInputField,
 	isScalarType,
 	parse,
 } from "graphql";
@@ -61,7 +63,7 @@ function synthesiseInput(type: GraphQLInputType, seed: string): unknown {
 		for (const field of Object.values(type.getFields())) {
 			// Required fields only: keeps recursive input types finite and mirrors a caller sending
 			// the smallest legal payload.
-			if (!isNonNullType(field.type) || field.defaultValue !== undefined) continue;
+			if (!isRequiredInputField(field)) continue;
 			value[field.name] = synthesiseInput(field.type, `${seed}.${field.name}`);
 		}
 		return value;
@@ -92,7 +94,7 @@ export function minimalArgs(d: OperationDescriptor): Record<string, unknown> {
 	const rootType = d.kind === "Query" ? schema.getQueryType()! : schema.getMutationType()!;
 	const args: Record<string, unknown> = { i: "population check" };
 	for (const arg of rootType.getFields()[d.root]!.args) {
-		if (!isNonNullType(arg.type) || arg.defaultValue !== undefined) continue;
+		if (!isRequiredArgument(arg)) continue;
 		args[arg.name] = synthesiseInput(arg.type, `${d.root}.${arg.name}`);
 	}
 	return args;

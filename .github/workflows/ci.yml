@@ -23,6 +23,6 @@ jobs:
           persist-credentials: false
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4 # dist/ is committed; build:check needs the same bun that built it
+          bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run check

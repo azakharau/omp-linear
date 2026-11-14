@@ -22,7 +22,7 @@ OMP 18.20.0 or later. The extension reads the call author from `ctx.agent`, whic
 18.20.0. On an older host every Linear call fails with
 `linear: host does not expose ctx.agent; OMP >= 18.20.0 is required`.
 
-The `@oh-my-pi/*` packages are peer dependencies pinned to 18.20.0. The host rewrites these
+The `@oh-my-pi/*` host packages are peer dependencies (`>=18.20.0`). The host rewrites these
 imports to its own modules at load time. The extension imports package roots only, with one
 exception: `findScopedSettings` from `@oh-my-pi/pi-coding-agent/config/settings`. The package
 root does not export it, and the extension needs the settings instance of the session that runs
@@ -210,14 +210,17 @@ then `bun run generate:catalog`. Introspection shows what the key's workspace ca
 | Script | Effect |
 | --- | --- |
 | `bun run check` | The offline gate: `typecheck`, `build:check`, then `bun test test`. CI runs it on every push to `main` and every pull request. |
-| `bun run build` | Rebuilds the committed bundle `dist/index.js` from `src/`. Run it after source changes and commit `dist/`. |
-| `bun run build:check` | Rebuilds and fails if `dist/` differs from the committed copy. |
+| `bun run build` | Rebuilds the committed bundle `dist/index.js` from `src/` and writes `dist/index.js.inputs`, a hash of `src/`, `bun.lock` and the build command. Run it after source or dependency changes and commit `dist/`. |
+| `bun run build:check` | Fails if `dist/index.js.inputs` does not match the current inputs. The check does not depend on the bun version. |
 | `bun run typecheck` | `tsc --noEmit` over `src`, `scripts` and `test`. |
 | `bun test test` | Unit tests and real OMP sessions (fake model, fake Linear). |
 | `bun run smoke` | Real loader in a separate host process: search, activation, API key, OAuth, attribution, deny. |
 | `bun run smoke:binary` | The installed omp binary: `-e` and `extensions:` load paths, `apiKeyFile`, `task` children. |
 | `bun run schema:check` | Drift report against live Linear (see [Schema drift](#schema-drift)). |
 | `bun run generate:catalog` | Regenerates `generated/catalog.json` from the pinned schema. |
+
+Dependencies, bun and OMP stay on their latest releases. Before work on the repository, run
+`bun update --latest`, then `bun run build` and `bun run check`. CI uses the latest bun.
 
 `smoke:binary` runs `/home/agent/.local/lib/omp/bin/omp` by default (`--omp <bin>` or `OMP_BIN`
 changes it). It uses a throwaway HOME and agent dir under `.scratch/`, a fake model and a fake
