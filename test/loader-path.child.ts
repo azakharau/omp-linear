@@ -1,6 +1,6 @@
 /**
  * Loads exactly one host (argv[2]) and this package through that host's own extension loader:
- * `additionalExtensionPaths` -> `package.json` `omp.extensions` -> `./src/index.ts`, with the
+ * `additionalExtensionPaths` -> `package.json` `omp.extensions` -> `./dist/index.js`, with the
  * extension's `@oh-my-pi/*` imports rewritten by the host to its own module tree.
  *
  * The host gives the session the top-level `ctx.agent` identity (`Main`), so the reported author id
