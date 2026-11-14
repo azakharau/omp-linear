@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `CONTRIBUTING.md`: setup, change workflow, checks, rules and release steps.
+- `AGENTS.md` with repository rules for coding agents. `CLAUDE.md` imports it.
 
 ## [1.0.2] - 2026-11-14
 
