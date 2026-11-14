@@ -34,12 +34,12 @@ try {
   .map(item => item.output)
   .find(o => o.includes('"selected"'));
  if (!output) throw new Error(`linear_connections produced no output: ${JSON.stringify(model.requests.map(r => r.input))}`);
- const parsed = JSON.parse(output) as { author: { label: string } | null; storePath: string };
+ const parsed = JSON.parse(output) as { author: { label: string } | null; connections: { id: string }[] };
  console.log(
   JSON.stringify({
    toolNames: session.getAllToolNames(),
    authorLabel: parsed.author?.label ?? null,
-   storePath: parsed.storePath,
+   connectionIds: parsed.connections.map(c => c.id),
   }),
  );
 } finally {

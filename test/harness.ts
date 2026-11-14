@@ -221,7 +221,8 @@ function recordingUIContext(sink: NotificationSink): Record<string, unknown> {
 export interface LoaderPathProof {
  toolNames: string[];
  authorLabel: string | null;
- storePath: string;
+ /** Connection ids `linear_connections` listed: proves which agent dir the store was opened under. */
+ connectionIds: string[];
 }
 
 /**

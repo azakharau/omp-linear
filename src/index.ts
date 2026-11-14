@@ -23,6 +23,7 @@ import {
 } from "@oh-my-pi/pi-coding-agent";
 import { rawApproval, typedApproval } from "./approval";
 import { ensureFreshAccessToken, loginOAuth, revokeToken } from "./auth/oauth";
+import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
 import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
 import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient } from "./client/graphql";
@@ -36,6 +37,12 @@ import { type UnpinnedNames, classifyRawDocument, injectCreateAsUser, mutationPa
 import { type LinearSessionState, emptyState, persistState, restoreState } from "./state";
 
 export const LINEAR_ENDPOINT = "https://api.linear.app/graphql";
+
+/** Where the connection of a call comes from: /linear-use, `linear.defaultConnection` or `linear.apiKeyFile`. */
+type ConnectionSource = "session" | "default" | "file";
+
+/** In-memory connection built from `linear.apiKeyFile`; it is never written to the store. */
+const API_KEY_FILE_CONNECTION = { id: "api-key-file", kind: "api_key", label: "API key file", actor: "user", workspace: null } as const;
 
 /** The only always-visible Linear tool. */
 export const SEARCH_TOOL = "linear_tool_search";
@@ -210,17 +217,36 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
   let state: LinearSessionState = emptyState();
   let activationChain: Promise<unknown> = Promise.resolve();
 
-  function selectedConnection(): Connection {
-   if (!state.connectionId) {
-    throw new Error(
-     "No Linear connection selected. Run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
-    );
+  /**
+   * The connection for this call: the session choice (/linear-use), then `linear.defaultConnection`,
+   * then `linear.apiKeyFile`. The key file is read on every call and is never stored or persisted.
+   */
+  function resolveConnection(cwd: string): { connection: Connection; source: ConnectionSource } {
+   if (state.connectionId) {
+    const connection = store.get(state.connectionId);
+    if (!connection) {
+     throw new Error(`Selected Linear connection "${state.connectionId}" no longer exists; run /linear-use <id>.`);
+    }
+    return { connection, source: "session" };
    }
-   const connection = store.get(state.connectionId);
-   if (!connection) {
-    throw new Error(`Selected Linear connection "${state.connectionId}" no longer exists; run /linear-use <id>.`);
+   const settings = readLinearSettings(cwd);
+   if (settings.defaultConnection) {
+    const connection = store.get(settings.defaultConnection);
+    if (!connection) {
+     throw new Error(`linear.defaultConnection "${settings.defaultConnection}" is not a stored connection; fix the setting or run /linear-use <id>.`);
+    }
+    return { connection, source: "default" };
    }
-   return connection;
+   if (settings.apiKeyFile) {
+    const apiKey = readApiKeyFile(settings.apiKeyFile);
+    return {
+     connection: { ...API_KEY_FILE_CONNECTION, createdAt: new Date().toISOString(), secret: { apiKey } },
+     source: "file",
+    };
+   }
+   throw new Error(
+    "No Linear connection selected. Set linear.apiKeyFile in the OMP settings, or run /linear-login (OAuth) or /linear-key (API key), then /linear-use <id>.",
+   );
   }
 
   function clientFor(connection: Connection, cwd: string): LinearClient {
@@ -236,11 +262,21 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    });
   }
 
-  /** Fails before any HTTP when the host gives no agent identity or no connection is selected. */
+  /** Fails before any HTTP when the host gives no agent identity or no connection is available. */
   function openCall(ctx: ExtensionContext): OutboundCall {
    const author = resolveAuthor(ctx.agent);
-   const connection = selectedConnection();
+   const { connection } = resolveConnection(ctx.cwd);
    return { connection, client: clientFor(connection, ctx.cwd), author, actor: connection.actor };
+  }
+
+  /** Secret-free view of the connection the next call would use, or why there is none. */
+  function effectiveConnection(cwd: string): { id: string; kind: string; actor: Actor; label: string; source: ConnectionSource } | { error: string } {
+   try {
+    const { connection, source } = resolveConnection(cwd);
+    return { id: connection.id, kind: connection.kind, actor: connection.actor, label: connection.label, source };
+   } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+   }
   }
 
   function attributes(call: OutboundCall): boolean {
@@ -394,12 +430,12 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    loadMode: "essential",
    defaultInactive: true,
    approval: "read",
-   async execute() {
+   async execute(_id, _params, _signal, _onUpdate, ctx) {
     const payload = {
      selected: state.connectionId,
+     effective: effectiveConnection(ctx.cwd),
      activeOperation: state.activeOperation,
      author: state.actor,
-     storePath: store.filePath,
      connections: store.list(),
     };
     return text(JSON.stringify(payload, null, 0), payload);

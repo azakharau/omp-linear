@@ -28,12 +28,18 @@ export type LinearOAuthSettings = typeof OAuthSettingsSchema.infer;
 const LinearSettingsSchema = type({
  /** GraphQL endpoint override (proxies, fakes); default https://api.linear.app/graphql. */
  "endpoint?": "string",
+ /** Env-style file with `LINEAR_API_KEY=...`; read on every call, the key never enters the session. */
+ "apiKeyFile?": "string",
+ /** Stored connection id used when the session has not selected one with /linear-use. */
+ "defaultConnection?": "string",
  "oauth?": OAuthSettingsSchema,
 });
 const SettingsLayerSchema = type({ "linear?": LinearSettingsSchema });
 
 export interface LinearSettings {
  endpoint?: string;
+ apiKeyFile?: string;
+ defaultConnection?: string;
  oauth: LinearOAuthSettings;
 }
 
@@ -54,7 +60,12 @@ export function readLinearSettings(cwd: string): LinearSettings {
  if (!settings) return { oauth: {} };
  const global = linearBlock(settings.getGlobalSettings(), "global");
  const project = linearBlock(settings.getProjectSettings(), "project");
- return { endpoint: project.endpoint ?? global.endpoint, oauth: { ...global.oauth, ...project.oauth } };
+ return {
+  endpoint: project.endpoint ?? global.endpoint,
+  apiKeyFile: project.apiKeyFile ?? global.apiKeyFile,
+  defaultConnection: project.defaultConnection ?? global.defaultConnection,
+  oauth: { ...global.oauth, ...project.oauth },
+ };
 }
 
 /**

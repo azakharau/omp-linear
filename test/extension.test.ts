@@ -253,6 +253,38 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
+	test("linear.apiKeyFile: without /linear-use a typed call sends the file key, which never reaches the model; the connection reports source=file", async () => {
+		const project = tempDir("omp-linear-keyfile-");
+		const keyFile = path.join(project, "linear.env");
+		const secret = "lin_api_keyfile_secret_7d2a";
+		fs.writeFileSync(keyFile, `export LINEAR_API_KEY="${secret}"\n`);
+		fs.mkdirSync(path.join(project, ".omp"), { recursive: true });
+		fs.writeFileSync(path.join(project, ".omp", "config.yml"), ["linear:", `  apiKeyFile: ${keyFile}`, ""].join("\n"));
+		const linear = fakeLinear(() => ({ data: { viewer: { id: "user-1", name: "Tester" } } }));
+		const script: ScriptedCall[] = [
+			activateCall("lq_viewer"),
+			["lq_viewer", { i: "Reading viewer" }],
+			activateCall("linear_connections"),
+			["linear_connections", { i: "Listing" }],
+		];
+		try {
+			const settingsInstance = await host.Settings.loadIsolated({ inMemory: true, cwd: project, agentDir });
+			await withSession({ script, endpoint: `${linear.url}graphql`, cwd: project, settingsInstance }, async (session, model) => {
+				await session.prompt("viewer and connections");
+				expect(toolOutputs(model.requests[2]!)[0]).toContain("Tester");
+				expect(linear.requests.map(r => r.authorization)).toEqual([secret]);
+				const listed = JSON.parse(toolOutputs(model.requests[4]!)[0]!) as { selected: string | null; effective: { id: string; source: string } };
+				expect(listed.selected).toBeNull();
+				expect(listed.effective).toMatchObject({ id: "api-key-file", source: "file" });
+				expect(model.requests.some(r => JSON.stringify(r).includes(secret))).toBe(false);
+				expect(session.sessionManager.getBranch().some(entry => JSON.stringify(entry).includes(secret))).toBe(false);
+			});
+		} finally {
+			linear.stop();
+			fs.rmSync(project, { recursive: true, force: true });
+		}
+	});
+
 	test("native deny: tools.approval denies lm_issueCreate before execute, so a valid connection makes zero requests", async () => {
 		const remove = await storeConnection(connection("key-deny", "user"));
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "i1", identifier: "ABC-1" } } } }));
@@ -473,14 +505,19 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("real loader path: package.json omp.extensions loads src/index.ts, reads ctx.agent from the host runner and uses the host agent dir", () => {
+	test("real loader path: package.json omp.extensions loads src/index.ts, reads ctx.agent from the host runner and uses the host agent dir", async () => {
 		// One host per process, loaded through the host's own loader: host identity, credentials under the host agent dir.
-		const { toolNames, authorLabel, storePath } = runLoaderPathProof(PRISTINE_HOST, agentDir);
-		expect(toolNames).toContain(SEARCH_TOOL);
-		expect(toolNames).toContain("linear_connections");
-		expect(toolNames.filter(isLinearOperation).length).toBe(550);
-		expect(authorLabel).toBe("OMP · Main");
-		expect(storePath).toBe(path.join(agentDir, "linear", "connections.json"));
+		const remove = await storeConnection(connection("loader-proof", "user"));
+		try {
+			const { toolNames, authorLabel, connectionIds } = runLoaderPathProof(PRISTINE_HOST, agentDir);
+			expect(toolNames).toContain(SEARCH_TOOL);
+			expect(toolNames).toContain("linear_connections");
+			expect(toolNames.filter(isLinearOperation).length).toBe(550);
+			expect(authorLabel).toBe("OMP · Main");
+			expect(connectionIds).toContain("loader-proof");
+		} finally {
+			await remove();
+		}
 	}, 30_000);
 
 	test("author labels: main is OMP · Main, a subagent names its definition and registry id, a missing identity throws", () => {
