@@ -32,7 +32,7 @@ import { getEncoding } from "js-tiktoken";
 const ROOT = path.resolve(import.meta.dir, "..");
 const ISSUE_UUID = "1e9f5a3c-6c1d-4f7e-9b2a-0c8d7e6f5a41";
 const FAKE_ISSUE_IDENTIFIER = "SMK-1";
-const DEFAULT_OMP = "/home/agent/.local/lib/omp/bin/omp";
+const DEFAULT_OMP = Bun.which("omp") ?? "omp";
 const VARIANTS = ["none", "ext", "ext-manifest", "ext-search-device", "ext-ergonomic-devices", "ext-all-devices", "mcp"] as const;
 type Variant = (typeof VARIANTS)[number];
 const SCENARIOS = ["S1", "S2", "S3", "S4"] as const;

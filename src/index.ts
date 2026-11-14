@@ -101,7 +101,7 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_issue_create: "Create a Linear issue. Aliases: new issue, create ticket.",
  linear_issue_update: "Update a Linear issue: edit, rename.",
  linear_issue_transition: "Transition a Linear issue to another workflow state, done.",
- linear_issue_get: "Get a Linear issue by identifier MNE-940 or UUID.",
+ linear_issue_get: "Get a Linear issue by identifier ENG-123 or UUID.",
  linear_issue_comment_add: "Add a comment to a Linear issue, reply.",
  linear_issue_relation_add: "Add a relation between Linear issues: blocks, related.",
  linear_issue_search: "Search or list Linear issues: assignee me, project, state types, stale issues not updated in N days.",

@@ -14,9 +14,8 @@ const FIXTURES = path.join(ROOT, "test", "fixtures");
 const ERGONOMIC: Record<string, string> = {
 	linear_issue_create: "Create new issue task ticket work item.",
 	linear_issue_update: "Update edit change issue task ticket title description.",
-	linear_issue_transition:
-		"Transition move workflow status state done issue task, update status.",
-	linear_issue_get: "Get show read issue by identifier MNE-940 or UUID.",
+	linear_issue_transition: "Transition move workflow status state done issue task, update status.",
+	linear_issue_get: "Get show read issue by identifier ENG-123 or UUID.",
 	linear_issue_comment_add: "Comment reply post add to issue task ticket.",
 	linear_issue_relation_add: "Relation link blocks related duplicate between issues.",
 	linear_issue_search: "Search find issues with filters and cursor pagination.",
@@ -121,7 +120,7 @@ describe("frozen intent corpus", () => {
 
 describe("encodeOutput", () => {
 	test("classifies the shape classes the policy was measured over", () => {
-		expect(analyzeShape("MNE-940")).toBe("scalar");
+		expect(analyzeShape("ENG-123")).toBe("scalar");
 		expect(analyzeShape(null)).toBe("scalar");
 		expect(analyzeShape([{ a: 1 }, { a: 2 }, { a: 3 }])).toBe("table");
 		expect(analyzeShape([{ a: 1 }])).toBe("table"); // row count is a policy threshold, not a class
@@ -137,7 +136,7 @@ describe("encodeOutput", () => {
 		expect(POLICY).toEqual(JSON.parse(fs.readFileSync(path.join(ROOT, "src", "output", "policy.json"), "utf8")).decisions);
 		const rows = Array.from({ length: 50 }, (_, i) => ({
 			id: `issue-${i}`,
-			identifier: `MNE-${i}`,
+			identifier: `ENG-${i}`,
 			title: `Row ${i}`,
 			priority: i % 4,
 			completed: i % 2 === 0,
@@ -189,8 +188,8 @@ describe("encodeOutput", () => {
 		expect(encoded.format).toBe("json");
 		expect(encoded.text).toBe(JSON.stringify(value));
 		expect(encoded.bytes).toBe(Buffer.byteLength(encoded.text, "utf8"));
-		const scalar = encodeOutput("MNE-940");
-		expect(scalar.text).toBe('"MNE-940"');
+		const scalar = encodeOutput("ENG-123");
+		expect(scalar.text).toBe('"ENG-123"');
 		expect(scalar.bytes).toBe(9);
 	});
 });
