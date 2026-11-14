@@ -33,6 +33,17 @@ describe("schema drift comparison", () => {
 		expect(report.drift).toBe(true);
 	});
 
+	test("a document using a field the live schema deprecates is drift", () => {
+		const live = buildSchema(`
+      type Issue { id: ID! title: String! @deprecated(reason: "use name") }
+      type Query { issue(id: String!): Issue  oldRoot: Issue }
+      type Mutation { issueArchive(id: String!, trash: Boolean): Boolean }
+    `);
+		const report = compareSchemas(PINNED, live, { stale: "query Stale { issue(id: \"1\") { id title } }" });
+		expect(Object.keys(report.invalidDocuments)).toEqual(["stale"]);
+		expect(report.drift).toBe(true);
+	});
+
 	test("identical schemas with valid documents report no drift", () => {
 		const report = compareSchemas(PINNED, PINNED, { ok: "query Ok { issue(id: \"1\") { id title } }" });
 		expect(report.drift).toBe(false);

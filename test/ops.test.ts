@@ -2,7 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { assertInputType, buildSchema, coerceInputValue, parse, validate, type OperationDefinitionNode } from "graphql";
+import { assertInputType, buildSchema, coerceInputValue, NoDeprecatedCustomRule, parse, validate, type OperationDefinitionNode } from "graphql";
 
 import { createLinearClient, type LinearClient } from "../src/client/graphql.ts";
 import { ergonomicOps, OP_DOCUMENTS, type ActorContext } from "../src/ops/index.ts";
@@ -112,6 +112,13 @@ describe("operation documents", () => {
 	test("every hand-written document validates against the pinned Linear schema", () => {
 		for (const [name, document] of Object.entries(ALL_DOCUMENTS)) {
 			const errors = validate(schema, parse(document));
+			expect(`${name}: ${errors.map(error => error.message).join(" | ")}`).toBe(`${name}: `);
+		}
+	});
+
+	test("no hand-written document selects a deprecated field, argument or enum value", () => {
+		for (const [name, document] of Object.entries(ALL_DOCUMENTS)) {
+			const errors = validate(schema, parse(document), [NoDeprecatedCustomRule]);
 			expect(`${name}: ${errors.map(error => error.message).join(" | ")}`).toBe(`${name}: `);
 		}
 	});
@@ -593,7 +600,7 @@ describe("linear_issue_search", () => {
 	test("is a single request that passes the cursor through and returns pageInfo verbatim", async () => {
 		const { client, calls } = await fakeLinear({
 			LinearIssueSearch: () => ({
-				issueSearch: {
+				searchIssues: {
 					nodes: [{ id: "i1", identifier: "ABC-12", title: "Fix the thing" }],
 					pageInfo: { hasNextPage: true, endCursor: "cursor-2" },
 				},
@@ -608,7 +615,7 @@ describe("linear_issue_search", () => {
 
 		expect(calls.length).toBe(1);
 		expect(calls[0]!.variables).toEqual({
-			query: "thing",
+			term: "thing",
 			filter: { team: { key: { eq: "ABC" } }, state: { name: { eq: "In Progress" } } },
 			first: 10,
 			after: "cursor-1",
@@ -675,7 +682,7 @@ describe("linear_issue_search", () => {
 				users: { nodes: [{ id: "u-ann", name: "Ann", displayName: "ann", email: "ann@x.io", active: true }] },
 			}),
 			LinearProjectLookup: () => ({ projects: { nodes: [{ id: "p-1", name: "Roadmap" }] } }),
-			LinearIssueSearch: () => ({ issueSearch: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
+			LinearIssueSearch: () => ({ searchIssues: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
 		});
 		await opNamed("linear_issue_search").run(
 			client,

@@ -8,9 +8,9 @@
  *
  * Variants:
  *   none                   `--no-extensions`
- *   ext                    `-e src/index.ts` as shipped
+ *   ext                    `-e src/index.ts` as shipped (`linear_tool_search` native, every other Linear tool inactive)
  *   ext-manifest           the package loaded from `extensions: [<repo>]` in the agent config.yml
- *   ext-search-device      only `linear_tool_search` remounted `loadMode: "discoverable"` (an xd:// device)
+ *   ext-search-device      comparison: only `linear_tool_search` remounted `loadMode: "discoverable"` (an xd:// device)
  *   ext-ergonomic-devices  search + utility + ergonomic tools discoverable (devices)
  *   ext-all-devices        every Linear tool discoverable
  *   mcp                    the official Linear MCP server (needs LINEAR_API_KEY or --key-file)

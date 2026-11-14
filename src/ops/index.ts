@@ -146,8 +146,8 @@ const ISSUE_PAGE = `nodes {
     }
     pageInfo { hasNextPage endCursor }`;
 
-export const ISSUE_SEARCH = `query LinearIssueSearch($query: String, $filter: IssueFilter, $first: Int, $after: String, $includeArchived: Boolean) {
-  issueSearch(query: $query, filter: $filter, first: $first, after: $after, includeArchived: $includeArchived) {
+export const ISSUE_SEARCH = `query LinearIssueSearch($term: String!, $filter: IssueFilter, $first: Int, $after: String, $includeArchived: Boolean) {
+  searchIssues(term: $term, filter: $filter, first: $first, after: $after, includeArchived: $includeArchived) {
     ${ISSUE_PAGE}
   }
 }`;
@@ -892,7 +892,7 @@ async function issueFilter(
  return Object.keys(filter).length === 0 ? null : filter;
 }
 
-const issueSearch: ErgonomicOp = {
+const searchIssues: ErgonomicOp = {
  name: "linear_issue_search",
  description:
   'Search or list issues in one bounded page, filtered by team key, state, assignee ("me", name or UUID), project (name or UUID), priority, labels and staleness.',
@@ -924,11 +924,11 @@ const issueSearch: ErgonomicOp = {
    after: optionalString(args, "after") ?? null,
    includeArchived: args.includeArchived === true,
   };
-  const root = query === undefined ? "issues" : "issueSearch";
+  const root = query === undefined ? "issues" : "searchIssues";
   const data =
    query === undefined
     ? await request(client, ISSUE_LIST, variables)
-    : await request(client, ISSUE_SEARCH, { query, ...variables });
+    : await request(client, ISSUE_SEARCH, { term: query, ...variables });
   return {
    nodes: connectionNodes(data, root),
    pageInfo: record(record(data, root, root), "pageInfo", root),
@@ -1075,7 +1075,7 @@ export const ergonomicOps: ErgonomicOp[] = [
  projectStatusPost,
  milestoneCreate,
  milestoneUpdate,
- issueSearch,
+ searchIssues,
  documentCreate,
  documentUpdate,
  documentGet,
