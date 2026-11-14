@@ -14,7 +14,7 @@ var __export = (target, all) => {
     });
 };
 
-// node_modules/graphql/language/kinds_.mjs
+// ../../node_modules/graphql/language/kinds_.mjs
 var exports_kinds_ = {};
 __export(exports_kinds_, {
   ARGUMENT: () => ARGUMENT,
@@ -71,12 +71,12 @@ __export(exports_kinds_, {
 
 // src/index.ts
 import { randomUUID as randomUUID2 } from "crypto";
-import * as path3 from "path";
+import * as path4 from "path";
 import {
   getAgentDir
 } from "@oh-my-pi/pi-coding-agent";
 
-// node_modules/graphql/jsutils/inspect.mjs
+// ../../node_modules/graphql/jsutils/inspect.mjs
 var MAX_ARRAY_LENGTH = 10;
 var MAX_RECURSIVE_DEPTH = 2;
 function inspect(value) {
@@ -157,7 +157,7 @@ function getObjectTag(object) {
   return tag;
 }
 
-// node_modules/graphql/jsutils/instanceOf.mjs
+// ../../node_modules/graphql/jsutils/instanceOf.mjs
 function devInstanceOf(value, symbol, constructor) {
   if (value?.__kind === symbol) {
     return true;
@@ -191,14 +191,14 @@ function enableDevInstanceOf() {
   instanceOf = devInstanceOf;
 }
 
-// node_modules/graphql/devMode.mjs
+// ../../node_modules/graphql/devMode.mjs
 var devMode = false;
 function enableDevMode() {
   devMode = true;
   enableDevInstanceOf();
 }
 
-// node_modules/graphql/jsutils/toError.mjs
+// ../../node_modules/graphql/jsutils/toError.mjs
 function toError(thrownValue) {
   return thrownValue instanceof Error ? thrownValue : new NonErrorThrown(thrownValue);
 }
@@ -211,12 +211,12 @@ class NonErrorThrown extends Error {
   }
 }
 
-// node_modules/graphql/jsutils/isObjectLike.mjs
+// ../../node_modules/graphql/jsutils/isObjectLike.mjs
 function isObjectLike(value) {
   return typeof value == "object" && value !== null;
 }
 
-// node_modules/graphql/jsutils/AccumulatorMap.mjs
+// ../../node_modules/graphql/jsutils/AccumulatorMap.mjs
 class AccumulatorMap extends Map {
   get [Symbol.toStringTag]() {
     return "AccumulatorMap";
@@ -231,7 +231,7 @@ class AccumulatorMap extends Map {
   }
 }
 
-// node_modules/graphql/language/location.mjs
+// ../../node_modules/graphql/language/location.mjs
 var LineRegExp = /\r\n|[\n\r]/g;
 function getLocation(source, position) {
   const matches = source.body.matchAll(LineRegExp);
@@ -277,7 +277,7 @@ function getLocations(locations) {
   return result;
 }
 
-// node_modules/graphql/language/printLocation.mjs
+// ../../node_modules/graphql/language/printLocation.mjs
 function printLocation(location) {
   return printSourceLocation(location.source, getLocation(location.source, location.start));
 }
@@ -322,7 +322,7 @@ function printPrefixedLines(lines) {
 `);
 }
 
-// node_modules/graphql/error/GraphQLError.mjs
+// ../../node_modules/graphql/error/GraphQLError.mjs
 class GraphQLError extends Error {
   constructor(message, options = {}) {
     const { nodes, source, positions, path, originalError, cause, extensions } = options;
@@ -410,7 +410,7 @@ function undefinedIfEmpty(array) {
   return array === undefined || array.length === 0 ? undefined : array;
 }
 
-// node_modules/graphql/error/ensureGraphQLError.mjs
+// ../../node_modules/graphql/error/ensureGraphQLError.mjs
 function ensureGraphQLError(rawError) {
   if (rawError instanceof GraphQLError) {
     return rawError;
@@ -419,19 +419,19 @@ function ensureGraphQLError(rawError) {
   return new GraphQLError(originalError.message, { originalError });
 }
 
-// node_modules/graphql/jsutils/capitalize.mjs
+// ../../node_modules/graphql/jsutils/capitalize.mjs
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-// node_modules/graphql/jsutils/invariant.mjs
+// ../../node_modules/graphql/jsutils/invariant.mjs
 function invariant(condition, message) {
   if (!condition) {
     throw new Error(message ?? "Unexpected invariant triggered.");
   }
 }
 
-// node_modules/graphql/jsutils/formatList.mjs
+// ../../node_modules/graphql/jsutils/formatList.mjs
 function orList(items) {
   return formatList("or", items);
 }
@@ -452,12 +452,12 @@ function formatList(conjunction, items) {
   return allButLast.join(", ") + ", " + conjunction + " " + lastItem;
 }
 
-// node_modules/graphql/jsutils/isIterableObject.mjs
+// ../../node_modules/graphql/jsutils/isIterableObject.mjs
 function isIterableObject(maybeIterable) {
   return typeof maybeIterable === "object" && typeof maybeIterable?.[Symbol.iterator] === "function";
 }
 
-// node_modules/graphql/jsutils/keyMap.mjs
+// ../../node_modules/graphql/jsutils/keyMap.mjs
 function keyMap(list, keyFn) {
   const result = Object.create(null);
   for (const item of list) {
@@ -466,7 +466,7 @@ function keyMap(list, keyFn) {
   return result;
 }
 
-// node_modules/graphql/jsutils/mapValue.mjs
+// ../../node_modules/graphql/jsutils/mapValue.mjs
 function mapValue(map, fn) {
   const result = Object.create(null);
   for (const key of Object.keys(map)) {
@@ -475,7 +475,7 @@ function mapValue(map, fn) {
   return result;
 }
 
-// node_modules/graphql/jsutils/printPathArray.mjs
+// ../../node_modules/graphql/jsutils/printPathArray.mjs
 function printPathArray(path) {
   if (path.length === 0) {
     return "";
@@ -483,7 +483,7 @@ function printPathArray(path) {
   return ` at ${path.map((key) => typeof key === "number" ? `[${key}]` : `.${key}`).join("")}`;
 }
 
-// node_modules/graphql/language/ast.mjs
+// ../../node_modules/graphql/language/ast.mjs
 class Location {
   constructor(startToken, endToken, source) {
     this.start = startToken.start;
@@ -633,7 +633,7 @@ var OperationTypeNode = {
   SUBSCRIPTION: "subscription"
 };
 
-// node_modules/graphql/language/kinds_.mjs
+// ../../node_modules/graphql/language/kinds_.mjs
 var NAME = "Name";
 var DOCUMENT = "Document";
 var OPERATION_DEFINITION = "OperationDefinition";
@@ -684,14 +684,14 @@ var MEMBER_COORDINATE = "MemberCoordinate";
 var ARGUMENT_COORDINATE = "ArgumentCoordinate";
 var DIRECTIVE_COORDINATE = "DirectiveCoordinate";
 var DIRECTIVE_ARGUMENT_COORDINATE = "DirectiveArgumentCoordinate";
-// node_modules/graphql/jsutils/devAssert.mjs
+// ../../node_modules/graphql/jsutils/devAssert.mjs
 function devAssert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-// node_modules/graphql/jsutils/didYouMean.mjs
+// ../../node_modules/graphql/jsutils/didYouMean.mjs
 var MAX_SUGGESTIONS = 5;
 function didYouMean(firstArg, secondArg) {
   const [subMessage, suggestions] = secondArg ? [firstArg, secondArg] : [undefined, firstArg];
@@ -706,12 +706,12 @@ function didYouMean(firstArg, secondArg) {
   return message + suggestionList + "?";
 }
 
-// node_modules/graphql/jsutils/identityFunc.mjs
+// ../../node_modules/graphql/jsutils/identityFunc.mjs
 function identityFunc(x) {
   return x;
 }
 
-// node_modules/graphql/jsutils/keyValMap.mjs
+// ../../node_modules/graphql/jsutils/keyValMap.mjs
 function keyValMap(list, keyFn, valFn) {
   const result = Object.create(null);
   for (const item of list) {
@@ -720,7 +720,7 @@ function keyValMap(list, keyFn, valFn) {
   return result;
 }
 
-// node_modules/graphql/jsutils/naturalCompare.mjs
+// ../../node_modules/graphql/jsutils/naturalCompare.mjs
 function naturalCompare(aStr, bStr) {
   let aIndex = 0;
   let bIndex = 0;
@@ -765,7 +765,7 @@ function isDigit(code) {
   return !isNaN(code) && DIGIT_0 <= code && code <= DIGIT_9;
 }
 
-// node_modules/graphql/jsutils/suggestionList.mjs
+// ../../node_modules/graphql/jsutils/suggestionList.mjs
 function suggestionList(input, options) {
   const optionsByDistance = Object.create(null);
   const lexicalDistance = new LexicalDistance(input);
@@ -850,7 +850,7 @@ function stringToArray(str) {
   return array;
 }
 
-// node_modules/graphql/jsutils/toObjMap.mjs
+// ../../node_modules/graphql/jsutils/toObjMap.mjs
 function toObjMapWithSymbols(obj) {
   if (obj == null) {
     return Object.create(null);
@@ -868,7 +868,7 @@ function toObjMapWithSymbols(obj) {
   return map;
 }
 
-// node_modules/graphql/language/characterClasses.mjs
+// ../../node_modules/graphql/language/characterClasses.mjs
 function isWhiteSpace(code) {
   return code === 9 || code === 32;
 }
@@ -885,7 +885,7 @@ function isNameContinue(code) {
   return isLetter(code) || isDigit2(code) || code === 95;
 }
 
-// node_modules/graphql/language/blockString.mjs
+// ../../node_modules/graphql/language/blockString.mjs
 function dedentBlockStringLines(lines) {
   let commonIndent = Number.MAX_SAFE_INTEGER;
   let firstNonEmptyLine = null;
@@ -935,7 +935,7 @@ function printBlockString(value, options) {
   return '"""' + result + '"""';
 }
 
-// node_modules/graphql/language/printString.mjs
+// ../../node_modules/graphql/language/printString.mjs
 function printString(str) {
   return `"${str.replace(escapedRegExp, escapedReplacer)}"`;
 }
@@ -1106,7 +1106,7 @@ var escapeSequences = [
   "\\u009F"
 ];
 
-// node_modules/graphql/language/reducer.mjs
+// ../../node_modules/graphql/language/reducer.mjs
 function reduce(root, reducer) {
   const stack = [];
   let frame = {
@@ -1162,7 +1162,7 @@ function reduce(root, reducer) {
   return node;
 }
 
-// node_modules/graphql/language/printer.mjs
+// ../../node_modules/graphql/language/printer.mjs
 function print(ast, options) {
   return render(reduce(ast, printDocASTReducer), options?.maxIndentDepth ?? Infinity);
 }
@@ -1499,7 +1499,7 @@ function wrappedLineAndArgs(prefix, args) {
   ]);
 }
 
-// node_modules/graphql/utilities/valueFromASTUntyped.mjs
+// ../../node_modules/graphql/utilities/valueFromASTUntyped.mjs
 function valueFromASTUntyped(valueNode, variables) {
   switch (valueNode.kind) {
     case NULL:
@@ -1521,7 +1521,7 @@ function valueFromASTUntyped(valueNode, variables) {
   }
 }
 
-// node_modules/graphql/type/assertName.mjs
+// ../../node_modules/graphql/type/assertName.mjs
 function assertName(name) {
   if (name.length === 0) {
     throw new GraphQLError("Expected name to be a non-empty string.");
@@ -1543,7 +1543,7 @@ function assertEnumValueName(name) {
   return assertName(name);
 }
 
-// node_modules/graphql/type/definition.mjs
+// ../../node_modules/graphql/type/definition.mjs
 function isType(type) {
   return isScalarType(type) || isObjectType(type) || isInterfaceType(type) || isUnionType(type) || isEnumType(type) || isInputObjectType(type) || isListType(type) || isNonNullType(type);
 }
@@ -2154,7 +2154,7 @@ function isRequiredInputField(field) {
   return isNonNullType(field.type) && field.defaultValue === undefined && field.default === undefined;
 }
 
-// node_modules/graphql/utilities/typeComparators.mjs
+// ../../node_modules/graphql/utilities/typeComparators.mjs
 function isEqualType(typeA, typeB) {
   if (typeA === typeB) {
     return true;
@@ -2207,7 +2207,7 @@ function doTypesOverlap(schema, typeA, typeB) {
   return false;
 }
 
-// node_modules/graphql/jsutils/Path.mjs
+// ../../node_modules/graphql/jsutils/Path.mjs
 function addPath(prev, key, typename) {
   return { prev, key, typename };
 }
@@ -2221,7 +2221,7 @@ function pathToArray(path) {
   return flattened.reverse();
 }
 
-// node_modules/graphql/utilities/valueToLiteral.mjs
+// ../../node_modules/graphql/utilities/valueToLiteral.mjs
 function valueToLiteral(value, type) {
   if (isNonNullType(type)) {
     if (value == null) {
@@ -2329,7 +2329,7 @@ function defaultScalarValueToLiteral(value) {
   throw new TypeError(`Cannot convert value to AST: ${inspect(value)}.`);
 }
 
-// node_modules/graphql/utilities/replaceVariables.mjs
+// ../../node_modules/graphql/utilities/replaceVariables.mjs
 function replaceVariables(valueNode, variableValues, fragmentVariableValues) {
   switch (valueNode.kind) {
     case VARIABLE: {
@@ -2395,7 +2395,7 @@ function replaceVariables(valueNode, variableValues, fragmentVariableValues) {
   }
 }
 
-// node_modules/graphql/utilities/validateInputValue.mjs
+// ../../node_modules/graphql/utilities/validateInputValue.mjs
 function validateInputValue(inputValue, type, onError, hideSuggestions) {
   return validateInputValueImpl(inputValue, type, onError, hideSuggestions, undefined);
 }
@@ -2623,7 +2623,7 @@ function getOneOfInputObjectErrorMessage(type) {
   return `Within OneOf Input Object type "${type}", exactly one field must be specified, and the value for that field must be non-null.`;
 }
 
-// node_modules/graphql/language/directiveLocation.mjs
+// ../../node_modules/graphql/language/directiveLocation.mjs
 var DirectiveLocation = {
   QUERY: "QUERY",
   MUTATION: "MUTATION",
@@ -2648,7 +2648,7 @@ var DirectiveLocation = {
   DIRECTIVE_DEFINITION: "DIRECTIVE_DEFINITION"
 };
 
-// node_modules/graphql/type/scalars.mjs
+// ../../node_modules/graphql/type/scalars.mjs
 var GRAPHQL_MAX_INT = 2147483647;
 var GRAPHQL_MIN_INT = -2147483648;
 var GraphQLInt = new GraphQLScalarType({
@@ -2952,7 +2952,7 @@ function coerceIDFromNumber(value) {
   return String(value);
 }
 
-// node_modules/graphql/type/directives.mjs
+// ../../node_modules/graphql/type/directives.mjs
 var directiveSymbol = Symbol("Directive");
 function isDirective(directive) {
   return instanceOf(directive, directiveSymbol, GraphQLDirective);
@@ -3124,7 +3124,7 @@ function isSpecifiedDirective(directive) {
   return specifiedDirectives.some(({ name }) => name === directive.name);
 }
 
-// node_modules/graphql/utilities/astFromValue.mjs
+// ../../node_modules/graphql/utilities/astFromValue.mjs
 function astFromValue(value, type) {
   if (isNonNullType(type)) {
     const astValue = astFromValue(value, type.ofType);
@@ -3203,7 +3203,7 @@ function astFromValue(value, type) {
 }
 var integerStringRegExp = /^-?(?:0|[1-9][0-9]*)$/;
 
-// node_modules/graphql/utilities/getDefaultValueAST.mjs
+// ../../node_modules/graphql/utilities/getDefaultValueAST.mjs
 function getDefaultValueAST(argOrInputField) {
   const type = argOrInputField.type;
   const defaultInput = argOrInputField.default;
@@ -3223,7 +3223,7 @@ function getDefaultValueAST(argOrInputField) {
   return;
 }
 
-// node_modules/graphql/type/introspection.mjs
+// ../../node_modules/graphql/type/introspection.mjs
 var __Schema = new GraphQLObjectType({
   name: "__Schema",
   description: "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.",
@@ -3697,7 +3697,7 @@ function isIntrospectionType(type) {
   return introspectionTypes.some(({ name }) => type.name === name);
 }
 
-// node_modules/graphql/type/schema.mjs
+// ../../node_modules/graphql/type/schema.mjs
 function isSchema(schema) {
   return instanceOf(schema, schemaSymbol, GraphQLSchema);
 }
@@ -3896,7 +3896,7 @@ function collectReferencedTypes(type, typeSet) {
   return typeSet;
 }
 
-// node_modules/graphql/type/validate.mjs
+// ../../node_modules/graphql/type/validate.mjs
 function validateSchema(schema) {
   assertSchema(schema);
   if (schema.__validationErrors) {
@@ -4427,7 +4427,7 @@ function getDeprecatedDirectiveNode(definitionNode) {
   return definitionNode?.directives?.find((node) => node.name.value === GraphQLDeprecatedDirective.name);
 }
 
-// node_modules/graphql/error/syntaxError.mjs
+// ../../node_modules/graphql/error/syntaxError.mjs
 function syntaxError(source, position, description) {
   return new GraphQLError(`Syntax Error: ${description}`, {
     source,
@@ -4435,7 +4435,7 @@ function syntaxError(source, position, description) {
   });
 }
 
-// node_modules/graphql/diagnostics.mjs
+// ../../node_modules/graphql/diagnostics.mjs
 function resolveDiagnosticsChannel() {
   let dc;
   try {
@@ -4471,7 +4471,7 @@ function shouldTrace(channel) {
   return false;
 }
 
-// node_modules/graphql/language/tokenKind.mjs
+// ../../node_modules/graphql/language/tokenKind.mjs
 var TokenKind = {
   SOF: "<SOF>",
   EOF: "<EOF>",
@@ -4498,7 +4498,7 @@ var TokenKind = {
   COMMENT: "Comment"
 };
 
-// node_modules/graphql/language/lexer.mjs
+// ../../node_modules/graphql/language/lexer.mjs
 class Lexer {
   constructor(source) {
     const startOfFileToken = new Token(TokenKind.SOF, 0, 0, 0, 0);
@@ -4885,7 +4885,7 @@ function readName(lexer, start) {
   return createToken(lexer, TokenKind.NAME, start, position, body.slice(start, position));
 }
 
-// node_modules/graphql/language/source.mjs
+// ../../node_modules/graphql/language/source.mjs
 var sourceSymbol = Symbol("Source");
 
 class Source {
@@ -4907,7 +4907,7 @@ function isSource(source) {
   return instanceOf(source, sourceSymbol, Source);
 }
 
-// node_modules/graphql/language/parser.mjs
+// ../../node_modules/graphql/language/parser.mjs
 function parse(source, options) {
   return shouldTrace(parseChannel) ? parseChannel.traceSync(() => parseImpl(source, options), { source }) : parseImpl(source, options);
 }
@@ -5861,7 +5861,7 @@ function getTokenKindDesc(kind) {
   return isPunctuatorTokenKind(kind) ? `"${kind}"` : kind;
 }
 
-// node_modules/graphql/language/visitor.mjs
+// ../../node_modules/graphql/language/visitor.mjs
 var allKinds = Object.values(exports_kinds_);
 var BREAK = Object.freeze({});
 function visit(root, visitor, visitorKeys = QueryDocumentKeys) {
@@ -6034,7 +6034,7 @@ function getEnterLeaveForKind(visitor, kind) {
   return { enter: visitor.enter, leave: visitor.leave };
 }
 
-// node_modules/graphql/utilities/typeFromAST.mjs
+// ../../node_modules/graphql/utilities/typeFromAST.mjs
 function typeFromAST(schema, typeNode) {
   switch (typeNode.kind) {
     case LIST_TYPE: {
@@ -6050,7 +6050,7 @@ function typeFromAST(schema, typeNode) {
   }
 }
 
-// node_modules/graphql/utilities/TypeInfo.mjs
+// ../../node_modules/graphql/utilities/TypeInfo.mjs
 class TypeInfo {
   constructor(schema, initialType, fragmentSignatures) {
     this._schema = schema;
@@ -6321,7 +6321,7 @@ function visitWithTypeInfo(typeInfo, visitor) {
   };
 }
 
-// node_modules/graphql/validation/rules/DeferStreamDirectiveLabelRule.mjs
+// ../../node_modules/graphql/validation/rules/DeferStreamDirectiveLabelRule.mjs
 function DeferStreamDirectiveLabelRule(context) {
   const knownLabels = new Map;
   return {
@@ -6347,7 +6347,7 @@ function DeferStreamDirectiveLabelRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/DeferStreamDirectiveOnRootFieldRule.mjs
+// ../../node_modules/graphql/validation/rules/DeferStreamDirectiveOnRootFieldRule.mjs
 function DeferStreamDirectiveOnRootFieldRule(context) {
   const checkedFragments = new Set;
   return {
@@ -6430,7 +6430,7 @@ function getDeferDirective(fragment) {
   return fragment.directives?.find((d) => d.name.value === GraphQLDeferDirective.name);
 }
 
-// node_modules/graphql/validation/rules/DeferStreamDirectiveOnValidOperationsRule.mjs
+// ../../node_modules/graphql/validation/rules/DeferStreamDirectiveOnValidOperationsRule.mjs
 function ifArgumentCanBeFalse(node) {
   const ifArgument = node.arguments?.find((arg) => arg.name.value === "if");
   if (!ifArgument) {
@@ -6548,7 +6548,7 @@ function forbidUnconditionalDeferStream({ context, checkedFragments, selectionSe
   return valid;
 }
 
-// node_modules/graphql/language/predicates.mjs
+// ../../node_modules/graphql/language/predicates.mjs
 function isExecutableDefinitionNode(node) {
   return node.kind === OPERATION_DEFINITION || node.kind === FRAGMENT_DEFINITION;
 }
@@ -6565,7 +6565,7 @@ function isTypeExtensionNode(node) {
   return node.kind === SCALAR_TYPE_EXTENSION || node.kind === OBJECT_TYPE_EXTENSION || node.kind === INTERFACE_TYPE_EXTENSION || node.kind === UNION_TYPE_EXTENSION || node.kind === ENUM_TYPE_EXTENSION || node.kind === INPUT_OBJECT_TYPE_EXTENSION;
 }
 
-// node_modules/graphql/validation/rules/ExecutableDefinitionsRule.mjs
+// ../../node_modules/graphql/validation/rules/ExecutableDefinitionsRule.mjs
 function ExecutableDefinitionsRule(context) {
   return {
     Document(node) {
@@ -6582,7 +6582,7 @@ function ExecutableDefinitionsRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/FieldsOnCorrectTypeRule.mjs
+// ../../node_modules/graphql/validation/rules/FieldsOnCorrectTypeRule.mjs
 function FieldsOnCorrectTypeRule(context) {
   return {
     Field(node) {
@@ -6644,7 +6644,7 @@ function getSuggestedFieldNames(type, fieldName) {
   return [];
 }
 
-// node_modules/graphql/validation/rules/FragmentsOnCompositeTypesRule.mjs
+// ../../node_modules/graphql/validation/rules/FragmentsOnCompositeTypesRule.mjs
 function FragmentsOnCompositeTypesRule(context) {
   return {
     InlineFragment(node) {
@@ -6667,7 +6667,7 @@ function FragmentsOnCompositeTypesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/KnownArgumentNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/KnownArgumentNamesRule.mjs
 function KnownArgumentNamesRule(context) {
   return {
     ...KnownArgumentNamesOnDirectivesRule(context),
@@ -6725,7 +6725,7 @@ function KnownArgumentNamesOnDirectivesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/KnownDirectivesRule.mjs
+// ../../node_modules/graphql/validation/rules/KnownDirectivesRule.mjs
 function KnownDirectivesRule(context) {
   const locationsMap = new Map;
   const schema = context.getSchema();
@@ -6824,7 +6824,7 @@ function getDirectiveLocationForOperation(operation) {
   }
 }
 
-// node_modules/graphql/validation/rules/KnownFragmentNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/KnownFragmentNamesRule.mjs
 function KnownFragmentNamesRule(context) {
   return {
     FragmentSpread(node) {
@@ -6839,7 +6839,7 @@ function KnownFragmentNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/KnownOperationTypesRule.mjs
+// ../../node_modules/graphql/validation/rules/KnownOperationTypesRule.mjs
 function KnownOperationTypesRule(context) {
   const schema = context.getSchema();
   return {
@@ -6852,7 +6852,7 @@ function KnownOperationTypesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/KnownTypeNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/KnownTypeNamesRule.mjs
 function KnownTypeNamesRule(context) {
   const { definitions } = context.getDocument();
   const existingTypesMap = context.getSchema()?.getTypeMap() ?? {};
@@ -6884,7 +6884,7 @@ function isSDLNode(value) {
   return "kind" in value && (isTypeSystemDefinitionNode(value) || isTypeSystemExtensionNode(value));
 }
 
-// node_modules/graphql/validation/rules/LoneAnonymousOperationRule.mjs
+// ../../node_modules/graphql/validation/rules/LoneAnonymousOperationRule.mjs
 function LoneAnonymousOperationRule(context) {
   let operationCount = 0;
   return {
@@ -6899,7 +6899,7 @@ function LoneAnonymousOperationRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/LoneSchemaDefinitionRule.mjs
+// ../../node_modules/graphql/validation/rules/LoneSchemaDefinitionRule.mjs
 function LoneSchemaDefinitionRule(context) {
   const oldSchema = context.getSchema();
   const alreadyDefined = oldSchema?.astNode ?? oldSchema?.getQueryType() ?? oldSchema?.getMutationType() ?? oldSchema?.getSubscriptionType();
@@ -6920,7 +6920,7 @@ function LoneSchemaDefinitionRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/MaxIntrospectionDepthRule.mjs
+// ../../node_modules/graphql/validation/rules/MaxIntrospectionDepthRule.mjs
 var MAX_LISTS_DEPTH = 3;
 function MaxIntrospectionDepthRule(context) {
   const checkedFragments = Object.create(null);
@@ -6979,7 +6979,7 @@ function MaxIntrospectionDepthRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/NoFragmentCyclesRule.mjs
+// ../../node_modules/graphql/validation/rules/NoFragmentCyclesRule.mjs
 function NoFragmentCyclesRule(context) {
   const visitedFrags = new Set;
   const spreadPath = [];
@@ -7022,7 +7022,7 @@ function NoFragmentCyclesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/NoUndefinedVariablesRule.mjs
+// ../../node_modules/graphql/validation/rules/NoUndefinedVariablesRule.mjs
 function NoUndefinedVariablesRule(context) {
   return {
     OperationDefinition(operation) {
@@ -7041,7 +7041,7 @@ function NoUndefinedVariablesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/NoUnusedFragmentsRule.mjs
+// ../../node_modules/graphql/validation/rules/NoUnusedFragmentsRule.mjs
 function NoUnusedFragmentsRule(context) {
   const operations = [];
   const fragmentDefs = [];
@@ -7070,7 +7070,7 @@ function NoUnusedFragmentsRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/NoUnusedVariablesRule.mjs
+// ../../node_modules/graphql/validation/rules/NoUnusedVariablesRule.mjs
 function NoUnusedVariablesRule(context) {
   return {
     FragmentDefinition(fragment) {
@@ -7104,10 +7104,10 @@ function NoUnusedVariablesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/validationAbortedError.mjs
+// ../../node_modules/graphql/validation/validationAbortedError.mjs
 var validationAbortedError = new GraphQLError("Validation aborted.");
 
-// node_modules/graphql/validation/rules/OverlappingFieldsCanBeMergedRule.mjs
+// ../../node_modules/graphql/validation/rules/OverlappingFieldsCanBeMergedRule.mjs
 var MAX_CONFLICT_DETAIL_LENGTH = 1000;
 var MAX_CONFLICT_NODES = 20;
 var MAX_FRAGMENT_ARGUMENT_SIZE = 256;
@@ -7738,7 +7738,7 @@ class PairSet {
   }
 }
 
-// node_modules/graphql/validation/rules/PossibleFragmentSpreadsRule.mjs
+// ../../node_modules/graphql/validation/rules/PossibleFragmentSpreadsRule.mjs
 function PossibleFragmentSpreadsRule(context) {
   return {
     InlineFragment(node) {
@@ -7772,7 +7772,7 @@ function getFragmentType(context, name) {
   }
 }
 
-// node_modules/graphql/validation/rules/PossibleTypeExtensionsRule.mjs
+// ../../node_modules/graphql/validation/rules/PossibleTypeExtensionsRule.mjs
 function PossibleTypeExtensionsRule(context) {
   const schema = context.getSchema();
   const definedTypes = new Map;
@@ -7863,7 +7863,7 @@ function extensionKindToTypeName(kind) {
   }
 }
 
-// node_modules/graphql/validation/rules/ProvidedRequiredArgumentsRule.mjs
+// ../../node_modules/graphql/validation/rules/ProvidedRequiredArgumentsRule.mjs
 function ProvidedRequiredArgumentsRule(context) {
   const requiredArgsByFragment = new Map;
   return {
@@ -7942,7 +7942,7 @@ function isRequiredArgumentNode(arg) {
   return arg.type.kind === NON_NULL_TYPE && arg.defaultValue == null;
 }
 
-// node_modules/graphql/validation/rules/ScalarLeafsRule.mjs
+// ../../node_modules/graphql/validation/rules/ScalarLeafsRule.mjs
 function ScalarLeafsRule(context) {
   return {
     Field(node) {
@@ -7969,7 +7969,7 @@ function ScalarLeafsRule(context) {
   };
 }
 
-// node_modules/graphql/utilities/coerceInputValue.mjs
+// ../../node_modules/graphql/utilities/coerceInputValue.mjs
 function coerceInputValue(inputValue, type) {
   if (isNonNullType(type)) {
     if (inputValue == null) {
@@ -8168,7 +8168,7 @@ function coerceDefaultValue(inputValue) {
   return defaultValue;
 }
 
-// node_modules/graphql/execution/values.mjs
+// ../../node_modules/graphql/execution/values.mjs
 function maybeUseDefaultValue(coercedValues, name, inputValue, onError, hideSuggestions) {
   try {
     const coercedDefaultValue = coerceDefaultValue(inputValue);
@@ -8266,7 +8266,7 @@ function getDirectiveValues(directiveDef, node, variableValues, fragmentVariable
   }
 }
 
-// node_modules/graphql/execution/collectFields.mjs
+// ../../node_modules/graphql/execution/collectFields.mjs
 function collectFields2(schema, fragments, variableValues, runtimeType, selectionSet, hideSuggestions, forbidSkipAndInclude = false, visit = visitSelectionSets) {
   const groupedFieldSet = new AccumulatorMap;
   const newDeferUsages = [];
@@ -8403,7 +8403,7 @@ function getFieldEntryKey(node) {
   return node.alias ? node.alias.value : node.name.value;
 }
 
-// node_modules/graphql/validation/rules/SingleFieldSubscriptionsRule.mjs
+// ../../node_modules/graphql/validation/rules/SingleFieldSubscriptionsRule.mjs
 function toNodes(fieldDetailsList) {
   return fieldDetailsList.map((fieldDetails) => fieldDetails.node);
 }
@@ -8465,7 +8465,7 @@ function SingleFieldSubscriptionsRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/StreamDirectiveOnListFieldRule.mjs
+// ../../node_modules/graphql/validation/rules/StreamDirectiveOnListFieldRule.mjs
 function StreamDirectiveOnListFieldRule(context) {
   return {
     Directive(node) {
@@ -8478,7 +8478,7 @@ function StreamDirectiveOnListFieldRule(context) {
   };
 }
 
-// node_modules/graphql/jsutils/groupBy.mjs
+// ../../node_modules/graphql/jsutils/groupBy.mjs
 function groupBy(list, keyFn) {
   const result = new AccumulatorMap;
   for (const item of list) {
@@ -8487,7 +8487,7 @@ function groupBy(list, keyFn) {
   return result;
 }
 
-// node_modules/graphql/validation/rules/UniqueArgumentDefinitionNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueArgumentDefinitionNamesRule.mjs
 function UniqueArgumentDefinitionNamesRule(context) {
   return {
     DirectiveDefinition(directiveNode) {
@@ -8520,7 +8520,7 @@ function UniqueArgumentDefinitionNamesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/UniqueArgumentNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueArgumentNamesRule.mjs
 function UniqueArgumentNamesRule(context) {
   return {
     Field: checkArgUniqueness,
@@ -8537,7 +8537,7 @@ function UniqueArgumentNamesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/UniqueDirectiveNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueDirectiveNamesRule.mjs
 function UniqueDirectiveNamesRule(context) {
   const knownDirectiveNames = new Map;
   const schema = context.getSchema();
@@ -8559,7 +8559,7 @@ function UniqueDirectiveNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/UniqueDirectivesPerLocationRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueDirectivesPerLocationRule.mjs
 function UniqueDirectivesPerLocationRule(context) {
   const uniqueDirectiveMap = new Map;
   const schema = context.getSchema();
@@ -8616,7 +8616,7 @@ function UniqueDirectivesPerLocationRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/UniqueEnumValueNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueEnumValueNamesRule.mjs
 function UniqueEnumValueNamesRule(context) {
   const schema = context.getSchema();
   const existingTypeMap = schema ? schema.getTypeMap() : Object.create(null);
@@ -8651,7 +8651,7 @@ function UniqueEnumValueNamesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/UniqueFieldDefinitionNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueFieldDefinitionNamesRule.mjs
 function UniqueFieldDefinitionNamesRule(context) {
   const schema = context.getSchema();
   const existingTypeMap = schema ? schema.getTypeMap() : Object.create(null);
@@ -8695,7 +8695,7 @@ function hasField(type, fieldName) {
   return false;
 }
 
-// node_modules/graphql/validation/rules/UniqueFragmentNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueFragmentNamesRule.mjs
 function UniqueFragmentNamesRule(context) {
   const knownFragmentNames = new Map;
   return {
@@ -8713,7 +8713,7 @@ function UniqueFragmentNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/UniqueInputFieldNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueInputFieldNamesRule.mjs
 function UniqueInputFieldNamesRule(context) {
   const knownNameStack = [];
   let knownNames = new Map;
@@ -8742,7 +8742,7 @@ function UniqueInputFieldNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/UniqueOperationNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueOperationNamesRule.mjs
 function UniqueOperationNamesRule(context) {
   const knownOperationNames = new Map;
   return {
@@ -8762,7 +8762,7 @@ function UniqueOperationNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/UniqueOperationTypesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueOperationTypesRule.mjs
 function UniqueOperationTypesRule(context) {
   const schema = context.getSchema();
   const definedOperationTypes = new Map;
@@ -8792,7 +8792,7 @@ function UniqueOperationTypesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/UniqueTypeNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueTypeNamesRule.mjs
 function UniqueTypeNamesRule(context) {
   const knownTypeNames = new Map;
   const schema = context.getSchema();
@@ -8822,7 +8822,7 @@ function UniqueTypeNamesRule(context) {
   }
 }
 
-// node_modules/graphql/validation/rules/UniqueVariableNamesRule.mjs
+// ../../node_modules/graphql/validation/rules/UniqueVariableNamesRule.mjs
 function UniqueVariableNamesRule(context) {
   return {
     OperationDefinition(operationNode) {
@@ -8837,7 +8837,7 @@ function UniqueVariableNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/ValuesOfCorrectTypeRule.mjs
+// ../../node_modules/graphql/validation/rules/ValuesOfCorrectTypeRule.mjs
 function ValuesOfCorrectTypeRule(context) {
   return {
     NullValue: (node) => isValidValueNode(context, node, context.getInputType()),
@@ -8859,7 +8859,7 @@ function isValidValueNode(context, node, inputType) {
   return false;
 }
 
-// node_modules/graphql/validation/rules/VariablesAreInputTypesRule.mjs
+// ../../node_modules/graphql/validation/rules/VariablesAreInputTypesRule.mjs
 function VariablesAreInputTypesRule(context) {
   return {
     VariableDefinition(node) {
@@ -8873,7 +8873,7 @@ function VariablesAreInputTypesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/VariablesInAllowedPositionRule.mjs
+// ../../node_modules/graphql/validation/rules/VariablesInAllowedPositionRule.mjs
 function VariablesInAllowedPositionRule(context) {
   let varDefMap;
   return {
@@ -8920,7 +8920,7 @@ function allowedVariableUsage(schema, varType, varDefaultValue, locationType, lo
   return isTypeSubTypeOf(schema, varType, locationType);
 }
 
-// node_modules/graphql/validation/specifiedRules.mjs
+// ../../node_modules/graphql/validation/specifiedRules.mjs
 var recommendedRules = Object.freeze([
   MaxIntrospectionDepthRule
 ]);
@@ -8976,7 +8976,7 @@ var specifiedSDLRules = Object.freeze([
   ProvidedRequiredArgumentsOnDirectivesRule
 ]);
 
-// node_modules/graphql/jsutils/SetMap.mjs
+// ../../node_modules/graphql/jsutils/SetMap.mjs
 class SetMap {
   constructor() {
     this._entries = new Map;
@@ -9053,7 +9053,7 @@ class SetMap {
   }
 }
 
-// node_modules/graphql/validation/ValidationContext.mjs
+// ../../node_modules/graphql/validation/ValidationContext.mjs
 class ASTValidationContext {
   constructor(ast, onError) {
     this._remainingFragmentWork = 50000;
@@ -9259,7 +9259,7 @@ class ValidationContext extends ASTValidationContext {
   }
 }
 
-// node_modules/graphql/validation/validate.mjs
+// ../../node_modules/graphql/validation/validate.mjs
 var QueryDocumentKeysToValidate = mapValue(QueryDocumentKeys, (keys) => keys.filter((key) => key !== "description"));
 var tooManyValidationErrorsError = new GraphQLError("Too many validation errors, error limit reached. Validation aborted.");
 function validate(schema, documentAST, rules = specifiedRules, options) {
@@ -9307,7 +9307,7 @@ function assertValidSDL(documentAST) {
 `));
   }
 }
-// node_modules/graphql/utilities/mapSchemaConfig.mjs
+// ../../node_modules/graphql/utilities/mapSchemaConfig.mjs
 var SchemaElementKind = {
   SCHEMA: "SCHEMA",
   SCALAR: "SCALAR",
@@ -9532,7 +9532,7 @@ var stdTypeMap = new Map([...specifiedScalarTypes, ...introspectionTypes].map((t
   type
 ]));
 
-// node_modules/graphql/utilities/extendSchema.mjs
+// ../../node_modules/graphql/utilities/extendSchema.mjs
 function extendSchemaImpl(schemaConfig, documentAST, options) {
   const typeDefs = [];
   const scalarExtensions = new AccumulatorMap;
@@ -9911,7 +9911,7 @@ function isOneOf(node) {
   return Boolean(getDirectiveValues(GraphQLOneOfDirective, node));
 }
 
-// node_modules/graphql/utilities/buildASTSchema.mjs
+// ../../node_modules/graphql/utilities/buildASTSchema.mjs
 function buildASTSchema(documentAST, options) {
   if (options?.assumeValid !== true && options?.assumeValidSDL !== true) {
     assertValidSDL(documentAST);
@@ -9953,7 +9953,7 @@ function buildSchema(source, options) {
     assumeValid: options?.assumeValid
   });
 }
-// node_modules/graphql/__dev__/index.mjs
+// ../../node_modules/graphql/__dev__/index.mjs
 enableDevMode();
 
 // src/identity/attribution.ts
@@ -11420,6 +11420,36 @@ function cachedAppAccessToken(credentials, tokenUrl) {
   return cache.get(cacheKey(tokenUrl, credentials))?.accessToken ?? null;
 }
 
+// src/auth/guard.ts
+import * as os2 from "os";
+import * as path3 from "path";
+var READ_FIELDS = {
+  bash: "command",
+  eval: "code",
+  read: "path",
+  grep: "path",
+  glob: "path"
+};
+var CREDENTIAL_ACCESS_REASON = "Linear credentials are read only by the Linear extension. Use the linear_* tools (start with linear_tool_search). " + "If they are missing in this session, stop and report it. Do not call the Linear API directly or set createAsUser.";
+function credentialSpellings(named, stores) {
+  const home = os2.homedir();
+  const spell = (file) => {
+    const absolute = path3.resolve(expandHome(file));
+    const relative2 = path3.relative(home, absolute);
+    const underHome = relative2 !== "" && !relative2.startsWith("..") && !path3.isAbsolute(relative2);
+    return underHome ? [absolute, `~/${relative2}`, `$HOME/${relative2}`, `\${HOME}/${relative2}`] : [absolute];
+  };
+  const spellings = [...named.flatMap((file) => [...spell(file), path3.basename(expandHome(file))]), ...stores.flatMap(spell)];
+  return [...new Set(spellings.filter((s) => s.length > 0))];
+}
+function readsCredentials(toolName, input, spellings) {
+  const field = READ_FIELDS[toolName];
+  if (!field || !input || typeof input !== "object" || !(field in input))
+    return false;
+  const value = input[field];
+  return typeof value === "string" && spellings.some((s) => value.includes(s));
+}
+
 // src/catalog/search.ts
 var K1 = 1.2;
 var B = 0.75;
@@ -12645,7 +12675,7 @@ var ergonomicOps = [
   documentGet
 ];
 
-// node_modules/@toon-format/toon/dist/index.mjs
+// ../../node_modules/@toon-format/toon/dist/index.mjs
 var NULL_LITERAL = "null";
 var DELIMITERS = {
   comma: ",",
@@ -13261,7 +13291,7 @@ function encodeOutput(value) {
   return { text: json, format: "json", shape, bytes: Buffer.byteLength(json, "utf8") };
 }
 
-// node_modules/@oh-my-pi/omptype/src/errors.ts
+// ../../node_modules/@oh-my-pi/omptype/src/errors.ts
 function format(override, context, fallback) {
   return typeof override === "function" ? override(context) : override ?? fallback;
 }
@@ -13598,7 +13628,7 @@ class OmpTypeError extends Error {
     this.name = "OmpTypeError";
   }
 }
-// node_modules/@oh-my-pi/omptype/src/keywords.ts
+// ../../node_modules/@oh-my-pi/omptype/src/keywords.ts
 var NUMERIC = /^(?:(?!^-0\.?0*$)(?:-?(?:(?:0|[1-9]\d*)(?:\.\d+)?)|\.\d+?))$/;
 var INTEGER = /^[+-]?(?:0|[1-9]\d*)$/;
 var EMAIL = /^[\w%+.-]+@[\d.A-Za-z-]+\.[A-Za-z]{2,}$/;
@@ -13925,7 +13955,7 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// node_modules/@oh-my-pi/omptype/src/ir.ts
+// ../../node_modules/@oh-my-pi/omptype/src/ir.ts
 var IR_BRAND = Symbol("omptype.schema");
 var kMorph = Symbol("omptype.hasMorph");
 var kMorphOwner = Symbol("omptype.hasMorphOwner");
@@ -15520,7 +15550,7 @@ function expectedOf(ir) {
   }
 }
 
-// node_modules/@oh-my-pi/omptype/src/jsonschema/resolve.ts
+// ../../node_modules/@oh-my-pi/omptype/src/jsonschema/resolve.ts
 var VOCAB_APPLICATOR = 1;
 var VOCAB_VALIDATION = 2;
 var VOCAB_UNEVALUATED = 4;
@@ -15552,10 +15582,10 @@ var SUBSCHEMA_KEYWORDS = new Map([
   ["dependencies", SCHEMA_MAP]
 ]);
 
-// node_modules/@oh-my-pi/omptype/src/jsonschema/runtime.ts
+// ../../node_modules/@oh-my-pi/omptype/src/jsonschema/runtime.ts
 var patterns = new Map;
 
-// node_modules/@oh-my-pi/omptype/src/jsonschema/plan.ts
+// ../../node_modules/@oh-my-pi/omptype/src/jsonschema/plan.ts
 var T_INTEGER = 4;
 var T_NUMBER = 8;
 var T_ANY = 127;
@@ -15568,11 +15598,11 @@ var TYPE_PLANS = new Map([
   [0, FALSE_PLAN]
 ]);
 
-// node_modules/@oh-my-pi/omptype/src/jsonschema/interpret.ts
+// ../../node_modules/@oh-my-pi/omptype/src/jsonschema/interpret.ts
 var kAnyOf = Symbol("omptype.jsonschema.anyOfTag");
 var kOneOf = Symbol("omptype.jsonschema.oneOfTag");
 
-// node_modules/@oh-my-pi/omptype/src/interp.ts
+// ../../node_modules/@oh-my-pi/omptype/src/interp.ts
 var own = Object.prototype.hasOwnProperty;
 function materializeDefault(payload) {
   if (payload === null || typeof payload !== "object")
@@ -16355,7 +16385,7 @@ function kindMatches(base, v) {
   }
 }
 
-// node_modules/@oh-my-pi/omptype/src/compile.ts
+// ../../node_modules/@oh-my-pi/omptype/src/compile.ts
 var own2 = Object.prototype.hasOwnProperty;
 var IDENT = /^[A-Za-z_$][\w$]*$/;
 function litSource(v) {
@@ -17218,7 +17248,7 @@ function compileAllows(ir) {
   return validator;
 }
 
-// node_modules/@oh-my-pi/omptype/src/json-schema.ts
+// ../../node_modules/@oh-my-pi/omptype/src/json-schema.ts
 function irToJsonSchema(ir, options) {
   const ctx = { options, defs: new Map, refs: new Map };
   let schema = emit(ir, ctx);
@@ -17516,7 +17546,7 @@ function isJsonValue(value, seen = new Set) {
   return true;
 }
 
-// node_modules/@oh-my-pi/omptype/src/type.ts
+// ../../node_modules/@oh-my-pi/omptype/src/type.ts
 useAssignability(isSubtype);
 var Type = Object.defineProperty(function Type() {}, Symbol.hasInstance, {
   value: (value) => (typeof value === "function" || typeof value === "object" && value !== null) && (IR_BRAND in value)
@@ -20630,7 +20660,8 @@ function createLinearExtension(options = {}) {
   const targets = attributionTargets(getSchema());
   const activatable = new Set([...UTILITY_TOOLS, ...ergonomicOps.map((op) => op.name), ...catalog.map((d) => d.tool)]);
   return (pi) => {
-    const store = createCredentialStore(path3.join(options.agentDir ?? getAgentDir(), "linear", "connections.json"));
+    const storeFile = path4.join(options.agentDir ?? getAgentDir(), "linear", "connections.json");
+    const store = createCredentialStore(storeFile);
     let state = emptyState();
     let activationChain = Promise.resolve();
     function resolveConnection(cwd) {
@@ -20768,6 +20799,18 @@ function createLinearExtension(options = {}) {
     }
     pi.on("session_start", async (_event, ctx) => onSessionOpen(ctx));
     pi.on("session_switch", async (_event, ctx) => onSessionOpen(ctx));
+    pi.on("tool_call", async (event, ctx) => {
+      let named;
+      try {
+        const settings = readLinearSettings(ctx.cwd);
+        named = [settings.appCredentialsFile, settings.apiKeyFile].filter((file) => !!file);
+      } catch {
+        named = [];
+      }
+      if (readsCredentials(event.toolName, event.input, credentialSpellings(named, [storeFile]))) {
+        return { block: true, reason: CREDENTIAL_ACCESS_REASON };
+      }
+    });
     pi.registerTool({
       name: SEARCH_TOOL,
       label: "Linear tool search",

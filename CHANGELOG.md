@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-14
+
 ### Added
 
+- Agent tool calls (`bash`, `eval`, `read`, `grep`, `glob`) that name a configured credentials file
+  or the connection store are blocked. An agent without the Linear tools can no longer call Linear
+  directly with the app token and an invented `createAsUser` name.
 - `CONTRIBUTING.md`: setup, change workflow, checks, rules and release steps.
 - `AGENTS.md` with repository rules for coding agents. `CLAUDE.md` imports it.
 
@@ -87,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
-[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/azakharau/omp-linear/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/azakharau/omp-linear/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/azakharau/omp-linear/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/azakharau/omp-linear/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/azakharau/omp-linear/releases/tag/v1.0.0
