@@ -6,25 +6,13 @@ import { buildSchema, parse, validate, type OperationDefinitionNode } from "grap
 
 import { createLinearClient, type LinearClient } from "../src/client/graphql.ts";
 import { ergonomicOps, OP_DOCUMENTS, type ActorContext } from "../src/ops/index.ts";
-import {
-	ISSUE_LOOKUP,
-	LABEL_LOOKUP,
-	MILESTONE_LOOKUP,
-	PROJECT_LOOKUP,
-	STATE_LOOKUP,
-	TEAM_LOOKUP,
-} from "../src/ops/resolve.ts";
+import { LOOKUP_DOCUMENTS } from "../src/ops/resolve.ts";
 
 const schema = buildSchema(readFileSync("schema/linear.schema.graphql", "utf8"));
 
 const ALL_DOCUMENTS: Record<string, string> = {
 	...OP_DOCUMENTS,
-	TEAM_LOOKUP,
-	ISSUE_LOOKUP,
-	STATE_LOOKUP,
-	LABEL_LOOKUP,
-	PROJECT_LOOKUP,
-	MILESTONE_LOOKUP,
+	...LOOKUP_DOCUMENTS,
 };
 
 const USER_CTX: ActorContext = { actor: "user", authorLabel: "Codey" };
@@ -128,11 +116,15 @@ describe("operation documents", () => {
 		}
 	});
 
-	test("the catalog exposes the twelve contracted ops with JSON Schema parameters", () => {
+	test("the catalog exposes the contracted ops with JSON Schema parameters", () => {
 		expect(ergonomicOps.map(op => op.name).sort()).toEqual([
+			"linear_document_create",
+			"linear_document_get",
+			"linear_document_update",
 			"linear_issue_comment_add",
 			"linear_issue_create",
 			"linear_issue_get",
+			"linear_issue_link_add",
 			"linear_issue_relation_add",
 			"linear_issue_search",
 			"linear_issue_transition",
@@ -141,6 +133,7 @@ describe("operation documents", () => {
 			"linear_milestone_update",
 			"linear_project_create",
 			"linear_project_get",
+			"linear_project_status_post",
 			"linear_project_update",
 		]);
 		for (const op of ergonomicOps) {
@@ -155,7 +148,7 @@ describe("operation documents", () => {
 				.filter(op => op.tier === "read")
 				.map(op => op.name)
 				.sort(),
-		).toEqual(["linear_issue_get", "linear_issue_search", "linear_project_get"]);
+		).toEqual(["linear_document_get", "linear_issue_get", "linear_issue_search", "linear_project_get"]);
 	});
 });
 
@@ -414,6 +407,146 @@ describe("linear_issue_create", () => {
 		expect(calls.at(-1)).toMatchObject({ name: "LinearIssueGet" });
 		expect(result).toMatchObject({ issue: { id: ISSUE_ABC12.id } });
 	});
+
+	const OTHER_A = "22222222-2222-4222-8222-222222222222";
+	const OTHER_B = "33333333-3333-4333-8333-333333333333";
+	const OTHER_C = "44444444-4444-4444-8444-444444444444";
+	const CREATE_BASE: Record<string, Responder> = {
+		LinearTeamLookup: () => ({ teams: { nodes: [{ id: "t-1", key: "ABC", name: "Alpha" }] } }),
+		LinearIssueCreate: () => ({ issueCreate: { success: true, issue: { id: ISSUE_ABC12.id } } }),
+		LinearIssueGet: () => ({ issue: ISSUE_ABC12 }),
+		LinearIssueCreatedGet: () => ({
+			issue: { ...ISSUE_ABC12, relations: { nodes: [] }, inverseRelations: { nodes: [] } },
+		}),
+	};
+
+	test("resolves the assignee by name and by me", async () => {
+		const { client, calls } = await fakeLinear({
+			...CREATE_BASE,
+			LinearUserLookup: () => ({
+				users: {
+					nodes: [{ id: "u-ann", name: "Ann", displayName: "ann", email: "ann@x.io", active: true }],
+				},
+			}),
+			LinearViewerLookup: () => ({ viewer: { id: "u-me" } }),
+		});
+		const create = opNamed("linear_issue_create");
+		await create.run(client, { team: "ABC", title: "One", assignee: "ann" }, USER_CTX);
+		await create.run(client, { team: "ABC", title: "Two", assignee: "Me" }, USER_CTX);
+
+		const lookups = calls.filter(call => call.name === "LinearUserLookup" || call.name === "LinearViewerLookup");
+		expect(lookups.map(call => call.name)).toEqual(["LinearUserLookup", "LinearViewerLookup"]);
+		expect(lookups[0]!.variables).toEqual({ ref: "ann" });
+		const inputs = calls
+			.filter(call => call.name === "LinearIssueCreate")
+			.map(call => (call.variables.input as Record<string, unknown>).assigneeId);
+		expect(inputs).toEqual(["u-ann", "u-me"]);
+	});
+
+	test("an ambiguous assignee lists the candidates and mutates nothing", async () => {
+		const { client, calls } = await fakeLinear({
+			...CREATE_BASE,
+			LinearUserLookup: () => ({
+				users: {
+					nodes: [
+						{ id: "u-1", name: "Sam A", displayName: "sam", email: "sam.a@x.io", active: true },
+						{ id: "u-2", name: "Sam B", displayName: "sam", email: "sam.b@x.io", active: true },
+					],
+				},
+			}),
+		});
+		const error = await opNamed("linear_issue_create")
+			.run(client, { team: "ABC", title: "One", assignee: "sam" }, USER_CTX)
+			.catch((caught: unknown) => caught as Error);
+		expect((error as Error).message).toContain("sam <sam.a@x.io>");
+		expect((error as Error).message).toContain("sam <sam.b@x.io>");
+		expect(calls.some(call => call.operation === "mutation")).toBe(false);
+	});
+
+	test("creates relations after the issue, swapping blockedBy, then refetches both directions", async () => {
+		const { client, calls } = await fakeLinear({
+			...CREATE_BASE,
+			LinearIssueRelationCreate: () => ({
+				issueRelationCreate: { success: true, issueRelation: { id: "r-1", issue: { id: ISSUE_ABC12.id } } },
+			}),
+		});
+		await opNamed("linear_issue_create").run(
+			client,
+			{
+				team: "ABC",
+				title: "One",
+				relations: [
+					{ type: "blocks", issue: OTHER_A },
+					{ type: "blockedBy", issue: OTHER_B },
+				],
+			},
+			USER_CTX,
+		);
+
+		const mutations = calls.filter(call => call.operation === "mutation");
+		expect(mutations.map(call => call.name)).toEqual([
+			"LinearIssueCreate",
+			"LinearIssueRelationCreate",
+			"LinearIssueRelationCreate",
+		]);
+		expect(mutations[1]!.variables).toEqual({
+			input: { issueId: ISSUE_ABC12.id, relatedIssueId: OTHER_A, type: "blocks" },
+		});
+		expect(mutations[2]!.variables).toEqual({
+			input: { issueId: OTHER_B, relatedIssueId: ISSUE_ABC12.id, type: "blocks" },
+		});
+		expect(calls.at(-1)?.name).toBe("LinearIssueCreatedGet");
+	});
+
+	test("a failed relation names the created issue and the relations not created, without a refetch", async () => {
+		let relationCalls = 0;
+		const { client, calls } = await fakeLinear({
+			...CREATE_BASE,
+			LinearIssueRelationCreate: () => {
+				relationCalls += 1;
+				return {
+					issueRelationCreate: {
+						success: relationCalls === 1,
+						issueRelation: { id: "r-1", issue: { id: ISSUE_ABC12.id } },
+					},
+				};
+			},
+		});
+		const error = await opNamed("linear_issue_create")
+			.run(
+				client,
+				{
+					team: "ABC",
+					title: "One",
+					relations: [
+						{ type: "blocks", issue: OTHER_A },
+						{ type: "related", issue: OTHER_B },
+						{ type: "duplicate", issue: OTHER_C },
+					],
+				},
+				USER_CTX,
+			)
+			.catch((caught: unknown) => caught as Error);
+
+		const message = (error as Error).message;
+		expect(message).toContain(`issue ${ISSUE_ABC12.id} was created`);
+		expect(message).toContain(`relations created: [blocks ${OTHER_A}]`);
+		expect(message).toContain(`not created: [related ${OTHER_B}, duplicate ${OTHER_C}]`);
+		expect(relationCalls).toBe(2);
+		expect(calls.some(call => call.name === "LinearIssueCreatedGet")).toBe(false);
+	});
+
+	test("rejects an unknown relation type before any request", async () => {
+		const { client, calls } = await fakeLinear(CREATE_BASE);
+		await expect(
+			opNamed("linear_issue_create").run(
+				client,
+				{ team: ISSUE_ABC12.team.id, title: "One", relations: [{ type: "parent", issue: OTHER_A }] },
+				USER_CTX,
+			),
+		).rejects.toThrow("relation type must be one of");
+		expect(calls.some(call => call.operation === "mutation")).toBe(false);
+	});
 });
 
 describe("linear_issue_transition", () => {
@@ -476,10 +609,60 @@ describe("linear_issue_search", () => {
 
 	test("caps an oversized page request at 100", async () => {
 		const { client, calls } = await fakeLinear({
-			LinearIssueSearch: () => ({ issueSearch: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
+			LinearIssueList: () => ({ issues: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
 		});
 		await opNamed("linear_issue_search").run(client, { first: 5000 }, USER_CTX);
 		expect(calls[0]!.variables.first).toBe(100);
+	});
+
+	test("without a query lists my stale issues through the issues root in one request", async () => {
+		const { client, calls } = await fakeLinear({
+			LinearIssueList: () => ({
+				issues: {
+					nodes: [{ id: "i1", identifier: "ABC-12", title: "Fix the thing" }],
+					pageInfo: { hasNextPage: false, endCursor: null },
+				},
+			}),
+		});
+		const result = await opNamed("linear_issue_search").run(
+			client,
+			{ assignee: "me", staleDays: 14, stateTypes: ["started"], stateName: "In Progress" },
+			USER_CTX,
+		);
+		expect(calls.map(call => call.name)).toEqual(["LinearIssueList"]);
+		expect(calls[0]!.variables.filter).toEqual({
+			state: { name: { eq: "In Progress" }, type: { in: ["started"] } },
+			assignee: { isMe: { eq: true } },
+			updatedAt: { lt: "-P14D" },
+		});
+		expect(result).toMatchObject({ nodes: [{ identifier: "ABC-12" }] });
+	});
+
+	test("resolves an assignee name and a project into id filters", async () => {
+		const { client, calls } = await fakeLinear({
+			LinearUserLookup: () => ({
+				users: { nodes: [{ id: "u-ann", name: "Ann", displayName: "ann", email: "ann@x.io", active: true }] },
+			}),
+			LinearProjectLookup: () => ({ projects: { nodes: [{ id: "p-1", name: "Roadmap" }] } }),
+			LinearIssueSearch: () => ({ issueSearch: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } }),
+		});
+		await opNamed("linear_issue_search").run(
+			client,
+			{ query: "thing", assignee: "ann", project: "Roadmap" },
+			USER_CTX,
+		);
+		expect(calls.at(-1)!.variables.filter).toEqual({
+			assignee: { id: { eq: "u-ann" } },
+			project: { id: { eq: "p-1" } },
+		});
+	});
+
+	test("rejects a fractional staleDays before any request", async () => {
+		const { client, calls } = await fakeLinear({});
+		await expect(opNamed("linear_issue_search").run(client, { staleDays: 1.5 }, USER_CTX)).rejects.toThrow(
+			'"staleDays" must be an integer',
+		);
+		expect(calls.length).toBe(0);
 	});
 });
 
@@ -544,6 +727,38 @@ describe("comment, relation, project and milestone ops", () => {
 				project: { id: "p-1", name: "Roadmap" },
 			},
 		}),
+		LinearViewerLookup: () => ({ viewer: { id: "u-me" } }),
+		LinearProjectStatusPost: () => ({ projectUpdateCreate: { success: true, projectUpdate: { id: "pu-1" } } }),
+		LinearProjectStatusGet: () => ({
+			projectUpdate: {
+				id: "pu-1",
+				body: "on track",
+				health: "onTrack",
+				url: "https://linear.app/x/project-update/pu-1",
+				createdAt: "2026-09-22T00:00:00.000Z",
+				project: { id: "p-1", name: "Roadmap" },
+				user: { displayName: "agent" },
+			},
+		}),
+		LinearIssueLinkAdd: () => ({ attachmentLinkURL: { success: true, attachment: { id: "a-1" } } }),
+		LinearAttachmentGet: () => ({
+			attachment: { id: "a-1", title: "PR 7", url: "https://github.com/o/r/pull/7", issue: { identifier: "ABC-12" } },
+		}),
+		LinearDocumentCreate: () => ({ documentCreate: { success: true, document: { id: "d-1" } } }),
+		LinearDocumentUpdate: () => ({ documentUpdate: { success: true, document: { id: "d-1" } } }),
+		LinearDocumentLookup: () => ({ documents: { nodes: [{ id: "d-1", title: "Spec", slugId: "abc123" }] } }),
+		LinearDocumentGet: () => ({
+			document: {
+				id: "d-1",
+				title: "Spec",
+				slugId: "abc123",
+				url: "https://linear.app/x/document/spec-abc123",
+				content: "# Spec",
+				updatedAt: "2026-09-22T00:00:00.000Z",
+				project: { id: "p-1", name: "Roadmap" },
+				issue: null,
+			},
+		}),
 	};
 
 	const cases: { op: string; args: Record<string, unknown>; mutation: string; refetch: string }[] = [
@@ -583,6 +798,30 @@ describe("comment, relation, project and milestone ops", () => {
 			mutation: "LinearMilestoneUpdate",
 			refetch: "LinearMilestoneGet",
 		},
+		{
+			op: "linear_project_status_post",
+			args: { project: "Roadmap", body: "on track", health: "onTrack" },
+			mutation: "LinearProjectStatusPost",
+			refetch: "LinearProjectStatusGet",
+		},
+		{
+			op: "linear_issue_link_add",
+			args: { issue: "ABC-12", url: "https://github.com/o/r/pull/7", title: "PR 7" },
+			mutation: "LinearIssueLinkAdd",
+			refetch: "LinearAttachmentGet",
+		},
+		{
+			op: "linear_document_create",
+			args: { title: "Spec", content: "# Spec", project: "Roadmap", issue: "ABC-12" },
+			mutation: "LinearDocumentCreate",
+			refetch: "LinearDocumentGet",
+		},
+		{
+			op: "linear_document_update",
+			args: { document: "Spec", content: "# Spec v2" },
+			mutation: "LinearDocumentUpdate",
+			refetch: "LinearDocumentGet",
+		},
 	];
 
 	test("each mutates once and refetches the affected entity once", async () => {
@@ -594,5 +833,64 @@ describe("comment, relation, project and milestone ops", () => {
 			]);
 			expect(calls.at(-1)?.name).toBe(scenario.refetch);
 		}
+	});
+
+	test("sends the resolved inputs for status posts, documents and project leads", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		const mutationVariables = () => calls.filter(call => call.operation === "mutation").at(-1)!.variables;
+
+		await opNamed("linear_project_status_post").run(
+			client,
+			{ project: "Roadmap", body: "slipping", health: "atRisk" },
+			APP_CTX,
+		);
+		// ProjectUpdateCreateInput has no createAsUser.
+		expect(mutationVariables()).toEqual({ input: { projectId: "p-1", body: "slipping", health: "atRisk" } });
+
+		await opNamed("linear_document_create").run(
+			client,
+			{ title: "Spec", content: "# Spec", project: "Roadmap", issue: "ABC-12" },
+			USER_CTX,
+		);
+		expect(mutationVariables()).toEqual({
+			input: { title: "Spec", content: "# Spec", projectId: "p-1", issueId: ISSUE_ABC12.id },
+		});
+
+		await opNamed("linear_document_update").run(client, { document: "abc123", title: "Spec v2" }, USER_CTX);
+		expect(calls.find(call => call.name === "LinearDocumentLookup")!.variables).toEqual({ ref: "abc123" });
+		expect(mutationVariables()).toEqual({ id: "d-1", input: { title: "Spec v2" } });
+
+		await opNamed("linear_project_create").run(client, { name: "Roadmap", teams: ["ABC"], lead: "me" }, USER_CTX);
+		expect(mutationVariables()).toMatchObject({ input: { leadId: "u-me" } });
+	});
+
+	test("a link carries createAsUser only for an app actor", async () => {
+		const args = { issue: "ABC-12", url: "https://github.com/o/r/pull/7" };
+		const app = await fakeLinear(canned);
+		await opNamed("linear_issue_link_add").run(app.client, args, APP_CTX);
+		expect(app.calls.find(call => call.name === "LinearIssueLinkAdd")!.variables).toEqual({
+			issueId: ISSUE_ABC12.id,
+			url: args.url,
+			createAsUser: "Codey",
+		});
+
+		const user = await fakeLinear(canned);
+		await opNamed("linear_issue_link_add").run(user.client, args, USER_CTX);
+		expect(user.calls.find(call => call.name === "LinearIssueLinkAdd")!.variables).toEqual({
+			issueId: ISSUE_ABC12.id,
+			url: args.url,
+		});
+	});
+
+	test("document get returns the content and a field-less update sends nothing", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		const result = await opNamed("linear_document_get").run(client, { document: "d-1" }, USER_CTX);
+		expect(result).toMatchObject({ document: { id: "d-1", content: "# Spec" } });
+		expect(calls.map(call => call.name)).toEqual(["LinearDocumentLookup", "LinearDocumentGet"]);
+
+		await expect(opNamed("linear_document_update").run(client, { document: "Spec" }, USER_CTX)).rejects.toThrow(
+			'argument "title" or "content" is required',
+		);
+		expect(calls.length).toBe(2);
 	});
 });

@@ -81,11 +81,17 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_issue_get: "Get a Linear issue by identifier MNE-940 or UUID.",
  linear_issue_comment_add: "Add a comment to a Linear issue, reply.",
  linear_issue_relation_add: "Add a relation between Linear issues: blocks, related.",
- linear_issue_search: "Search Linear issues with filters and cursor pagination.",
+ linear_issue_search: "Search or list Linear issues: assignee me, project, state types, stale issues not updated in N days.",
+ linear_issue_link_add: "Attach a URL link (PR, doc) to a Linear issue.",
  linear_project_create: "Create a Linear project.",
  linear_project_update: "Update a Linear project.",
+ linear_project_get: "Get a Linear project with milestones.",
+ linear_project_status_post: "Post a project status update with health onTrack atRisk offTrack.",
  linear_milestone_create: "Create a Linear project milestone.",
  linear_milestone_update: "Update a Linear project milestone.",
+ linear_document_create: "Create a Linear document in a project or issue.",
+ linear_document_update: "Update a Linear document title or content.",
+ linear_document_get: "Get a Linear document by id, slug or title.",
 };
 
 /** The host injects and strips its own intent field (`i`); tool schemas declare only real arguments. */
