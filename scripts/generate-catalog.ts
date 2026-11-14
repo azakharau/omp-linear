@@ -11,14 +11,18 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
  buildSchema,
+ coerceInputLiteral,
  getNamedType,
  isEnumType,
  isInputObjectType,
  isListType,
  isNonNullType,
+ isRequiredArgument,
+ isRequiredInputField,
  isScalarType,
  type GraphQLArgument,
  type GraphQLField,
+ type GraphQLInputField,
  type GraphQLInputType,
  type GraphQLSchema,
 } from "graphql";
@@ -30,6 +34,11 @@ type JsonSchema = Record<string, unknown>;
 
 /** Scalars that carry no extra structure beyond a JSON string. */
 const STRING_SCALARS = new Set(["String", "ID", "DateTime", "TimelessDate", "URL", "UUID"]);
+
+/** Default of an argument or input field as a JSON value; graphql 17 keeps SDL defaults as literals. */
+function defaultOf(input: GraphQLArgument | GraphQLInputField): unknown {
+ return input.default?.literal ? coerceInputLiteral(input.default.literal, input.type) : input.default?.value;
+}
 
 function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>, building: Set<string>): JsonSchema {
  if (isListType(type)) return { type: "array", items: jsonSchema(type.ofType, defs, building) };
@@ -50,12 +59,13 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
    const properties: Record<string, JsonSchema> = {};
    const required: string[] = [];
    for (const field of Object.values(named.getFields())) {
+    const fallback = defaultOf(field);
     properties[field.name] = {
      ...jsonSchema(field.type, defs, building),
      ...(field.description ? { description: field.description } : {}),
-     ...(field.defaultValue !== undefined ? { default: field.defaultValue } : {}),
+     ...(fallback !== undefined ? { default: fallback } : {}),
     };
-    if (isNonNullType(field.type) && field.defaultValue === undefined) required.push(field.name);
+    if (isRequiredInputField(field)) required.push(field.name);
    }
    defs[named.name] = { type: "object", properties, ...(required.length ? { required } : {}), additionalProperties: false };
    building.delete(named.name);
@@ -78,12 +88,13 @@ function argumentSchema(args: readonly GraphQLArgument[], kind: string, root: st
  };
  const required: string[] = ["i"];
  for (const arg of args) {
+  const fallback = defaultOf(arg);
   properties[arg.name] = {
    ...jsonSchema(arg.type, defs),
    ...(arg.description ? { description: arg.description } : {}),
-   ...(arg.defaultValue !== undefined ? { default: arg.defaultValue } : {}),
+   ...(fallback !== undefined ? { default: fallback } : {}),
   };
-  if (isNonNullType(arg.type) && arg.defaultValue === undefined) required.push(arg.name);
+  if (isRequiredArgument(arg)) required.push(arg.name);
  }
  properties.selection = {
   type: "string",

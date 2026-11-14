@@ -8,12 +8,13 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
  buildSchema,
+ coerceInputLiteral,
  getNamedType,
  isEnumType,
  isInputObjectType,
  isInterfaceType,
- isNonNullType,
  isObjectType,
+ isRequiredArgument,
  isScalarType,
  isUnionType,
  Kind,
@@ -25,7 +26,9 @@ import {
  type DocumentNode,
  type FieldNode,
  type FragmentDefinitionNode,
+ type GraphQLArgument,
  type GraphQLField,
+ type GraphQLInputField,
  type GraphQLNamedType,
  type GraphQLObjectType,
  type GraphQLSchema,
@@ -86,7 +89,12 @@ function rootField(schema: GraphQLSchema, descriptor: OperationDescriptor): Grap
 
 /** A field is selectable without arguments when every argument is optional. */
 function selectableWithoutArgs(field: GraphQLField<unknown, unknown>): boolean {
- return field.args.every((arg) => !isNonNullType(arg.type) || arg.defaultValue !== undefined);
+ return !field.args.some(isRequiredArgument);
+}
+
+/** Default of an argument or input field as a JSON value; graphql 17 keeps SDL defaults as literals. */
+function defaultOf(input: GraphQLArgument | GraphQLInputField): unknown {
+ return input.default?.literal ? coerceInputLiteral(input.default.literal, input.type) : input.default?.value;
 }
 
 function leafFieldNames(type: GraphQLNamedType): string[] {
@@ -192,7 +200,7 @@ export function composeOperation(
  const argumentNodes: ArgumentNode[] = [];
  for (const arg of field.args) {
   if (!(arg.name in args) || args[arg.name] === undefined) {
-   if (isNonNullType(arg.type) && arg.defaultValue === undefined) {
+   if (isRequiredArgument(arg)) {
     throw new Error(`${descriptor.tool}: missing required argument "${arg.name}" of type ${String(arg.type)}`);
    }
    continue;
@@ -237,7 +245,8 @@ function describeField(field: GraphQLField<unknown, unknown>, descriptor: Operat
  lines.push(field.args.length ? "Arguments:" : "Arguments: none");
  for (const arg of field.args) {
   const parts = [`  ${arg.name}: ${String(arg.type)}`];
-  if (arg.defaultValue !== undefined) parts.push(`(default ${JSON.stringify(arg.defaultValue)})`);
+  const fallback = defaultOf(arg);
+  if (fallback !== undefined) parts.push(`(default ${JSON.stringify(fallback)})`);
   if (arg.description) parts.push(`— ${arg.description.replace(/\s+/g, " ").trim()}`);
   lines.push(parts.join(" "));
  }
@@ -275,7 +284,8 @@ function describeType(type: GraphQLNamedType): string {
  if (isScalarType(type)) return `scalar ${header}`;
  if (isInputObjectType(type)) {
   const fields = Object.values(type.getFields()).map((f) => {
-   const suffix = f.defaultValue !== undefined ? ` (default ${JSON.stringify(f.defaultValue)})` : "";
+   const fallback = defaultOf(f);
+   const suffix = fallback !== undefined ? ` (default ${JSON.stringify(fallback)})` : "";
    return `  ${f.name}: ${String(f.type)}${suffix}${f.deprecationReason ? ` [deprecated: ${f.deprecationReason}]` : ""}`;
   });
   return [`input ${header}`, ...fields].join("\n");

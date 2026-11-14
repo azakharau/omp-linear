@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildSchema, Kind, getNamedType, isNonNullType, isObjectType } from "graphql";
+import { buildSchema, Kind, getNamedType, isObjectType, isRequiredArgument } from "graphql";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -63,8 +63,7 @@ describe("catalog coverage", () => {
 			expect(required).not.toContain("selection");
 			for (const arg of field.args) {
 				expect(props[arg.name]).toBeDefined();
-				const mustBeRequired = isNonNullType(arg.type) && arg.defaultValue === undefined;
-				expect(required.includes(arg.name)).toBe(mustBeRequired);
+				expect(required.includes(arg.name)).toBe(isRequiredArgument(arg));
 			}
 		}
 	});
@@ -155,7 +154,7 @@ describe("composeOperation", () => {
 			const field = rootType.getFields()[d.root]!;
 			const args: Record<string, unknown> = {};
 			for (const arg of field.args) {
-				if (!isNonNullType(arg.type) || arg.defaultValue !== undefined) continue;
+				if (!isRequiredArgument(arg)) continue;
 				args[arg.name] = isObjectType(getNamedType(arg.type)) ? {} : "x";
 			}
 			try {
@@ -375,7 +374,7 @@ describe("injectCreateAsUser", () => {
 		);
 		expect(result.document.match(/createAsUser: "Agent A"/g)).toHaveLength(1);
 		expect(result.variables).toEqual({ second: { title: "B", createAsUser: "Agent A" } });
-		expect(result.document).toContain('first: issueCreate(input: {title: "A", teamId: "t", createAsUser: "Agent A"})');
+		expect(result.document).toContain('first: issueCreate(input: { title: "A", teamId: "t", createAsUser: "Agent A" })');
 	});
 
 	test("leaves untargeted mutations and queries untouched", () => {
@@ -396,7 +395,7 @@ describe("injectCreateAsUser", () => {
 			'mutation A($input: IssueCreateInput!) { issueCreate(input: $input) { success } } mutation B { commentCreate(input: {body: "b"}) { success } }';
 		const result = injectCreateAsUser(document, { input: { title: "T" } }, targets, "Agent A", "A");
 		expect(result.variables).toEqual({ input: { title: "T", createAsUser: "Agent A" } });
-		expect(result.document).toContain('commentCreate(input: {body: "b"})');
+		expect(result.document).toContain('commentCreate(input: { body: "b" })');
 		expect(result.document).not.toContain('body: "b", createAsUser');
 		expect(() => injectCreateAsUser(document, {}, targets, "Agent A")).toThrow(/operationName is required/);
 		expect(() => injectCreateAsUser(document, {}, targets, "Agent A", "C")).toThrow(/unknown operationName "C"/);

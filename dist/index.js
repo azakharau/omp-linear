@@ -1,17 +1,80 @@
 // @bun
+var __defProp = Object.defineProperty;
+var __returnValue = (v) => v;
+function __exportSetter(name, newValue) {
+  this[name] = __returnValue.bind(null, newValue);
+}
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {
+      get: all[name],
+      enumerable: true,
+      configurable: true,
+      set: __exportSetter.bind(all, name)
+    });
+};
+
+// node_modules/graphql/language/kinds_.mjs
+var exports_kinds_ = {};
+__export(exports_kinds_, {
+  ARGUMENT: () => ARGUMENT,
+  ARGUMENT_COORDINATE: () => ARGUMENT_COORDINATE,
+  BOOLEAN: () => BOOLEAN,
+  DIRECTIVE: () => DIRECTIVE,
+  DIRECTIVE_ARGUMENT_COORDINATE: () => DIRECTIVE_ARGUMENT_COORDINATE,
+  DIRECTIVE_COORDINATE: () => DIRECTIVE_COORDINATE,
+  DIRECTIVE_DEFINITION: () => DIRECTIVE_DEFINITION,
+  DIRECTIVE_EXTENSION: () => DIRECTIVE_EXTENSION,
+  DOCUMENT: () => DOCUMENT,
+  ENUM: () => ENUM,
+  ENUM_TYPE_DEFINITION: () => ENUM_TYPE_DEFINITION,
+  ENUM_TYPE_EXTENSION: () => ENUM_TYPE_EXTENSION,
+  ENUM_VALUE_DEFINITION: () => ENUM_VALUE_DEFINITION,
+  FIELD: () => FIELD,
+  FIELD_DEFINITION: () => FIELD_DEFINITION,
+  FLOAT: () => FLOAT,
+  FRAGMENT_ARGUMENT: () => FRAGMENT_ARGUMENT,
+  FRAGMENT_DEFINITION: () => FRAGMENT_DEFINITION,
+  FRAGMENT_SPREAD: () => FRAGMENT_SPREAD,
+  INLINE_FRAGMENT: () => INLINE_FRAGMENT,
+  INPUT_OBJECT_TYPE_DEFINITION: () => INPUT_OBJECT_TYPE_DEFINITION,
+  INPUT_OBJECT_TYPE_EXTENSION: () => INPUT_OBJECT_TYPE_EXTENSION,
+  INPUT_VALUE_DEFINITION: () => INPUT_VALUE_DEFINITION,
+  INT: () => INT,
+  INTERFACE_TYPE_DEFINITION: () => INTERFACE_TYPE_DEFINITION,
+  INTERFACE_TYPE_EXTENSION: () => INTERFACE_TYPE_EXTENSION,
+  LIST: () => LIST,
+  LIST_TYPE: () => LIST_TYPE,
+  MEMBER_COORDINATE: () => MEMBER_COORDINATE,
+  NAME: () => NAME,
+  NAMED_TYPE: () => NAMED_TYPE,
+  NON_NULL_TYPE: () => NON_NULL_TYPE,
+  NULL: () => NULL,
+  OBJECT: () => OBJECT,
+  OBJECT_FIELD: () => OBJECT_FIELD,
+  OBJECT_TYPE_DEFINITION: () => OBJECT_TYPE_DEFINITION,
+  OBJECT_TYPE_EXTENSION: () => OBJECT_TYPE_EXTENSION,
+  OPERATION_DEFINITION: () => OPERATION_DEFINITION,
+  OPERATION_TYPE_DEFINITION: () => OPERATION_TYPE_DEFINITION,
+  SCALAR_TYPE_DEFINITION: () => SCALAR_TYPE_DEFINITION,
+  SCALAR_TYPE_EXTENSION: () => SCALAR_TYPE_EXTENSION,
+  SCHEMA_DEFINITION: () => SCHEMA_DEFINITION,
+  SCHEMA_EXTENSION: () => SCHEMA_EXTENSION,
+  SELECTION_SET: () => SELECTION_SET,
+  STRING: () => STRING,
+  TYPE_COORDINATE: () => TYPE_COORDINATE,
+  UNION_TYPE_DEFINITION: () => UNION_TYPE_DEFINITION,
+  UNION_TYPE_EXTENSION: () => UNION_TYPE_EXTENSION,
+  VARIABLE: () => VARIABLE,
+  VARIABLE_DEFINITION: () => VARIABLE_DEFINITION
+});
+
 // src/index.ts
 import { randomUUID as randomUUID2 } from "crypto";
 import * as path3 from "path";
 import {
   getAgentDir
 } from "@oh-my-pi/pi-coding-agent";
-// node_modules/graphql/jsutils/devAssert.mjs
-function devAssert(condition, message) {
-  const booleanCondition = Boolean(condition);
-  if (!booleanCondition) {
-    throw new Error(message);
-  }
-}
 
 // node_modules/graphql/jsutils/inspect.mjs
 var MAX_ARRAY_LENGTH = 10;
@@ -95,17 +158,13 @@ function getObjectTag(object) {
 }
 
 // node_modules/graphql/jsutils/instanceOf.mjs
-var isProduction = globalThis.process && false;
-var instanceOf = isProduction ? function instanceOf(value, constructor) {
-  return value instanceof constructor;
-} : function instanceOf(value, constructor) {
-  if (value instanceof constructor) {
+function devInstanceOf(value, symbol, constructor) {
+  if (value?.__kind === symbol) {
     return true;
   }
   if (typeof value === "object" && value !== null) {
-    var _value$constructor;
     const className = constructor.prototype[Symbol.toStringTag];
-    const valueClassName = Symbol.toStringTag in value ? value[Symbol.toStringTag] : (_value$constructor = value.constructor) === null || _value$constructor === undefined ? undefined : _value$constructor.name;
+    const valueClassName = Symbol.toStringTag in value ? value[Symbol.toStringTag] : value.constructor?.name;
     if (className === valueClassName) {
       const stringifiedValue = inspect(value);
       throw new Error(`Cannot use ${className} "${stringifiedValue}" from another module or realm.
@@ -123,26 +182,305 @@ spurious results.`);
     }
   }
   return false;
-};
+}
+function prodInstanceOf(value, symbol) {
+  return value?.__kind === symbol;
+}
+var instanceOf = prodInstanceOf;
+function enableDevInstanceOf() {
+  instanceOf = devInstanceOf;
+}
+
+// node_modules/graphql/devMode.mjs
+var devMode = false;
+function enableDevMode() {
+  devMode = true;
+  enableDevInstanceOf();
+}
+
+// node_modules/graphql/jsutils/toError.mjs
+function toError(thrownValue) {
+  return thrownValue instanceof Error ? thrownValue : new NonErrorThrown(thrownValue);
+}
+
+class NonErrorThrown extends Error {
+  constructor(thrownValue) {
+    super("Unexpected error value: " + inspect(thrownValue));
+    this.name = "NonErrorThrown";
+    this.thrownValue = thrownValue;
+  }
+}
 
 // node_modules/graphql/jsutils/isObjectLike.mjs
 function isObjectLike(value) {
   return typeof value == "object" && value !== null;
 }
 
-// node_modules/graphql/jsutils/toObjMap.mjs
-function toObjMap(obj) {
-  if (obj == null) {
-    return Object.create(null);
+// node_modules/graphql/jsutils/AccumulatorMap.mjs
+class AccumulatorMap extends Map {
+  get [Symbol.toStringTag]() {
+    return "AccumulatorMap";
   }
-  if (Object.getPrototypeOf(obj) === null) {
-    return obj;
+  add(key, item) {
+    const group = this.get(key);
+    if (group === undefined) {
+      this.set(key, [item]);
+    } else {
+      group.push(item);
+    }
   }
-  const map = Object.create(null);
-  for (const [key, value] of Object.entries(obj)) {
-    map[key] = value;
+}
+
+// node_modules/graphql/language/location.mjs
+var LineRegExp = /\r\n|[\n\r]/g;
+function getLocation(source, position) {
+  const matches = source.body.matchAll(LineRegExp);
+  let match = matches.next().value;
+  let line = 1;
+  let lastLineStart = 0;
+  while (match !== undefined && match.index < position) {
+    lastLineStart = match.index + match[0].length;
+    line++;
+    match = matches.next().value;
   }
-  return map;
+  return { line, column: position + 1 - lastLineStart };
+}
+function getLocations(locations) {
+  if (locations.length < 2) {
+    return locations.map(({ source, start }) => getLocation(source, start));
+  }
+  const bySource = new AccumulatorMap;
+  locations.forEach(({ source, start }, index) => {
+    bySource.add(source, {
+      position: start,
+      index
+    });
+  });
+  const result = new Array(locations.length);
+  for (const [source, positions] of bySource) {
+    const matches = source.body.matchAll(LineRegExp);
+    let match = matches.next().value;
+    let line = 1;
+    let lastLineStart = 0;
+    for (const { position, index } of positions.toSorted((a, b) => a.position - b.position)) {
+      while (match !== undefined && match.index < position) {
+        lastLineStart = match.index + match[0].length;
+        line++;
+        match = matches.next().value;
+      }
+      result[index] = {
+        line,
+        column: position + 1 - lastLineStart
+      };
+    }
+  }
+  return result;
+}
+
+// node_modules/graphql/language/printLocation.mjs
+function printLocation(location) {
+  return printSourceLocation(location.source, getLocation(location.source, location.start));
+}
+function printSourceLocation(source, sourceLocation) {
+  const firstLineColumnOffset = source.locationOffset.column - 1;
+  const body = "".padStart(firstLineColumnOffset) + source.body;
+  const lineIndex = sourceLocation.line - 1;
+  const lineOffset = source.locationOffset.line - 1;
+  const lineNum = sourceLocation.line + lineOffset;
+  const columnOffset = sourceLocation.line === 1 ? firstLineColumnOffset : 0;
+  const columnNum = sourceLocation.column + columnOffset;
+  const locationStr = `${source.name}:${lineNum}:${columnNum}
+`;
+  const lines = body.split(/\r\n|[\n\r]/g);
+  const locationLine = lines[lineIndex];
+  if (locationLine.length > 120) {
+    const subLines = [];
+    for (let i = 0;i < locationLine.length; i += 80) {
+      subLines.push(locationLine.slice(i, i + 80));
+    }
+    const zeroBasedColumn = columnNum - 1;
+    const subLineIndex = Math.min(Math.floor(zeroBasedColumn / 80), subLines.length - 1);
+    const subLineColumnNum = columnNum - subLineIndex * 80;
+    return locationStr + printPrefixedLines([
+      [`${lineNum} |`, subLines[0]],
+      ...subLines.slice(1, subLineIndex + 1).map((subLine) => ["|", subLine]),
+      ["|", "^".padStart(subLineColumnNum)],
+      ["|", subLines[subLineIndex + 1]]
+    ]);
+  }
+  return locationStr + printPrefixedLines([
+    [`${lineNum - 1} |`, lines[lineIndex - 1]],
+    [`${lineNum} |`, locationLine],
+    ["|", "^".padStart(columnNum)],
+    [`${lineNum + 1} |`, lines[lineIndex + 1]]
+  ]);
+}
+function printPrefixedLines(lines) {
+  const existingLines = lines.filter(([_, line]) => line !== undefined);
+  const padLen = Math.max(...existingLines.map(([prefix]) => prefix.length));
+  return existingLines.map(([prefix, line]) => prefix.padStart(padLen) + (line ? " " + line : "")).join(`
+`);
+}
+
+// node_modules/graphql/error/GraphQLError.mjs
+class GraphQLError extends Error {
+  constructor(message, options = {}) {
+    const { nodes, source, positions, path, originalError, cause, extensions } = options;
+    const hasCause = "cause" in options;
+    const errorCause = hasCause ? cause : originalError;
+    const errorOptions = hasCause || originalError != null ? { cause: errorCause } : undefined;
+    super(message, errorOptions);
+    this.name = "GraphQLError";
+    this.path = path ?? undefined;
+    const underlyingError = originalError ?? (cause instanceof Error ? cause : undefined);
+    this.originalError = underlyingError;
+    this.nodes = undefinedIfEmpty(Array.isArray(nodes) ? nodes : nodes ? [nodes] : undefined);
+    const nodeLocations = undefinedIfEmpty(this.nodes?.map((node) => node.loc).filter((loc) => loc != null));
+    this.source = source ?? nodeLocations?.[0]?.source;
+    this.positions = positions ?? nodeLocations?.map((loc) => loc.start);
+    this.locations = positions && source ? getLocations(positions.map((start) => ({ source, start }))) : nodeLocations && getLocations(nodeLocations);
+    const originalExtensions = isObjectLike(underlyingError?.extensions) ? underlyingError.extensions : undefined;
+    this.extensions = extensions ?? originalExtensions ?? Object.create(null);
+    Object.defineProperties(this, {
+      message: {
+        writable: true,
+        enumerable: true
+      },
+      name: { enumerable: false },
+      nodes: { enumerable: false },
+      source: { enumerable: false },
+      positions: { enumerable: false },
+      originalError: { enumerable: false }
+    });
+    if (originalError?.stack != null) {
+      Object.defineProperty(this, "stack", {
+        value: originalError.stack,
+        writable: true,
+        configurable: true
+      });
+    } else if (Error.captureStackTrace != null) {
+      Error.captureStackTrace(this, GraphQLError);
+    } else {
+      Object.defineProperty(this, "stack", {
+        value: Error().stack,
+        writable: true,
+        configurable: true
+      });
+    }
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLError";
+  }
+  toString() {
+    let output = this.message;
+    if (this.nodes) {
+      for (const node of this.nodes) {
+        if (node.loc) {
+          output += `
+
+` + printLocation(node.loc);
+        }
+      }
+    } else if (this.source && this.locations) {
+      for (const location of this.locations) {
+        output += `
+
+` + printSourceLocation(this.source, location);
+      }
+    }
+    return output;
+  }
+  toJSON() {
+    const formattedError = {
+      message: this.message
+    };
+    if (this.locations != null) {
+      formattedError.locations = this.locations;
+    }
+    if (this.path != null) {
+      formattedError.path = this.path;
+    }
+    if (this.extensions != null && Object.keys(this.extensions).length > 0) {
+      formattedError.extensions = this.extensions;
+    }
+    return formattedError;
+  }
+}
+function undefinedIfEmpty(array) {
+  return array === undefined || array.length === 0 ? undefined : array;
+}
+
+// node_modules/graphql/error/ensureGraphQLError.mjs
+function ensureGraphQLError(rawError) {
+  if (rawError instanceof GraphQLError) {
+    return rawError;
+  }
+  const originalError = toError(rawError);
+  return new GraphQLError(originalError.message, { originalError });
+}
+
+// node_modules/graphql/jsutils/capitalize.mjs
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+// node_modules/graphql/jsutils/invariant.mjs
+function invariant(condition, message) {
+  if (!condition) {
+    throw new Error(message ?? "Unexpected invariant triggered.");
+  }
+}
+
+// node_modules/graphql/jsutils/formatList.mjs
+function orList(items) {
+  return formatList("or", items);
+}
+function andList(items) {
+  return formatList("and", items);
+}
+function formatList(conjunction, items) {
+  if (!(items.length !== 0))
+    invariant(false);
+  switch (items.length) {
+    case 1:
+      return items[0];
+    case 2:
+      return items[0] + " " + conjunction + " " + items[1];
+  }
+  const allButLast = items.slice(0, -1);
+  const lastItem = items.at(-1);
+  return allButLast.join(", ") + ", " + conjunction + " " + lastItem;
+}
+
+// node_modules/graphql/jsutils/isIterableObject.mjs
+function isIterableObject(maybeIterable) {
+  return typeof maybeIterable === "object" && typeof maybeIterable?.[Symbol.iterator] === "function";
+}
+
+// node_modules/graphql/jsutils/keyMap.mjs
+function keyMap(list, keyFn) {
+  const result = Object.create(null);
+  for (const item of list) {
+    result[keyFn(item)] = item;
+  }
+  return result;
+}
+
+// node_modules/graphql/jsutils/mapValue.mjs
+function mapValue(map, fn) {
+  const result = Object.create(null);
+  for (const key of Object.keys(map)) {
+    result[key] = fn(map[key], key);
+  }
+  return result;
+}
+
+// node_modules/graphql/jsutils/printPathArray.mjs
+function printPathArray(path) {
+  if (path.length === 0) {
+    return "";
+  }
+  return ` at ${path.map((key) => typeof key === "number" ? `[${key}]` : `.${key}`).join("")}`;
 }
 
 // node_modules/graphql/language/ast.mjs
@@ -158,10 +496,7 @@ class Location {
     return "Location";
   }
   toJSON() {
-    return {
-      start: this.start,
-      end: this.end
-    };
+    return { start: this.start, end: this.end };
   }
 }
 
@@ -192,19 +527,32 @@ var QueryDocumentKeys = {
   Name: [],
   Document: ["definitions"],
   OperationDefinition: [
+    "description",
     "name",
     "variableDefinitions",
     "directives",
     "selectionSet"
   ],
-  VariableDefinition: ["variable", "type", "defaultValue", "directives"],
+  VariableDefinition: [
+    "description",
+    "variable",
+    "type",
+    "defaultValue",
+    "directives"
+  ],
   Variable: ["name"],
   SelectionSet: ["selections"],
   Field: ["alias", "name", "arguments", "directives", "selectionSet"],
   Argument: ["name", "value"],
-  FragmentSpread: ["name", "directives"],
+  FragmentArgument: ["name", "value"],
+  FragmentSpread: [
+    "name",
+    "arguments",
+    "directives"
+  ],
   InlineFragment: ["typeCondition", "directives", "selectionSet"],
   FragmentDefinition: [
+    "description",
     "name",
     "variableDefinitions",
     "typeCondition",
@@ -253,47 +601,109 @@ var QueryDocumentKeys = {
   EnumTypeDefinition: ["description", "name", "directives", "values"],
   EnumValueDefinition: ["description", "name", "directives"],
   InputObjectTypeDefinition: ["description", "name", "directives", "fields"],
-  DirectiveDefinition: ["description", "name", "arguments", "locations"],
+  DirectiveDefinition: [
+    "description",
+    "name",
+    "arguments",
+    "directives",
+    "locations"
+  ],
   SchemaExtension: ["directives", "operationTypes"],
+  DirectiveExtension: ["name", "directives"],
   ScalarTypeExtension: ["name", "directives"],
   ObjectTypeExtension: ["name", "interfaces", "directives", "fields"],
   InterfaceTypeExtension: ["name", "interfaces", "directives", "fields"],
   UnionTypeExtension: ["name", "directives", "types"],
   EnumTypeExtension: ["name", "directives", "values"],
-  InputObjectTypeExtension: ["name", "directives", "fields"]
+  InputObjectTypeExtension: ["name", "directives", "fields"],
+  TypeCoordinate: ["name"],
+  MemberCoordinate: ["name", "memberName"],
+  ArgumentCoordinate: ["name", "fieldName", "argumentName"],
+  DirectiveCoordinate: ["name"],
+  DirectiveArgumentCoordinate: ["name", "argumentName"]
 };
 var kindValues = new Set(Object.keys(QueryDocumentKeys));
 function isNode(maybeNode) {
-  const maybeKind = maybeNode === null || maybeNode === undefined ? undefined : maybeNode.kind;
+  const maybeKind = maybeNode?.kind;
   return typeof maybeKind === "string" && kindValues.has(maybeKind);
 }
-var OperationTypeNode;
-(function(OperationTypeNode) {
-  OperationTypeNode["QUERY"] = "query";
-  OperationTypeNode["MUTATION"] = "mutation";
-  OperationTypeNode["SUBSCRIPTION"] = "subscription";
-})(OperationTypeNode || (OperationTypeNode = {}));
+var OperationTypeNode = {
+  QUERY: "query",
+  MUTATION: "mutation",
+  SUBSCRIPTION: "subscription"
+};
+
+// node_modules/graphql/language/kinds_.mjs
+var NAME = "Name";
+var DOCUMENT = "Document";
+var OPERATION_DEFINITION = "OperationDefinition";
+var VARIABLE_DEFINITION = "VariableDefinition";
+var SELECTION_SET = "SelectionSet";
+var FIELD = "Field";
+var ARGUMENT = "Argument";
+var FRAGMENT_ARGUMENT = "FragmentArgument";
+var FRAGMENT_SPREAD = "FragmentSpread";
+var INLINE_FRAGMENT = "InlineFragment";
+var FRAGMENT_DEFINITION = "FragmentDefinition";
+var VARIABLE = "Variable";
+var INT = "IntValue";
+var FLOAT = "FloatValue";
+var STRING = "StringValue";
+var BOOLEAN = "BooleanValue";
+var NULL = "NullValue";
+var ENUM = "EnumValue";
+var LIST = "ListValue";
+var OBJECT = "ObjectValue";
+var OBJECT_FIELD = "ObjectField";
+var DIRECTIVE = "Directive";
+var NAMED_TYPE = "NamedType";
+var LIST_TYPE = "ListType";
+var NON_NULL_TYPE = "NonNullType";
+var SCHEMA_DEFINITION = "SchemaDefinition";
+var OPERATION_TYPE_DEFINITION = "OperationTypeDefinition";
+var SCALAR_TYPE_DEFINITION = "ScalarTypeDefinition";
+var OBJECT_TYPE_DEFINITION = "ObjectTypeDefinition";
+var FIELD_DEFINITION = "FieldDefinition";
+var INPUT_VALUE_DEFINITION = "InputValueDefinition";
+var INTERFACE_TYPE_DEFINITION = "InterfaceTypeDefinition";
+var UNION_TYPE_DEFINITION = "UnionTypeDefinition";
+var ENUM_TYPE_DEFINITION = "EnumTypeDefinition";
+var ENUM_VALUE_DEFINITION = "EnumValueDefinition";
+var INPUT_OBJECT_TYPE_DEFINITION = "InputObjectTypeDefinition";
+var DIRECTIVE_DEFINITION = "DirectiveDefinition";
+var SCHEMA_EXTENSION = "SchemaExtension";
+var DIRECTIVE_EXTENSION = "DirectiveExtension";
+var SCALAR_TYPE_EXTENSION = "ScalarTypeExtension";
+var OBJECT_TYPE_EXTENSION = "ObjectTypeExtension";
+var INTERFACE_TYPE_EXTENSION = "InterfaceTypeExtension";
+var UNION_TYPE_EXTENSION = "UnionTypeExtension";
+var ENUM_TYPE_EXTENSION = "EnumTypeExtension";
+var INPUT_OBJECT_TYPE_EXTENSION = "InputObjectTypeExtension";
+var TYPE_COORDINATE = "TypeCoordinate";
+var MEMBER_COORDINATE = "MemberCoordinate";
+var ARGUMENT_COORDINATE = "ArgumentCoordinate";
+var DIRECTIVE_COORDINATE = "DirectiveCoordinate";
+var DIRECTIVE_ARGUMENT_COORDINATE = "DirectiveArgumentCoordinate";
+// node_modules/graphql/jsutils/devAssert.mjs
+function devAssert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
 
 // node_modules/graphql/jsutils/didYouMean.mjs
 var MAX_SUGGESTIONS = 5;
 function didYouMean(firstArg, secondArg) {
-  const [subMessage, suggestionsArg] = secondArg ? [firstArg, secondArg] : [undefined, firstArg];
+  const [subMessage, suggestions] = secondArg ? [firstArg, secondArg] : [undefined, firstArg];
+  if (suggestions.length === 0) {
+    return "";
+  }
   let message = " Did you mean ";
-  if (subMessage) {
+  if (subMessage != null) {
     message += subMessage + " ";
   }
-  const suggestions = suggestionsArg.map((x) => `"${x}"`);
-  switch (suggestions.length) {
-    case 0:
-      return "";
-    case 1:
-      return message + suggestions[0] + "?";
-    case 2:
-      return message + suggestions[0] + " or " + suggestions[1] + "?";
-  }
-  const selected = suggestions.slice(0, MAX_SUGGESTIONS);
-  const lastItem = selected.pop();
-  return message + selected.join(", ") + ", or " + lastItem + "?";
+  const suggestionList = orList(suggestions.slice(0, MAX_SUGGESTIONS).map((x) => `"${x}"`));
+  return message + suggestionList + "?";
 }
 
 // node_modules/graphql/jsutils/identityFunc.mjs
@@ -301,29 +711,11 @@ function identityFunc(x) {
   return x;
 }
 
-// node_modules/graphql/jsutils/keyMap.mjs
-function keyMap(list, keyFn) {
-  const result = Object.create(null);
-  for (const item of list) {
-    result[keyFn(item)] = item;
-  }
-  return result;
-}
-
 // node_modules/graphql/jsutils/keyValMap.mjs
 function keyValMap(list, keyFn, valFn) {
   const result = Object.create(null);
   for (const item of list) {
     result[keyFn(item)] = valFn(item);
-  }
-  return result;
-}
-
-// node_modules/graphql/jsutils/mapValue.mjs
-function mapValue(map, fn) {
-  const result = Object.create(null);
-  for (const key of Object.keys(map)) {
-    result[key] = fn(map[key], key);
   }
   return result;
 }
@@ -458,234 +850,23 @@ function stringToArray(str) {
   return array;
 }
 
-// node_modules/graphql/jsutils/invariant.mjs
-function invariant(condition, message) {
-  const booleanCondition = Boolean(condition);
-  if (!booleanCondition) {
-    throw new Error(message != null ? message : "Unexpected invariant triggered.");
+// node_modules/graphql/jsutils/toObjMap.mjs
+function toObjMapWithSymbols(obj) {
+  if (obj == null) {
+    return Object.create(null);
   }
-}
-
-// node_modules/graphql/language/location.mjs
-var LineRegExp = /\r\n|[\n\r]/g;
-function getLocation(source, position) {
-  let lastLineStart = 0;
-  let line = 1;
-  for (const match of source.body.matchAll(LineRegExp)) {
-    typeof match.index === "number" || invariant(false);
-    if (match.index >= position) {
-      break;
-    }
-    lastLineStart = match.index + match[0].length;
-    line += 1;
+  if (Object.getPrototypeOf(obj) === null) {
+    return obj;
   }
-  return {
-    line,
-    column: position + 1 - lastLineStart
-  };
-}
-
-// node_modules/graphql/language/printLocation.mjs
-function printLocation(location) {
-  return printSourceLocation(location.source, getLocation(location.source, location.start));
-}
-function printSourceLocation(source, sourceLocation) {
-  const firstLineColumnOffset = source.locationOffset.column - 1;
-  const body = "".padStart(firstLineColumnOffset) + source.body;
-  const lineIndex = sourceLocation.line - 1;
-  const lineOffset = source.locationOffset.line - 1;
-  const lineNum = sourceLocation.line + lineOffset;
-  const columnOffset = sourceLocation.line === 1 ? firstLineColumnOffset : 0;
-  const columnNum = sourceLocation.column + columnOffset;
-  const locationStr = `${source.name}:${lineNum}:${columnNum}
-`;
-  const lines = body.split(/\r\n|[\n\r]/g);
-  const locationLine = lines[lineIndex];
-  if (locationLine.length > 120) {
-    const subLineIndex = Math.floor(columnNum / 80);
-    const subLineColumnNum = columnNum % 80;
-    const subLines = [];
-    for (let i = 0;i < locationLine.length; i += 80) {
-      subLines.push(locationLine.slice(i, i + 80));
-    }
-    return locationStr + printPrefixedLines([
-      [`${lineNum} |`, subLines[0]],
-      ...subLines.slice(1, subLineIndex + 1).map((subLine) => ["|", subLine]),
-      ["|", "^".padStart(subLineColumnNum)],
-      ["|", subLines[subLineIndex + 1]]
-    ]);
+  const map = Object.create(null);
+  for (const [key, value] of Object.entries(obj)) {
+    map[key] = value;
   }
-  return locationStr + printPrefixedLines([
-    [`${lineNum - 1} |`, lines[lineIndex - 1]],
-    [`${lineNum} |`, locationLine],
-    ["|", "^".padStart(columnNum)],
-    [`${lineNum + 1} |`, lines[lineIndex + 1]]
-  ]);
-}
-function printPrefixedLines(lines) {
-  const existingLines = lines.filter(([_, line]) => line !== undefined);
-  const padLen = Math.max(...existingLines.map(([prefix]) => prefix.length));
-  return existingLines.map(([prefix, line]) => prefix.padStart(padLen) + (line ? " " + line : "")).join(`
-`);
-}
-
-// node_modules/graphql/error/GraphQLError.mjs
-function toNormalizedOptions(args) {
-  const firstArg = args[0];
-  if (firstArg == null || "kind" in firstArg || "length" in firstArg) {
-    return {
-      nodes: firstArg,
-      source: args[1],
-      positions: args[2],
-      path: args[3],
-      originalError: args[4],
-      extensions: args[5]
-    };
+  for (const key of Object.getOwnPropertySymbols(obj)) {
+    map[key] = obj[key];
   }
-  return firstArg;
+  return map;
 }
-
-class GraphQLError extends Error {
-  constructor(message, ...rawArgs) {
-    var _this$nodes, _nodeLocations$, _ref;
-    const { nodes, source, positions, path, originalError, extensions } = toNormalizedOptions(rawArgs);
-    super(message);
-    this.name = "GraphQLError";
-    this.path = path !== null && path !== undefined ? path : undefined;
-    this.originalError = originalError !== null && originalError !== undefined ? originalError : undefined;
-    this.nodes = undefinedIfEmpty(Array.isArray(nodes) ? nodes : nodes ? [nodes] : undefined);
-    const nodeLocations = undefinedIfEmpty((_this$nodes = this.nodes) === null || _this$nodes === undefined ? undefined : _this$nodes.map((node) => node.loc).filter((loc) => loc != null));
-    this.source = source !== null && source !== undefined ? source : nodeLocations === null || nodeLocations === undefined ? undefined : (_nodeLocations$ = nodeLocations[0]) === null || _nodeLocations$ === undefined ? undefined : _nodeLocations$.source;
-    this.positions = positions !== null && positions !== undefined ? positions : nodeLocations === null || nodeLocations === undefined ? undefined : nodeLocations.map((loc) => loc.start);
-    this.locations = positions && source ? positions.map((pos) => getLocation(source, pos)) : nodeLocations === null || nodeLocations === undefined ? undefined : nodeLocations.map((loc) => getLocation(loc.source, loc.start));
-    const originalExtensions = isObjectLike(originalError === null || originalError === undefined ? undefined : originalError.extensions) ? originalError === null || originalError === undefined ? undefined : originalError.extensions : undefined;
-    this.extensions = (_ref = extensions !== null && extensions !== undefined ? extensions : originalExtensions) !== null && _ref !== undefined ? _ref : Object.create(null);
-    Object.defineProperties(this, {
-      message: {
-        writable: true,
-        enumerable: true
-      },
-      name: {
-        enumerable: false
-      },
-      nodes: {
-        enumerable: false
-      },
-      source: {
-        enumerable: false
-      },
-      positions: {
-        enumerable: false
-      },
-      originalError: {
-        enumerable: false
-      }
-    });
-    if (originalError !== null && originalError !== undefined && originalError.stack) {
-      Object.defineProperty(this, "stack", {
-        value: originalError.stack,
-        writable: true,
-        configurable: true
-      });
-    } else if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, GraphQLError);
-    } else {
-      Object.defineProperty(this, "stack", {
-        value: Error().stack,
-        writable: true,
-        configurable: true
-      });
-    }
-  }
-  get [Symbol.toStringTag]() {
-    return "GraphQLError";
-  }
-  toString() {
-    let output = this.message;
-    if (this.nodes) {
-      for (const node of this.nodes) {
-        if (node.loc) {
-          output += `
-
-` + printLocation(node.loc);
-        }
-      }
-    } else if (this.source && this.locations) {
-      for (const location of this.locations) {
-        output += `
-
-` + printSourceLocation(this.source, location);
-      }
-    }
-    return output;
-  }
-  toJSON() {
-    const formattedError = {
-      message: this.message
-    };
-    if (this.locations != null) {
-      formattedError.locations = this.locations;
-    }
-    if (this.path != null) {
-      formattedError.path = this.path;
-    }
-    if (this.extensions != null && Object.keys(this.extensions).length > 0) {
-      formattedError.extensions = this.extensions;
-    }
-    return formattedError;
-  }
-}
-function undefinedIfEmpty(array) {
-  return array === undefined || array.length === 0 ? undefined : array;
-}
-
-// node_modules/graphql/language/kinds.mjs
-var Kind;
-(function(Kind) {
-  Kind["NAME"] = "Name";
-  Kind["DOCUMENT"] = "Document";
-  Kind["OPERATION_DEFINITION"] = "OperationDefinition";
-  Kind["VARIABLE_DEFINITION"] = "VariableDefinition";
-  Kind["SELECTION_SET"] = "SelectionSet";
-  Kind["FIELD"] = "Field";
-  Kind["ARGUMENT"] = "Argument";
-  Kind["FRAGMENT_SPREAD"] = "FragmentSpread";
-  Kind["INLINE_FRAGMENT"] = "InlineFragment";
-  Kind["FRAGMENT_DEFINITION"] = "FragmentDefinition";
-  Kind["VARIABLE"] = "Variable";
-  Kind["INT"] = "IntValue";
-  Kind["FLOAT"] = "FloatValue";
-  Kind["STRING"] = "StringValue";
-  Kind["BOOLEAN"] = "BooleanValue";
-  Kind["NULL"] = "NullValue";
-  Kind["ENUM"] = "EnumValue";
-  Kind["LIST"] = "ListValue";
-  Kind["OBJECT"] = "ObjectValue";
-  Kind["OBJECT_FIELD"] = "ObjectField";
-  Kind["DIRECTIVE"] = "Directive";
-  Kind["NAMED_TYPE"] = "NamedType";
-  Kind["LIST_TYPE"] = "ListType";
-  Kind["NON_NULL_TYPE"] = "NonNullType";
-  Kind["SCHEMA_DEFINITION"] = "SchemaDefinition";
-  Kind["OPERATION_TYPE_DEFINITION"] = "OperationTypeDefinition";
-  Kind["SCALAR_TYPE_DEFINITION"] = "ScalarTypeDefinition";
-  Kind["OBJECT_TYPE_DEFINITION"] = "ObjectTypeDefinition";
-  Kind["FIELD_DEFINITION"] = "FieldDefinition";
-  Kind["INPUT_VALUE_DEFINITION"] = "InputValueDefinition";
-  Kind["INTERFACE_TYPE_DEFINITION"] = "InterfaceTypeDefinition";
-  Kind["UNION_TYPE_DEFINITION"] = "UnionTypeDefinition";
-  Kind["ENUM_TYPE_DEFINITION"] = "EnumTypeDefinition";
-  Kind["ENUM_VALUE_DEFINITION"] = "EnumValueDefinition";
-  Kind["INPUT_OBJECT_TYPE_DEFINITION"] = "InputObjectTypeDefinition";
-  Kind["DIRECTIVE_DEFINITION"] = "DirectiveDefinition";
-  Kind["SCHEMA_EXTENSION"] = "SchemaExtension";
-  Kind["SCALAR_TYPE_EXTENSION"] = "ScalarTypeExtension";
-  Kind["OBJECT_TYPE_EXTENSION"] = "ObjectTypeExtension";
-  Kind["INTERFACE_TYPE_EXTENSION"] = "InterfaceTypeExtension";
-  Kind["UNION_TYPE_EXTENSION"] = "UnionTypeExtension";
-  Kind["ENUM_TYPE_EXTENSION"] = "EnumTypeExtension";
-  Kind["INPUT_OBJECT_TYPE_EXTENSION"] = "InputObjectTypeExtension";
-})(Kind || (Kind = {}));
 
 // node_modules/graphql/language/characterClasses.mjs
 function isWhiteSpace(code) {
@@ -706,24 +887,22 @@ function isNameContinue(code) {
 
 // node_modules/graphql/language/blockString.mjs
 function dedentBlockStringLines(lines) {
-  var _firstNonEmptyLine2;
   let commonIndent = Number.MAX_SAFE_INTEGER;
   let firstNonEmptyLine = null;
   let lastNonEmptyLine = -1;
   for (let i = 0;i < lines.length; ++i) {
-    var _firstNonEmptyLine;
     const line = lines[i];
     const indent = leadingWhitespace(line);
     if (indent === line.length) {
       continue;
     }
-    firstNonEmptyLine = (_firstNonEmptyLine = firstNonEmptyLine) !== null && _firstNonEmptyLine !== undefined ? _firstNonEmptyLine : i;
+    firstNonEmptyLine ??= i;
     lastNonEmptyLine = i;
     if (i !== 0 && indent < commonIndent) {
       commonIndent = indent;
     }
   }
-  return lines.map((line, i) => i === 0 ? line : line.slice(commonIndent)).slice((_firstNonEmptyLine2 = firstNonEmptyLine) !== null && _firstNonEmptyLine2 !== undefined ? _firstNonEmptyLine2 : 0, lastNonEmptyLine + 1);
+  return lines.map((line, i) => i === 0 ? line : line.slice(commonIndent)).slice(firstNonEmptyLine ?? 0, lastNonEmptyLine + 1);
 }
 function leadingWhitespace(str) {
   let i = 0;
@@ -733,7 +912,7 @@ function leadingWhitespace(str) {
   return i;
 }
 function printBlockString(value, options) {
-  const escapedValue = value.replace(/"""/g, '\\"""');
+  const escapedValue = value.replaceAll('"""', '\\"""');
   const lines = escapedValue.split(/\r\n|[\n\r]/g);
   const isSingleLine = lines.length === 1;
   const forceLeadingNewLine = lines.length > 1 && lines.slice(1).every((line) => line.length === 0 || isWhiteSpace(line.charCodeAt(0)));
@@ -741,7 +920,7 @@ function printBlockString(value, options) {
   const hasTrailingQuote = value.endsWith('"') && !hasTrailingTripleQuotes;
   const hasTrailingSlash = value.endsWith("\\");
   const forceTrailingNewline = hasTrailingQuote || hasTrailingSlash;
-  const printAsMultipleLines = !(options !== null && options !== undefined && options.minimize) && (!isSingleLine || value.length > 70 || forceTrailingNewline || forceLeadingNewLine || hasTrailingTripleQuotes);
+  const printAsMultipleLines = !options?.minimize && (!isSingleLine || value.length > 70 || forceTrailingNewline || forceLeadingNewLine || hasTrailingTripleQuotes);
   let result = "";
   const skipLeadingNewLine = isSingleLine && isWhiteSpace(value.charCodeAt(0));
   if (printAsMultipleLines && !skipLeadingNewLine || forceLeadingNewLine) {
@@ -927,445 +1106,423 @@ var escapeSequences = [
   "\\u009F"
 ];
 
-// node_modules/graphql/language/visitor.mjs
-var BREAK = Object.freeze({});
-function visit(root, visitor, visitorKeys = QueryDocumentKeys) {
-  const enterLeaveMap = new Map;
-  for (const kind of Object.values(Kind)) {
-    enterLeaveMap.set(kind, getEnterLeaveForKind(visitor, kind));
-  }
-  let stack = undefined;
-  let inArray = Array.isArray(root);
-  let keys = [root];
-  let index = -1;
-  let edits = [];
-  let node = root;
-  let key = undefined;
-  let parent = undefined;
-  const path = [];
-  const ancestors = [];
+// node_modules/graphql/language/reducer.mjs
+function reduce(root, reducer) {
+  const stack = [];
+  let frame = {
+    parent: [root],
+    keys: undefined,
+    results: [],
+    index: -1
+  };
+  let node;
   do {
-    index++;
-    const isLeaving = index === keys.length;
-    const isEdited = isLeaving && edits.length !== 0;
-    if (isLeaving) {
-      key = ancestors.length === 0 ? undefined : path[path.length - 1];
-      node = parent;
-      parent = ancestors.pop();
-      if (isEdited) {
-        if (inArray) {
-          node = node.slice();
-          let editOffset = 0;
-          for (const [editKey, editValue] of edits) {
-            const arrayKey = editKey - editOffset;
-            if (editValue === null) {
-              node.splice(arrayKey, 1);
-              editOffset++;
-            } else {
-              node[arrayKey] = editValue;
-            }
-          }
-        } else {
-          node = { ...node };
-          for (const [editKey, editValue] of edits) {
-            node[editKey] = editValue;
-          }
-        }
-      }
-      index = stack.index;
-      keys = stack.keys;
-      edits = stack.edits;
-      inArray = stack.inArray;
-      stack = stack.prev;
-    } else if (parent) {
-      key = inArray ? index : keys[index];
-      node = parent[key];
-      if (node === null || node === undefined) {
+    let kind;
+    frame.index++;
+    const length = frame.keys === undefined ? frame.parent.length : frame.keys.length;
+    if (frame.index === length) {
+      node = frame.results;
+      kind = frame.keys === undefined ? undefined : frame.results.kind;
+      frame = stack.pop();
+    } else {
+      node = frame.keys === undefined ? frame.parent[frame.index] : frame.parent[frame.keys[frame.index]];
+      if (node == null && stack.length !== 0) {
         continue;
       }
-      path.push(key);
-    }
-    let result;
-    if (!Array.isArray(node)) {
-      var _enterLeaveMap$get, _enterLeaveMap$get2;
-      isNode(node) || devAssert(false, `Invalid AST Node: ${inspect(node)}.`);
-      const visitFn = isLeaving ? (_enterLeaveMap$get = enterLeaveMap.get(node.kind)) === null || _enterLeaveMap$get === undefined ? undefined : _enterLeaveMap$get.leave : (_enterLeaveMap$get2 = enterLeaveMap.get(node.kind)) === null || _enterLeaveMap$get2 === undefined ? undefined : _enterLeaveMap$get2.enter;
-      result = visitFn === null || visitFn === undefined ? undefined : visitFn.call(visitor, node, key, parent, path, ancestors);
-      if (result === BREAK) {
-        break;
-      }
-      if (result === false) {
-        if (!isLeaving) {
-          path.pop();
+      if (Array.isArray(node)) {
+        if (node.length !== 0) {
+          stack.push(frame);
+          frame = { parent: node, keys: undefined, results: [], index: -1 };
           continue;
         }
-      } else if (result !== undefined) {
-        edits.push([key, result]);
-        if (!isLeaving) {
-          if (isNode(result)) {
-            node = result;
-          } else {
-            path.pop();
-            continue;
-          }
+      } else {
+        const parent = node;
+        kind = parent?.kind;
+        const keys = typeof kind === "string" ? QueryDocumentKeys[kind] : undefined;
+        if (!Array.isArray(keys)) {
+          throw new Error(`Invalid AST Node: ${inspect(node)}.`);
+        }
+        if (keys.length !== 0) {
+          stack.push(frame);
+          frame = { parent, keys, results: { ...parent }, index: -1 };
+          continue;
         }
       }
     }
-    if (result === undefined && isEdited) {
-      edits.push([key, node]);
+    if (kind !== undefined) {
+      const reduceNode = reducer[kind];
+      node = reduceNode?.(node);
     }
-    if (isLeaving) {
-      path.pop();
+    if (frame.keys === undefined) {
+      frame.results.push(node);
     } else {
-      var _node$kind;
-      stack = {
-        inArray,
-        index,
-        keys,
-        edits,
-        prev: stack
-      };
-      inArray = Array.isArray(node);
-      keys = inArray ? node : (_node$kind = visitorKeys[node.kind]) !== null && _node$kind !== undefined ? _node$kind : [];
-      index = -1;
-      edits = [];
-      if (parent) {
-        ancestors.push(parent);
-      }
-      parent = node;
+      frame.results[frame.keys[frame.index]] = node;
     }
-  } while (stack !== undefined);
-  if (edits.length !== 0) {
-    return edits[edits.length - 1][1];
-  }
-  return root;
-}
-function visitInParallel(visitors) {
-  const skipping = new Array(visitors.length).fill(null);
-  const mergedVisitor = Object.create(null);
-  for (const kind of Object.values(Kind)) {
-    let hasVisitor = false;
-    const enterList = new Array(visitors.length).fill(undefined);
-    const leaveList = new Array(visitors.length).fill(undefined);
-    for (let i = 0;i < visitors.length; ++i) {
-      const { enter, leave } = getEnterLeaveForKind(visitors[i], kind);
-      hasVisitor || (hasVisitor = enter != null || leave != null);
-      enterList[i] = enter;
-      leaveList[i] = leave;
-    }
-    if (!hasVisitor) {
-      continue;
-    }
-    const mergedEnterLeave = {
-      enter(...args) {
-        const node = args[0];
-        for (let i = 0;i < visitors.length; i++) {
-          if (skipping[i] === null) {
-            var _enterList$i;
-            const result = (_enterList$i = enterList[i]) === null || _enterList$i === undefined ? undefined : _enterList$i.apply(visitors[i], args);
-            if (result === false) {
-              skipping[i] = node;
-            } else if (result === BREAK) {
-              skipping[i] = BREAK;
-            } else if (result !== undefined) {
-              return result;
-            }
-          }
-        }
-      },
-      leave(...args) {
-        const node = args[0];
-        for (let i = 0;i < visitors.length; i++) {
-          if (skipping[i] === null) {
-            var _leaveList$i;
-            const result = (_leaveList$i = leaveList[i]) === null || _leaveList$i === undefined ? undefined : _leaveList$i.apply(visitors[i], args);
-            if (result === BREAK) {
-              skipping[i] = BREAK;
-            } else if (result !== undefined && result !== false) {
-              return result;
-            }
-          } else if (skipping[i] === node) {
-            skipping[i] = null;
-          }
-        }
-      }
-    };
-    mergedVisitor[kind] = mergedEnterLeave;
-  }
-  return mergedVisitor;
-}
-function getEnterLeaveForKind(visitor, kind) {
-  const kindVisitor = visitor[kind];
-  if (typeof kindVisitor === "object") {
-    return kindVisitor;
-  } else if (typeof kindVisitor === "function") {
-    return {
-      enter: kindVisitor,
-      leave: undefined
-    };
-  }
-  return {
-    enter: visitor.enter,
-    leave: visitor.leave
-  };
+  } while (stack.length !== 0);
+  return node;
 }
 
 // node_modules/graphql/language/printer.mjs
-function print(ast) {
-  return visit(ast, printDocASTReducer);
+function print(ast, options) {
+  return render(reduce(ast, printDocASTReducer), options?.maxIndentDepth ?? Infinity);
+}
+function printForError(ast) {
+  return print(ast, { maxIndentDepth: 100 });
 }
 var MAX_LINE_LENGTH = 80;
-var printDocASTReducer = {
-  Name: {
-    leave: (node) => node.value
-  },
-  Variable: {
-    leave: (node) => "$" + node.name
-  },
-  Document: {
-    leave: (node) => join(node.definitions, `
 
-`)
-  },
-  OperationDefinition: {
-    leave(node) {
-      const varDefs = wrap("(", join(node.variableDefinitions, ", "), ")");
-      const prefix = join([
+class PrintBuffer {
+  constructor(value = "", isBlockString = false) {
+    this.next = undefined;
+    this.tail = this;
+    this.indentBefore = false;
+    this.dedentAfter = false;
+    this.length = value.length;
+    this.lines = value.includes(`
+`) ? value.split(`
+`) : value;
+    this.newlines = typeof this.lines === "string" ? 0 : this.lines.length - 1;
+    this.isBlockString = isBlockString;
+  }
+  append(result) {
+    if (result.length === 0) {
+      return this;
+    }
+    const next = typeof result === "string" ? new PrintBuffer(result) : result;
+    this.tail.next = next;
+    this.tail = next.tail;
+    this.length += next.length;
+    this.newlines += next.newlines;
+    return this;
+  }
+  indent() {
+    if (this.length === 0) {
+      return this;
+    }
+    this.indentBefore = true;
+    this.tail.dedentAfter = true;
+    this.length += 2 * (this.newlines + 1);
+    return this;
+  }
+}
+var EMPTY = new PrintBuffer;
+function render(buffer, maxDepth) {
+  let output = "";
+  let text = "";
+  let depth = 0;
+  let indentation = "";
+  let part = buffer;
+  while (part !== undefined) {
+    const lines = part.lines;
+    if (part.indentBefore) {
+      if (depth < maxDepth) {
+        indentation += "  ";
+        text += "  ";
+      }
+      depth++;
+    }
+    if (typeof lines === "string") {
+      text += lines;
+    } else {
+      text += lines[0];
+      const newline = !part.isBlockString && depth >= maxDepth ? " " : `
+` + indentation;
+      for (let i = 1;i < lines.length; i++) {
+        output += text;
+        text = newline + lines[i];
+      }
+    }
+    if (part.dedentAfter) {
+      depth--;
+      indentation = indentation.slice(0, depth * 2);
+    }
+    part = part.next;
+  }
+  return output + text;
+}
+var printDocASTReducer = {
+  Name: (node) => new PrintBuffer(node.value),
+  Variable: (node) => join(["$", node.name]),
+  Document: (node) => join(node.definitions, `
+
+`),
+  OperationDefinition(node) {
+    const varDefs = hasMultilineItems(node.variableDefinitions) ? wrap(`(
+`, join(node.variableDefinitions, `
+`), `
+)`) : wrap("(", join(node.variableDefinitions, ", "), ")");
+    const prefix = join([
+      wrap("", node.description, `
+`),
+      join([
         node.operation,
         join([node.name, varDefs]),
         join(node.directives, " ")
-      ], " ");
-      return (prefix === "query" ? "" : prefix + " ") + node.selectionSet;
+      ], " ")
+    ]);
+    return join([
+      node.operation === "query" && prefix.length === node.operation.length ? "" : join([prefix, " "]),
+      node.selectionSet
+    ]);
+  },
+  VariableDefinition: ({ variable, type, defaultValue, directives, description }) => join([
+    wrap("", description, `
+`),
+    variable,
+    ": ",
+    type,
+    wrap(" = ", defaultValue),
+    wrap(" ", join(directives, " "))
+  ]),
+  SelectionSet: ({ selections }) => selections.length === 0 ? new PrintBuffer("{}") : block(selections),
+  Field({ alias, name, arguments: args, directives, selectionSet }) {
+    const prefix = join([wrap("", alias, ": "), name], "");
+    return join([
+      wrappedLineAndArgs(prefix, args),
+      wrap(" ", join(directives, " ")),
+      wrap(" ", selectionSet)
+    ]);
+  },
+  Argument: ({ name, value }) => join([name, ": ", value]),
+  FragmentArgument: ({ name, value }) => join([name, ": ", value]),
+  FragmentSpread: ({ name, arguments: args, directives }) => {
+    const prefix = join(["...", name]);
+    return join([
+      wrappedLineAndArgs(prefix, args),
+      wrap(" ", join(directives, " "))
+    ]);
+  },
+  InlineFragment: ({ typeCondition, directives, selectionSet }) => join(["...", wrap("on ", typeCondition), join(directives, " "), selectionSet], " "),
+  FragmentDefinition: ({ name, typeCondition, variableDefinitions, directives, selectionSet, description }) => join([
+    wrap("", description, `
+`),
+    "fragment ",
+    name,
+    wrap("(", join(variableDefinitions, ", "), ")"),
+    " on ",
+    typeCondition,
+    " ",
+    wrap("", join(directives, " "), " "),
+    selectionSet
+  ]),
+  IntValue: ({ value }) => new PrintBuffer(value),
+  FloatValue: ({ value }) => new PrintBuffer(value),
+  StringValue: ({ value, block: isBlockString }) => new PrintBuffer(isBlockString === true ? printBlockString(value) : printString(value), isBlockString === true),
+  BooleanValue: ({ value }) => new PrintBuffer(value ? "true" : "false"),
+  NullValue: () => new PrintBuffer("null"),
+  EnumValue: ({ value }) => new PrintBuffer(value),
+  ListValue: ({ values }) => {
+    if (2 + joinedLength(values, ", ") > MAX_LINE_LENGTH) {
+      return wrap(`[
+`, join(values, `
+`).indent(), `
+]`);
     }
+    return join(["[", join(values, ", "), "]"]);
   },
-  VariableDefinition: {
-    leave: ({ variable, type, defaultValue, directives }) => variable + ": " + type + wrap(" = ", defaultValue) + wrap(" ", join(directives, " "))
-  },
-  SelectionSet: {
-    leave: ({ selections }) => block(selections)
-  },
-  Field: {
-    leave({ alias, name, arguments: args, directives, selectionSet }) {
-      const prefix = wrap("", alias, ": ") + name;
-      let argsLine = prefix + wrap("(", join(args, ", "), ")");
-      if (argsLine.length > MAX_LINE_LENGTH) {
-        argsLine = prefix + wrap(`(
-`, indent(join(args, `
-`)), `
-)`);
-      }
-      return join([argsLine, join(directives, " "), selectionSet], " ");
-    }
-  },
-  Argument: {
-    leave: ({ name, value }) => name + ": " + value
-  },
-  FragmentSpread: {
-    leave: ({ name, directives }) => "..." + name + wrap(" ", join(directives, " "))
-  },
-  InlineFragment: {
-    leave: ({ typeCondition, directives, selectionSet }) => join([
-      "...",
-      wrap("on ", typeCondition),
-      join(directives, " "),
-      selectionSet
-    ], " ")
-  },
-  FragmentDefinition: {
-    leave: ({ name, typeCondition, variableDefinitions, directives, selectionSet }) => `fragment ${name}${wrap("(", join(variableDefinitions, ", "), ")")} ` + `on ${typeCondition} ${wrap("", join(directives, " "), " ")}` + selectionSet
-  },
-  IntValue: {
-    leave: ({ value }) => value
-  },
-  FloatValue: {
-    leave: ({ value }) => value
-  },
-  StringValue: {
-    leave: ({ value, block: isBlockString }) => isBlockString ? printBlockString(value) : printString(value)
-  },
-  BooleanValue: {
-    leave: ({ value }) => value ? "true" : "false"
-  },
-  NullValue: {
-    leave: () => "null"
-  },
-  EnumValue: {
-    leave: ({ value }) => value
-  },
-  ListValue: {
-    leave: ({ values }) => "[" + join(values, ", ") + "]"
-  },
-  ObjectValue: {
-    leave: ({ fields }) => "{" + join(fields, ", ") + "}"
-  },
-  ObjectField: {
-    leave: ({ name, value }) => name + ": " + value
-  },
-  Directive: {
-    leave: ({ name, arguments: args }) => "@" + name + wrap("(", join(args, ", "), ")")
-  },
-  NamedType: {
-    leave: ({ name }) => name
-  },
-  ListType: {
-    leave: ({ type }) => "[" + type + "]"
-  },
-  NonNullType: {
-    leave: ({ type }) => type + "!"
-  },
-  SchemaDefinition: {
-    leave: ({ description, directives, operationTypes }) => wrap("", description, `
-`) + join(["schema", join(directives, " "), block(operationTypes)], " ")
-  },
-  OperationTypeDefinition: {
-    leave: ({ operation, type }) => operation + ": " + type
-  },
-  ScalarTypeDefinition: {
-    leave: ({ description, name, directives }) => wrap("", description, `
-`) + join(["scalar", name, join(directives, " ")], " ")
-  },
-  ObjectTypeDefinition: {
-    leave: ({ description, name, interfaces, directives, fields }) => wrap("", description, `
-`) + join([
+  ObjectValue: ({ fields }) => 4 + joinedLength(fields, ", ") > MAX_LINE_LENGTH ? block(fields) : join(["{ ", join(fields, ", "), " }"]),
+  ObjectField: ({ name, value }) => join([name, ": ", value]),
+  Directive: ({ name, arguments: args }) => join(["@", name, wrap("(", join(args, ", "), ")")]),
+  NamedType: ({ name }) => name,
+  ListType: ({ type }) => join(["[", type, "]"]),
+  NonNullType: ({ type }) => join([type, "!"]),
+  SchemaDefinition: ({ description, directives, operationTypes }) => join([
+    wrap("", description, `
+`),
+    join(["schema", join(directives, " "), block(operationTypes)], " ")
+  ]),
+  OperationTypeDefinition: ({ operation, type }) => join([operation, ": ", type]),
+  ScalarTypeDefinition: ({ description, name, directives }) => join([
+    wrap("", description, `
+`),
+    join(["scalar", name, join(directives, " ")], " ")
+  ]),
+  ObjectTypeDefinition: ({ description, name, interfaces, directives, fields }) => join([
+    wrap("", description, `
+`),
+    join([
       "type",
       name,
       wrap("implements ", join(interfaces, " & ")),
       join(directives, " "),
       block(fields)
     ], " ")
-  },
-  FieldDefinition: {
-    leave: ({ description, name, arguments: args, type, directives }) => wrap("", description, `
-`) + name + (hasMultilineItems(args) ? wrap(`(
-`, indent(join(args, `
-`)), `
-)`) : wrap("(", join(args, ", "), ")")) + ": " + type + wrap(" ", join(directives, " "))
-  },
-  InputValueDefinition: {
-    leave: ({ description, name, type, defaultValue, directives }) => wrap("", description, `
-`) + join([name + ": " + type, wrap("= ", defaultValue), join(directives, " ")], " ")
-  },
-  InterfaceTypeDefinition: {
-    leave: ({ description, name, interfaces, directives, fields }) => wrap("", description, `
-`) + join([
+  ]),
+  FieldDefinition: ({ description, name, arguments: args, type, directives }) => join([
+    wrap("", description, `
+`),
+    name,
+    hasMultilineItems(args) ? wrap(`(
+`, join(args, `
+`).indent(), `
+)`) : wrap("(", join(args, ", "), ")"),
+    ": ",
+    type,
+    wrap(" ", join(directives, " "))
+  ]),
+  InputValueDefinition: ({ description, name, type, defaultValue, directives }) => join([
+    wrap("", description, `
+`),
+    name,
+    ": ",
+    type,
+    wrap(" = ", defaultValue),
+    wrap(" ", join(directives, " "))
+  ]),
+  InterfaceTypeDefinition: ({ description, name, interfaces, directives, fields }) => join([
+    wrap("", description, `
+`),
+    join([
       "interface",
       name,
       wrap("implements ", join(interfaces, " & ")),
       join(directives, " "),
       block(fields)
     ], " ")
-  },
-  UnionTypeDefinition: {
-    leave: ({ description, name, directives, types }) => wrap("", description, `
-`) + join(["union", name, join(directives, " "), wrap("= ", join(types, " | "))], " ")
-  },
-  EnumTypeDefinition: {
-    leave: ({ description, name, directives, values }) => wrap("", description, `
-`) + join(["enum", name, join(directives, " "), block(values)], " ")
-  },
-  EnumValueDefinition: {
-    leave: ({ description, name, directives }) => wrap("", description, `
-`) + join([name, join(directives, " ")], " ")
-  },
-  InputObjectTypeDefinition: {
-    leave: ({ description, name, directives, fields }) => wrap("", description, `
-`) + join(["input", name, join(directives, " "), block(fields)], " ")
-  },
-  DirectiveDefinition: {
-    leave: ({ description, name, arguments: args, repeatable, locations }) => wrap("", description, `
-`) + "directive @" + name + (hasMultilineItems(args) ? wrap(`(
-`, indent(join(args, `
-`)), `
-)`) : wrap("(", join(args, ", "), ")")) + (repeatable ? " repeatable" : "") + " on " + join(locations, " | ")
-  },
-  SchemaExtension: {
-    leave: ({ directives, operationTypes }) => join(["extend schema", join(directives, " "), block(operationTypes)], " ")
-  },
-  ScalarTypeExtension: {
-    leave: ({ name, directives }) => join(["extend scalar", name, join(directives, " ")], " ")
-  },
-  ObjectTypeExtension: {
-    leave: ({ name, interfaces, directives, fields }) => join([
-      "extend type",
-      name,
-      wrap("implements ", join(interfaces, " & ")),
-      join(directives, " "),
-      block(fields)
-    ], " ")
-  },
-  InterfaceTypeExtension: {
-    leave: ({ name, interfaces, directives, fields }) => join([
-      "extend interface",
-      name,
-      wrap("implements ", join(interfaces, " & ")),
-      join(directives, " "),
-      block(fields)
-    ], " ")
-  },
-  UnionTypeExtension: {
-    leave: ({ name, directives, types }) => join([
-      "extend union",
-      name,
-      join(directives, " "),
-      wrap("= ", join(types, " | "))
-    ], " ")
-  },
-  EnumTypeExtension: {
-    leave: ({ name, directives, values }) => join(["extend enum", name, join(directives, " "), block(values)], " ")
-  },
-  InputObjectTypeExtension: {
-    leave: ({ name, directives, fields }) => join(["extend input", name, join(directives, " "), block(fields)], " ")
-  }
+  ]),
+  UnionTypeDefinition: ({ description, name, directives, types }) => join([
+    wrap("", description, `
+`),
+    join(["union", name, join(directives, " "), wrap("= ", join(types, " | "))], " ")
+  ]),
+  EnumTypeDefinition: ({ description, name, directives, values }) => join([
+    wrap("", description, `
+`),
+    join(["enum", name, join(directives, " "), block(values)], " ")
+  ]),
+  EnumValueDefinition: ({ description, name, directives }) => join([
+    wrap("", description, `
+`),
+    join([name, join(directives, " ")], " ")
+  ]),
+  InputObjectTypeDefinition: ({ description, name, directives, fields }) => join([
+    wrap("", description, `
+`),
+    join(["input", name, join(directives, " "), block(fields)], " ")
+  ]),
+  DirectiveDefinition: ({ description, name, arguments: args, directives, repeatable, locations }) => join([
+    wrap("", description, `
+`),
+    "directive @",
+    name,
+    hasMultilineItems(args) ? wrap(`(
+`, join(args, `
+`).indent(), `
+)`) : wrap("(", join(args, ", "), ")"),
+    wrap(" ", join(directives, " ")),
+    repeatable ? " repeatable" : "",
+    " on ",
+    join(locations, " | ")
+  ]),
+  SchemaExtension: ({ directives, operationTypes }) => join(["extend schema", join(directives, " "), block(operationTypes)], " "),
+  ScalarTypeExtension: ({ name, directives }) => join(["extend scalar", name, join(directives, " ")], " "),
+  ObjectTypeExtension: ({ name, interfaces, directives, fields }) => join([
+    "extend type",
+    name,
+    wrap("implements ", join(interfaces, " & ")),
+    join(directives, " "),
+    block(fields)
+  ], " "),
+  InterfaceTypeExtension: ({ name, interfaces, directives, fields }) => join([
+    "extend interface",
+    name,
+    wrap("implements ", join(interfaces, " & ")),
+    join(directives, " "),
+    block(fields)
+  ], " "),
+  UnionTypeExtension: ({ name, directives, types }) => join([
+    "extend union",
+    name,
+    join(directives, " "),
+    wrap("= ", join(types, " | "))
+  ], " "),
+  EnumTypeExtension: ({ name, directives, values }) => join(["extend enum", name, join(directives, " "), block(values)], " "),
+  InputObjectTypeExtension: ({ name, directives, fields }) => join(["extend input", name, join(directives, " "), block(fields)], " "),
+  DirectiveExtension: ({ name, directives }) => join([join(["extend directive @", name]), join(directives, " ")], " "),
+  TypeCoordinate: ({ name }) => name,
+  MemberCoordinate: ({ name, memberName }) => join([name, wrap(".", memberName)]),
+  ArgumentCoordinate: ({ name, fieldName, argumentName }) => join([name, wrap(".", fieldName), wrap("(", argumentName, ":)")]),
+  DirectiveCoordinate: ({ name }) => join(["@", name]),
+  DirectiveArgumentCoordinate: ({ name, argumentName }) => join(["@", name, wrap("(", argumentName, ":)")])
 };
 function join(maybeArray, separator = "") {
-  var _maybeArray$filter$jo;
-  return (_maybeArray$filter$jo = maybeArray === null || maybeArray === undefined ? undefined : maybeArray.filter((x) => x).join(separator)) !== null && _maybeArray$filter$jo !== undefined ? _maybeArray$filter$jo : "";
+  if (maybeArray == null || maybeArray.length === 0) {
+    return EMPTY;
+  }
+  let result = EMPTY;
+  for (const item of maybeArray) {
+    if (item === undefined || item.length === 0) {
+      continue;
+    }
+    if (result.length === 0) {
+      result = typeof item === "string" ? new PrintBuffer(item) : item;
+    } else {
+      if (separator !== "") {
+        result.append(separator);
+      }
+      result.append(item);
+    }
+  }
+  return result;
+}
+function joinedLength(array, separator) {
+  let length = 0;
+  for (const item of array) {
+    if (item.length !== 0) {
+      length += (length === 0 ? 0 : separator.length) + item.length;
+    }
+  }
+  return length;
 }
 function block(array) {
   return wrap(`{
-`, indent(join(array, `
-`)), `
+`, join(array, `
+`).indent(), `
 }`);
 }
-function wrap(start, maybeString, end = "") {
-  return maybeString != null && maybeString !== "" ? start + maybeString + end : "";
-}
-function indent(str) {
-  return wrap("  ", str.replace(/\n/g, `
-  `));
+function wrap(start, maybeBuffer, end = "") {
+  return maybeBuffer != null && maybeBuffer.length !== 0 ? start === "" ? maybeBuffer.append(end) : new PrintBuffer(start).append(maybeBuffer).append(end) : EMPTY;
 }
 function hasMultilineItems(maybeArray) {
-  var _maybeArray$some;
-  return (_maybeArray$some = maybeArray === null || maybeArray === undefined ? undefined : maybeArray.some((str) => str.includes(`
-`))) !== null && _maybeArray$some !== undefined ? _maybeArray$some : false;
+  return maybeArray?.some((result) => result.newlines !== 0) ?? false;
+}
+function wrappedLineAndArgs(prefix, args) {
+  if (args == null || args.length === 0) {
+    return prefix;
+  }
+  return join([
+    prefix,
+    prefix.length + joinedLength(args, ", ") + 2 > MAX_LINE_LENGTH ? wrap(`(
+`, join(args, `
+`).indent(), `
+)`) : wrap("(", join(args, ", "), ")")
+  ]);
 }
 
 // node_modules/graphql/utilities/valueFromASTUntyped.mjs
 function valueFromASTUntyped(valueNode, variables) {
   switch (valueNode.kind) {
-    case Kind.NULL:
+    case NULL:
       return null;
-    case Kind.INT:
+    case INT:
       return parseInt(valueNode.value, 10);
-    case Kind.FLOAT:
+    case FLOAT:
       return parseFloat(valueNode.value);
-    case Kind.STRING:
-    case Kind.ENUM:
-    case Kind.BOOLEAN:
+    case STRING:
+    case ENUM:
+    case BOOLEAN:
       return valueNode.value;
-    case Kind.LIST:
+    case LIST:
       return valueNode.values.map((node) => valueFromASTUntyped(node, variables));
-    case Kind.OBJECT:
+    case OBJECT:
       return keyValMap(valueNode.fields, (field) => field.name.value, (field) => valueFromASTUntyped(field.value, variables));
-    case Kind.VARIABLE:
-      return variables === null || variables === undefined ? undefined : variables[valueNode.name.value];
+    case VARIABLE:
+      return variables?.[valueNode.name.value];
   }
 }
 
 // node_modules/graphql/type/assertName.mjs
 function assertName(name) {
-  name != null || devAssert(false, "Must provide name.");
-  typeof name === "string" || devAssert(false, "Expected name to be a string.");
   if (name.length === 0) {
     throw new GraphQLError("Expected name to be a non-empty string.");
   }
@@ -1390,29 +1547,44 @@ function assertEnumValueName(name) {
 function isType(type) {
   return isScalarType(type) || isObjectType(type) || isInterfaceType(type) || isUnionType(type) || isEnumType(type) || isInputObjectType(type) || isListType(type) || isNonNullType(type);
 }
+var scalarSymbol = Symbol("Scalar");
 function isScalarType(type) {
-  return instanceOf(type, GraphQLScalarType);
+  return instanceOf(type, scalarSymbol, GraphQLScalarType);
 }
+var objectSymbol = Symbol("Object");
 function isObjectType(type) {
-  return instanceOf(type, GraphQLObjectType);
+  return instanceOf(type, objectSymbol, GraphQLObjectType);
 }
+var fieldSymbol = Symbol("Field");
+var argumentSymbol = Symbol("Argument");
+function isArgument(arg) {
+  return instanceOf(arg, argumentSymbol, GraphQLArgument);
+}
+var interfaceSymbol = Symbol("Interface");
 function isInterfaceType(type) {
-  return instanceOf(type, GraphQLInterfaceType);
+  return instanceOf(type, interfaceSymbol, GraphQLInterfaceType);
 }
+var unionSymbol = Symbol("Union");
 function isUnionType(type) {
-  return instanceOf(type, GraphQLUnionType);
+  return instanceOf(type, unionSymbol, GraphQLUnionType);
 }
+var enumSymbol = Symbol("Enum");
 function isEnumType(type) {
-  return instanceOf(type, GraphQLEnumType);
+  return instanceOf(type, enumSymbol, GraphQLEnumType);
 }
+var enumValueSymbol = Symbol("EnumValue");
+var inputObjectSymbol = Symbol("InputObject");
 function isInputObjectType(type) {
-  return instanceOf(type, GraphQLInputObjectType);
+  return instanceOf(type, inputObjectSymbol, GraphQLInputObjectType);
 }
+var inputFieldSymbol = Symbol("InputField");
+var listSymbol = Symbol("List");
 function isListType(type) {
-  return instanceOf(type, GraphQLList);
+  return instanceOf(type, listSymbol, GraphQLList);
 }
+var nonNullSymbol = Symbol("NonNull");
 function isNonNullType(type) {
-  return instanceOf(type, GraphQLNonNull);
+  return instanceOf(type, nonNullSymbol, GraphQLNonNull);
 }
 function isInputType(type) {
   return isScalarType(type) || isEnumType(type) || isInputObjectType(type) || isWrappingType(type) && isInputType(type.ofType);
@@ -1423,6 +1595,12 @@ function isOutputType(type) {
 function isLeafType(type) {
   return isScalarType(type) || isEnumType(type);
 }
+function assertLeafType(type) {
+  if (!isLeafType(type)) {
+    throw new Error(`Expected ${inspect(type)} to be a GraphQL leaf type.`);
+  }
+  return type;
+}
 function isCompositeType(type) {
   return isObjectType(type) || isInterfaceType(type) || isUnionType(type);
 }
@@ -1431,7 +1609,7 @@ function isAbstractType(type) {
 }
 class GraphQLList {
   constructor(ofType) {
-    isType(ofType) || devAssert(false, `Expected ${inspect(ofType)} to be a GraphQL type.`);
+    this.__kind = listSymbol;
     this.ofType = ofType;
   }
   get [Symbol.toStringTag]() {
@@ -1447,7 +1625,7 @@ class GraphQLList {
 
 class GraphQLNonNull {
   constructor(ofType) {
-    isNullableType(ofType) || devAssert(false, `Expected ${inspect(ofType)} to be a GraphQL nullable type.`);
+    this.__kind = nonNullSymbol;
     this.ofType = ofType;
   }
   get [Symbol.toStringTag]() {
@@ -1492,21 +1670,27 @@ function resolveObjMapThunk(thunk) {
 
 class GraphQLScalarType {
   constructor(config) {
-    var _config$parseValue, _config$serialize, _config$parseLiteral, _config$extensionASTN;
-    const parseValue = (_config$parseValue = config.parseValue) !== null && _config$parseValue !== undefined ? _config$parseValue : identityFunc;
+    this.__kind = scalarSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
     this.specifiedByURL = config.specifiedByURL;
-    this.serialize = (_config$serialize = config.serialize) !== null && _config$serialize !== undefined ? _config$serialize : identityFunc;
-    this.parseValue = parseValue;
-    this.parseLiteral = (_config$parseLiteral = config.parseLiteral) !== null && _config$parseLiteral !== undefined ? _config$parseLiteral : (node, variables) => parseValue(valueFromASTUntyped(node, variables));
-    this.extensions = toObjMap(config.extensions);
+    this.serialize = config.serialize ?? config.coerceOutputValue ?? identityFunc;
+    this.parseValue = config.parseValue ?? config.coerceInputValue ?? identityFunc;
+    this.parseLiteral = config.parseLiteral ?? ((node, variables) => this.coerceInputValue(valueFromASTUntyped(node, variables)));
+    this.coerceOutputValue = config.coerceOutputValue ?? this.serialize;
+    this.coerceInputValue = config.coerceInputValue ?? this.parseValue;
+    this.coerceInputLiteral = config.coerceInputLiteral;
+    this.valueToLiteral = config.valueToLiteral;
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN = config.extensionASTNodes) !== null && _config$extensionASTN !== undefined ? _config$extensionASTN : [];
-    config.specifiedByURL == null || typeof config.specifiedByURL === "string" || devAssert(false, `${this.name} must provide "specifiedByURL" as a string, ` + `but got: ${inspect(config.specifiedByURL)}.`);
-    config.serialize == null || typeof config.serialize === "function" || devAssert(false, `${this.name} must provide "serialize" function. If this custom Scalar is also used as an input type, ensure "parseValue" and "parseLiteral" functions are also provided.`);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
     if (config.parseLiteral) {
-      typeof config.parseValue === "function" && typeof config.parseLiteral === "function" || devAssert(false, `${this.name} must provide both "parseValue" and "parseLiteral" functions.`);
+      if (!(typeof config.parseValue === "function" && typeof config.parseLiteral === "function"))
+        devAssert(false, `${this.name} must provide both "parseValue" and "parseLiteral" functions.`);
+    }
+    if (config.coerceInputLiteral) {
+      if (!(typeof config.coerceInputValue === "function" && typeof config.coerceInputLiteral === "function"))
+        devAssert(false, `${this.name} must provide both "coerceInputValue" and "coerceInputLiteral" functions.`);
     }
   }
   get [Symbol.toStringTag]() {
@@ -1520,6 +1704,10 @@ class GraphQLScalarType {
       serialize: this.serialize,
       parseValue: this.parseValue,
       parseLiteral: this.parseLiteral,
+      coerceOutputValue: this.coerceOutputValue,
+      coerceInputValue: this.coerceInputValue,
+      coerceInputLiteral: this.coerceInputLiteral,
+      valueToLiteral: this.valueToLiteral,
       extensions: this.extensions,
       astNode: this.astNode,
       extensionASTNodes: this.extensionASTNodes
@@ -1535,16 +1723,16 @@ class GraphQLScalarType {
 
 class GraphQLObjectType {
   constructor(config) {
-    var _config$extensionASTN2;
+    this.__kind = objectSymbol;
+    this.__kind = objectSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
     this.isTypeOf = config.isTypeOf;
-    this.extensions = toObjMap(config.extensions);
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN2 = config.extensionASTNodes) !== null && _config$extensionASTN2 !== undefined ? _config$extensionASTN2 : [];
-    this._fields = () => defineFieldMap(config);
-    this._interfaces = () => defineInterfaces(config);
-    config.isTypeOf == null || typeof config.isTypeOf === "function" || devAssert(false, `${this.name} must provide "isTypeOf" as a function, ` + `but got: ${inspect(config.isTypeOf)}.`);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this._fields = defineFieldMap.bind(undefined, this, config.fields);
+    this._interfaces = defineInterfaces.bind(undefined, config.interfaces);
   }
   get [Symbol.toStringTag]() {
     return "GraphQLObjectType";
@@ -1566,7 +1754,7 @@ class GraphQLObjectType {
       name: this.name,
       description: this.description,
       interfaces: this.getInterfaces(),
-      fields: fieldsToFieldsConfig(this.getFields()),
+      fields: mapValue(this.getFields(), (field) => field.toConfig()),
       isTypeOf: this.isTypeOf,
       extensions: this.extensions,
       astNode: this.astNode,
@@ -1580,86 +1768,102 @@ class GraphQLObjectType {
     return this.toString();
   }
 }
-function defineInterfaces(config) {
-  var _config$interfaces;
-  const interfaces = resolveReadonlyArrayThunk((_config$interfaces = config.interfaces) !== null && _config$interfaces !== undefined ? _config$interfaces : []);
-  Array.isArray(interfaces) || devAssert(false, `${config.name} interfaces must be an Array or a function which returns an Array.`);
-  return interfaces;
+function defineInterfaces(interfaces) {
+  return resolveReadonlyArrayThunk(interfaces ?? []);
 }
-function defineFieldMap(config) {
-  const fieldMap = resolveObjMapThunk(config.fields);
-  isPlainObj(fieldMap) || devAssert(false, `${config.name} fields must be an object with field names as keys or a function which returns such an object.`);
-  return mapValue(fieldMap, (fieldConfig, fieldName) => {
-    var _fieldConfig$args;
-    isPlainObj(fieldConfig) || devAssert(false, `${config.name}.${fieldName} field config must be an object.`);
-    fieldConfig.resolve == null || typeof fieldConfig.resolve === "function" || devAssert(false, `${config.name}.${fieldName} field resolver must be a function if ` + `provided, but got: ${inspect(fieldConfig.resolve)}.`);
-    const argsConfig = (_fieldConfig$args = fieldConfig.args) !== null && _fieldConfig$args !== undefined ? _fieldConfig$args : {};
-    isPlainObj(argsConfig) || devAssert(false, `${config.name}.${fieldName} args must be an object with argument names as keys.`);
+function defineFieldMap(parentType, fields) {
+  const fieldMap = resolveObjMapThunk(fields);
+  return mapValue(fieldMap, (fieldConfig, fieldName) => new GraphQLField(parentType, fieldName, fieldConfig));
+}
+
+class GraphQLField {
+  constructor(parentType, name, config) {
+    this.__kind = fieldSymbol;
+    this.parentType = parentType;
+    this.name = assertName(name);
+    this.description = config.description;
+    this.type = config.type;
+    const argsConfig = config.args;
+    this.args = argsConfig ? Object.entries(argsConfig).map(([argName, argConfig]) => new GraphQLArgument(this, argName, argConfig)) : [];
+    this.resolve = config.resolve;
+    this.subscribe = config.subscribe;
+    this.deprecationReason = config.deprecationReason;
+    this.extensions = toObjMapWithSymbols(config.extensions);
+    this.astNode = config.astNode;
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLField";
+  }
+  toConfig() {
     return {
-      name: assertName(fieldName),
-      description: fieldConfig.description,
-      type: fieldConfig.type,
-      args: defineArguments(argsConfig),
-      resolve: fieldConfig.resolve,
-      subscribe: fieldConfig.subscribe,
-      deprecationReason: fieldConfig.deprecationReason,
-      extensions: toObjMap(fieldConfig.extensions),
-      astNode: fieldConfig.astNode
+      description: this.description,
+      type: this.type,
+      args: keyValMap(this.args, (arg) => arg.name, (arg) => arg.toConfig()),
+      resolve: this.resolve,
+      subscribe: this.subscribe,
+      deprecationReason: this.deprecationReason,
+      extensions: this.extensions,
+      astNode: this.astNode
     };
-  });
+  }
+  toString() {
+    return `${this.parentType ?? "<meta>"}.${this.name}`;
+  }
+  toJSON() {
+    return this.toString();
+  }
 }
-function defineArguments(config) {
-  return Object.entries(config).map(([argName, argConfig]) => ({
-    name: assertName(argName),
-    description: argConfig.description,
-    type: argConfig.type,
-    defaultValue: argConfig.defaultValue,
-    deprecationReason: argConfig.deprecationReason,
-    extensions: toObjMap(argConfig.extensions),
-    astNode: argConfig.astNode
-  }));
-}
-function isPlainObj(obj) {
-  return isObjectLike(obj) && !Array.isArray(obj);
-}
-function fieldsToFieldsConfig(fields) {
-  return mapValue(fields, (field) => ({
-    description: field.description,
-    type: field.type,
-    args: argsToArgsConfig(field.args),
-    resolve: field.resolve,
-    subscribe: field.subscribe,
-    deprecationReason: field.deprecationReason,
-    extensions: field.extensions,
-    astNode: field.astNode
-  }));
-}
-function argsToArgsConfig(args) {
-  return keyValMap(args, (arg) => arg.name, (arg) => ({
-    description: arg.description,
-    type: arg.type,
-    defaultValue: arg.defaultValue,
-    deprecationReason: arg.deprecationReason,
-    extensions: arg.extensions,
-    astNode: arg.astNode
-  }));
+
+class GraphQLArgument {
+  constructor(parent, name, config) {
+    this.__kind = argumentSymbol;
+    this.parent = parent;
+    this.name = assertName(name);
+    this.description = config.description;
+    this.type = config.type;
+    this.defaultValue = config.defaultValue;
+    this.default = config.default;
+    this._memoizedCoercedDefaultValue = undefined;
+    this.deprecationReason = config.deprecationReason;
+    this.extensions = toObjMapWithSymbols(config.extensions);
+    this.astNode = config.astNode;
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLArgument";
+  }
+  toConfig() {
+    return {
+      description: this.description,
+      type: this.type,
+      defaultValue: this.defaultValue,
+      default: this.default,
+      deprecationReason: this.deprecationReason,
+      extensions: this.extensions,
+      astNode: this.astNode
+    };
+  }
+  toString() {
+    return `${this.parent}(${this.name}:)`;
+  }
+  toJSON() {
+    return this.toString();
+  }
 }
 function isRequiredArgument(arg) {
-  return isNonNullType(arg.type) && arg.defaultValue === undefined;
+  return isNonNullType(arg.type) && arg.default === undefined && arg.defaultValue === undefined;
 }
 
 class GraphQLInterfaceType {
   constructor(config) {
-    var _config$extensionASTN3;
+    this.__kind = interfaceSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
     this.resolveType = config.resolveType;
-    this.extensions = toObjMap(config.extensions);
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN3 = config.extensionASTNodes) !== null && _config$extensionASTN3 !== undefined ? _config$extensionASTN3 : [];
-    this._fields = defineFieldMap.bind(undefined, config);
-    this._interfaces = defineInterfaces.bind(undefined, config);
-    config.resolveType == null || typeof config.resolveType === "function" || devAssert(false, `${this.name} must provide "resolveType" as a function, ` + `but got: ${inspect(config.resolveType)}.`);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this._fields = defineFieldMap.bind(undefined, this, config.fields);
+    this._interfaces = defineInterfaces.bind(undefined, config.interfaces);
   }
   get [Symbol.toStringTag]() {
     return "GraphQLInterfaceType";
@@ -1681,7 +1885,7 @@ class GraphQLInterfaceType {
       name: this.name,
       description: this.description,
       interfaces: this.getInterfaces(),
-      fields: fieldsToFieldsConfig(this.getFields()),
+      fields: mapValue(this.getFields(), (field) => field.toConfig()),
       resolveType: this.resolveType,
       extensions: this.extensions,
       astNode: this.astNode,
@@ -1698,15 +1902,14 @@ class GraphQLInterfaceType {
 
 class GraphQLUnionType {
   constructor(config) {
-    var _config$extensionASTN4;
+    this.__kind = unionSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
     this.resolveType = config.resolveType;
-    this.extensions = toObjMap(config.extensions);
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN4 = config.extensionASTNodes) !== null && _config$extensionASTN4 !== undefined ? _config$extensionASTN4 : [];
-    this._types = defineTypes.bind(undefined, config);
-    config.resolveType == null || typeof config.resolveType === "function" || devAssert(false, `${this.name} must provide "resolveType" as a function, ` + `but got: ${inspect(config.resolveType)}.`);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this._types = defineTypes.bind(undefined, config.types);
   }
   get [Symbol.toStringTag]() {
     return "GraphQLUnionType";
@@ -1735,21 +1938,19 @@ class GraphQLUnionType {
     return this.toString();
   }
 }
-function defineTypes(config) {
-  const types = resolveReadonlyArrayThunk(config.types);
-  Array.isArray(types) || devAssert(false, `Must provide Array of types or a function which returns such an array for Union ${config.name}.`);
-  return types;
+function defineTypes(types) {
+  return resolveReadonlyArrayThunk(types);
 }
 
 class GraphQLEnumType {
   constructor(config) {
-    var _config$extensionASTN5;
+    this.__kind = enumSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
-    this.extensions = toObjMap(config.extensions);
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN5 = config.extensionASTNodes) !== null && _config$extensionASTN5 !== undefined ? _config$extensionASTN5 : [];
-    this._values = typeof config.values === "function" ? config.values : defineEnumValues(this.name, config.values);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this._values = defineEnumValues.bind(undefined, this, config.values);
     this._valueLookup = null;
     this._nameLookup = null;
   }
@@ -1758,65 +1959,64 @@ class GraphQLEnumType {
   }
   getValues() {
     if (typeof this._values === "function") {
-      this._values = defineEnumValues(this.name, this._values());
+      this._values = this._values();
     }
     return this._values;
   }
   getValue(name) {
-    if (this._nameLookup === null) {
-      this._nameLookup = keyMap(this.getValues(), (value) => value.name);
-    }
+    this._nameLookup ??= keyMap(this.getValues(), (value) => value.name);
     return this._nameLookup[name];
   }
   serialize(outputValue) {
-    if (this._valueLookup === null) {
-      this._valueLookup = new Map(this.getValues().map((enumValue) => [enumValue.value, enumValue]));
-    }
+    return this.coerceOutputValue(outputValue);
+  }
+  coerceOutputValue(outputValue) {
+    this._valueLookup ??= new Map(this.getValues().map((enumValue) => [enumValue.value, enumValue]));
     const enumValue = this._valueLookup.get(outputValue);
     if (enumValue === undefined) {
       throw new GraphQLError(`Enum "${this.name}" cannot represent value: ${inspect(outputValue)}`);
     }
     return enumValue.name;
   }
-  parseValue(inputValue) {
+  parseValue(inputValue, hideSuggestions) {
+    return this.coerceInputValue(inputValue, hideSuggestions);
+  }
+  coerceInputValue(inputValue, hideSuggestions) {
     if (typeof inputValue !== "string") {
       const valueStr = inspect(inputValue);
-      throw new GraphQLError(`Enum "${this.name}" cannot represent non-string value: ${valueStr}.` + didYouMeanEnumValue(this, valueStr));
+      throw new GraphQLError(`Enum "${this.name}" cannot represent non-string value: ${valueStr}.` + (hideSuggestions ? "" : didYouMeanEnumValue(this, valueStr)));
     }
     const enumValue = this.getValue(inputValue);
     if (enumValue == null) {
-      throw new GraphQLError(`Value "${inputValue}" does not exist in "${this.name}" enum.` + didYouMeanEnumValue(this, inputValue));
+      throw new GraphQLError(`Value "${inputValue}" does not exist in "${this.name}" enum.` + (hideSuggestions ? "" : didYouMeanEnumValue(this, inputValue)));
     }
     return enumValue.value;
   }
-  parseLiteral(valueNode, _variables) {
-    if (valueNode.kind !== Kind.ENUM) {
-      const valueStr = print(valueNode);
-      throw new GraphQLError(`Enum "${this.name}" cannot represent non-enum value: ${valueStr}.` + didYouMeanEnumValue(this, valueStr), {
-        nodes: valueNode
-      });
+  parseLiteral(valueNode, _variables, hideSuggestions) {
+    return this.coerceInputLiteral(valueNode, hideSuggestions);
+  }
+  coerceInputLiteral(valueNode, hideSuggestions) {
+    if (valueNode.kind !== ENUM) {
+      const valueStr = printForError(valueNode);
+      throw new GraphQLError(`Enum "${this.name}" cannot represent non-enum value: ${valueStr}.` + (hideSuggestions ? "" : didYouMeanEnumValue(this, valueStr)), { nodes: valueNode });
     }
     const enumValue = this.getValue(valueNode.value);
     if (enumValue == null) {
-      const valueStr = print(valueNode);
-      throw new GraphQLError(`Value "${valueStr}" does not exist in "${this.name}" enum.` + didYouMeanEnumValue(this, valueStr), {
-        nodes: valueNode
-      });
+      const valueStr = printForError(valueNode);
+      throw new GraphQLError(`Value "${valueStr}" does not exist in "${this.name}" enum.` + (hideSuggestions ? "" : didYouMeanEnumValue(this, valueStr)), { nodes: valueNode });
     }
     return enumValue.value;
   }
+  valueToLiteral(value) {
+    if (typeof value === "string" && this.getValue(value)) {
+      return { kind: ENUM, value };
+    }
+  }
   toConfig() {
-    const values = keyValMap(this.getValues(), (value) => value.name, (value) => ({
-      description: value.description,
-      value: value.value,
-      deprecationReason: value.deprecationReason,
-      extensions: value.extensions,
-      astNode: value.astNode
-    }));
     return {
       name: this.name,
       description: this.description,
-      values,
+      values: keyValMap(this.getValues(), (value) => value.name, (value) => value.toConfig()),
       extensions: this.extensions,
       astNode: this.astNode,
       extensionASTNodes: this.extensionASTNodes
@@ -1829,36 +2029,57 @@ class GraphQLEnumType {
     return this.toString();
   }
 }
+function defineEnumValues(parentEnum, values) {
+  const valueMap = resolveObjMapThunk(values);
+  return Object.entries(valueMap).map(([valueName, valueConfig]) => new GraphQLEnumValue(parentEnum, valueName, valueConfig));
+}
 function didYouMeanEnumValue(enumType, unknownValueStr) {
   const allNames = enumType.getValues().map((value) => value.name);
   const suggestedValues = suggestionList(unknownValueStr, allNames);
   return didYouMean("the enum value", suggestedValues);
 }
-function defineEnumValues(typeName, valueMap) {
-  isPlainObj(valueMap) || devAssert(false, `${typeName} values must be an object with value names as keys.`);
-  return Object.entries(valueMap).map(([valueName, valueConfig]) => {
-    isPlainObj(valueConfig) || devAssert(false, `${typeName}.${valueName} must refer to an object with a "value" key ` + `representing an internal value but got: ${inspect(valueConfig)}.`);
+
+class GraphQLEnumValue {
+  constructor(parentEnum, name, config) {
+    this.__kind = enumValueSymbol;
+    this.parentEnum = parentEnum;
+    this.name = assertEnumValueName(name);
+    this.description = config.description;
+    this.value = config.value !== undefined ? config.value : name;
+    this.deprecationReason = config.deprecationReason;
+    this.extensions = toObjMapWithSymbols(config.extensions);
+    this.astNode = config.astNode;
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLEnumValue";
+  }
+  toConfig() {
     return {
-      name: assertEnumValueName(valueName),
-      description: valueConfig.description,
-      value: valueConfig.value !== undefined ? valueConfig.value : valueName,
-      deprecationReason: valueConfig.deprecationReason,
-      extensions: toObjMap(valueConfig.extensions),
-      astNode: valueConfig.astNode
+      description: this.description,
+      value: this.value,
+      deprecationReason: this.deprecationReason,
+      extensions: this.extensions,
+      astNode: this.astNode
     };
-  });
+  }
+  toString() {
+    return `${this.parentEnum.name}.${this.name}`;
+  }
+  toJSON() {
+    return this.toString();
+  }
 }
 
 class GraphQLInputObjectType {
   constructor(config) {
-    var _config$extensionASTN6, _config$isOneOf;
+    this.__kind = inputObjectSymbol;
     this.name = assertName(config.name);
     this.description = config.description;
-    this.extensions = toObjMap(config.extensions);
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN6 = config.extensionASTNodes) !== null && _config$extensionASTN6 !== undefined ? _config$extensionASTN6 : [];
-    this.isOneOf = (_config$isOneOf = config.isOneOf) !== null && _config$isOneOf !== undefined ? _config$isOneOf : false;
-    this._fields = defineInputFieldMap.bind(undefined, config);
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this.isOneOf = config.isOneOf ?? false;
+    this._fields = defineInputFieldMap.bind(undefined, this, config.fields);
   }
   get [Symbol.toStringTag]() {
     return "GraphQLInputObjectType";
@@ -1870,18 +2091,10 @@ class GraphQLInputObjectType {
     return this._fields;
   }
   toConfig() {
-    const fields = mapValue(this.getFields(), (field) => ({
-      description: field.description,
-      type: field.type,
-      defaultValue: field.defaultValue,
-      deprecationReason: field.deprecationReason,
-      extensions: field.extensions,
-      astNode: field.astNode
-    }));
     return {
       name: this.name,
       description: this.description,
-      fields,
+      fields: mapValue(this.getFields(), (field) => field.toConfig()),
       extensions: this.extensions,
       astNode: this.astNode,
       extensionASTNodes: this.extensionASTNodes,
@@ -1895,1134 +2108,52 @@ class GraphQLInputObjectType {
     return this.toString();
   }
 }
-function defineInputFieldMap(config) {
-  const fieldMap = resolveObjMapThunk(config.fields);
-  isPlainObj(fieldMap) || devAssert(false, `${config.name} fields must be an object with field names as keys or a function which returns such an object.`);
-  return mapValue(fieldMap, (fieldConfig, fieldName) => {
-    !("resolve" in fieldConfig) || devAssert(false, `${config.name}.${fieldName} field has a resolve property, but Input Types cannot define resolvers.`);
-    return {
-      name: assertName(fieldName),
-      description: fieldConfig.description,
-      type: fieldConfig.type,
-      defaultValue: fieldConfig.defaultValue,
-      deprecationReason: fieldConfig.deprecationReason,
-      extensions: toObjMap(fieldConfig.extensions),
-      astNode: fieldConfig.astNode
-    };
-  });
-}
-function isRequiredInputField(field) {
-  return isNonNullType(field.type) && field.defaultValue === undefined;
+function defineInputFieldMap(parentType, fields) {
+  const fieldMap = resolveObjMapThunk(fields);
+  return mapValue(fieldMap, (fieldConfig, fieldName) => new GraphQLInputField(parentType, fieldName, fieldConfig));
 }
 
-// node_modules/graphql/language/directiveLocation.mjs
-var DirectiveLocation;
-(function(DirectiveLocation) {
-  DirectiveLocation["QUERY"] = "QUERY";
-  DirectiveLocation["MUTATION"] = "MUTATION";
-  DirectiveLocation["SUBSCRIPTION"] = "SUBSCRIPTION";
-  DirectiveLocation["FIELD"] = "FIELD";
-  DirectiveLocation["FRAGMENT_DEFINITION"] = "FRAGMENT_DEFINITION";
-  DirectiveLocation["FRAGMENT_SPREAD"] = "FRAGMENT_SPREAD";
-  DirectiveLocation["INLINE_FRAGMENT"] = "INLINE_FRAGMENT";
-  DirectiveLocation["VARIABLE_DEFINITION"] = "VARIABLE_DEFINITION";
-  DirectiveLocation["SCHEMA"] = "SCHEMA";
-  DirectiveLocation["SCALAR"] = "SCALAR";
-  DirectiveLocation["OBJECT"] = "OBJECT";
-  DirectiveLocation["FIELD_DEFINITION"] = "FIELD_DEFINITION";
-  DirectiveLocation["ARGUMENT_DEFINITION"] = "ARGUMENT_DEFINITION";
-  DirectiveLocation["INTERFACE"] = "INTERFACE";
-  DirectiveLocation["UNION"] = "UNION";
-  DirectiveLocation["ENUM"] = "ENUM";
-  DirectiveLocation["ENUM_VALUE"] = "ENUM_VALUE";
-  DirectiveLocation["INPUT_OBJECT"] = "INPUT_OBJECT";
-  DirectiveLocation["INPUT_FIELD_DEFINITION"] = "INPUT_FIELD_DEFINITION";
-})(DirectiveLocation || (DirectiveLocation = {}));
-
-// node_modules/graphql/type/scalars.mjs
-var GRAPHQL_MAX_INT = 2147483647;
-var GRAPHQL_MIN_INT = -2147483648;
-var GraphQLInt = new GraphQLScalarType({
-  name: "Int",
-  description: "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
-  serialize(outputValue) {
-    const coercedValue = serializeObject(outputValue);
-    if (typeof coercedValue === "boolean") {
-      return coercedValue ? 1 : 0;
-    }
-    let num = coercedValue;
-    if (typeof coercedValue === "string" && coercedValue !== "") {
-      num = Number(coercedValue);
-    }
-    if (typeof num !== "number" || !Number.isInteger(num)) {
-      throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(coercedValue)}`);
-    }
-    if (num > GRAPHQL_MAX_INT || num < GRAPHQL_MIN_INT) {
-      throw new GraphQLError("Int cannot represent non 32-bit signed integer value: " + inspect(coercedValue));
-    }
-    return num;
-  },
-  parseValue(inputValue) {
-    if (typeof inputValue !== "number" || !Number.isInteger(inputValue)) {
-      throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(inputValue)}`);
-    }
-    if (inputValue > GRAPHQL_MAX_INT || inputValue < GRAPHQL_MIN_INT) {
-      throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${inputValue}`);
-    }
-    return inputValue;
-  },
-  parseLiteral(valueNode) {
-    if (valueNode.kind !== Kind.INT) {
-      throw new GraphQLError(`Int cannot represent non-integer value: ${print(valueNode)}`, {
-        nodes: valueNode
-      });
-    }
-    const num = parseInt(valueNode.value, 10);
-    if (num > GRAPHQL_MAX_INT || num < GRAPHQL_MIN_INT) {
-      throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${valueNode.value}`, {
-        nodes: valueNode
-      });
-    }
-    return num;
-  }
-});
-var GraphQLFloat = new GraphQLScalarType({
-  name: "Float",
-  description: "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
-  serialize(outputValue) {
-    const coercedValue = serializeObject(outputValue);
-    if (typeof coercedValue === "boolean") {
-      return coercedValue ? 1 : 0;
-    }
-    let num = coercedValue;
-    if (typeof coercedValue === "string" && coercedValue !== "") {
-      num = Number(coercedValue);
-    }
-    if (typeof num !== "number" || !Number.isFinite(num)) {
-      throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(coercedValue)}`);
-    }
-    return num;
-  },
-  parseValue(inputValue) {
-    if (typeof inputValue !== "number" || !Number.isFinite(inputValue)) {
-      throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(inputValue)}`);
-    }
-    return inputValue;
-  },
-  parseLiteral(valueNode) {
-    if (valueNode.kind !== Kind.FLOAT && valueNode.kind !== Kind.INT) {
-      throw new GraphQLError(`Float cannot represent non numeric value: ${print(valueNode)}`, valueNode);
-    }
-    return parseFloat(valueNode.value);
-  }
-});
-var GraphQLString = new GraphQLScalarType({
-  name: "String",
-  description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
-  serialize(outputValue) {
-    const coercedValue = serializeObject(outputValue);
-    if (typeof coercedValue === "string") {
-      return coercedValue;
-    }
-    if (typeof coercedValue === "boolean") {
-      return coercedValue ? "true" : "false";
-    }
-    if (typeof coercedValue === "number" && Number.isFinite(coercedValue)) {
-      return coercedValue.toString();
-    }
-    throw new GraphQLError(`String cannot represent value: ${inspect(outputValue)}`);
-  },
-  parseValue(inputValue) {
-    if (typeof inputValue !== "string") {
-      throw new GraphQLError(`String cannot represent a non string value: ${inspect(inputValue)}`);
-    }
-    return inputValue;
-  },
-  parseLiteral(valueNode) {
-    if (valueNode.kind !== Kind.STRING) {
-      throw new GraphQLError(`String cannot represent a non string value: ${print(valueNode)}`, {
-        nodes: valueNode
-      });
-    }
-    return valueNode.value;
-  }
-});
-var GraphQLBoolean = new GraphQLScalarType({
-  name: "Boolean",
-  description: "The `Boolean` scalar type represents `true` or `false`.",
-  serialize(outputValue) {
-    const coercedValue = serializeObject(outputValue);
-    if (typeof coercedValue === "boolean") {
-      return coercedValue;
-    }
-    if (Number.isFinite(coercedValue)) {
-      return coercedValue !== 0;
-    }
-    throw new GraphQLError(`Boolean cannot represent a non boolean value: ${inspect(coercedValue)}`);
-  },
-  parseValue(inputValue) {
-    if (typeof inputValue !== "boolean") {
-      throw new GraphQLError(`Boolean cannot represent a non boolean value: ${inspect(inputValue)}`);
-    }
-    return inputValue;
-  },
-  parseLiteral(valueNode) {
-    if (valueNode.kind !== Kind.BOOLEAN) {
-      throw new GraphQLError(`Boolean cannot represent a non boolean value: ${print(valueNode)}`, {
-        nodes: valueNode
-      });
-    }
-    return valueNode.value;
-  }
-});
-var GraphQLID = new GraphQLScalarType({
-  name: "ID",
-  description: 'The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.',
-  serialize(outputValue) {
-    const coercedValue = serializeObject(outputValue);
-    if (typeof coercedValue === "string") {
-      return coercedValue;
-    }
-    if (Number.isInteger(coercedValue)) {
-      return String(coercedValue);
-    }
-    throw new GraphQLError(`ID cannot represent value: ${inspect(outputValue)}`);
-  },
-  parseValue(inputValue) {
-    if (typeof inputValue === "string") {
-      return inputValue;
-    }
-    if (typeof inputValue === "number" && Number.isInteger(inputValue)) {
-      return inputValue.toString();
-    }
-    throw new GraphQLError(`ID cannot represent value: ${inspect(inputValue)}`);
-  },
-  parseLiteral(valueNode) {
-    if (valueNode.kind !== Kind.STRING && valueNode.kind !== Kind.INT) {
-      throw new GraphQLError("ID cannot represent a non-string and non-integer value: " + print(valueNode), {
-        nodes: valueNode
-      });
-    }
-    return valueNode.value;
-  }
-});
-var specifiedScalarTypes = Object.freeze([
-  GraphQLString,
-  GraphQLInt,
-  GraphQLFloat,
-  GraphQLBoolean,
-  GraphQLID
-]);
-function isSpecifiedScalarType(type) {
-  return specifiedScalarTypes.some(({ name }) => type.name === name);
-}
-function serializeObject(outputValue) {
-  if (isObjectLike(outputValue)) {
-    if (typeof outputValue.valueOf === "function") {
-      const valueOfResult = outputValue.valueOf();
-      if (!isObjectLike(valueOfResult)) {
-        return valueOfResult;
-      }
-    }
-    if (typeof outputValue.toJSON === "function") {
-      return outputValue.toJSON();
-    }
-  }
-  return outputValue;
-}
-
-// node_modules/graphql/type/directives.mjs
-function isDirective(directive) {
-  return instanceOf(directive, GraphQLDirective);
-}
-class GraphQLDirective {
-  constructor(config) {
-    var _config$isRepeatable, _config$args;
-    this.name = assertName(config.name);
+class GraphQLInputField {
+  constructor(parentType, name, config) {
+    if (!!("resolve" in config))
+      devAssert(false, `${parentType}.${name} field has a resolve property, but Input Types cannot define resolvers.`);
+    this.__kind = inputFieldSymbol;
+    this.parentType = parentType;
+    this.name = assertName(name);
     this.description = config.description;
-    this.locations = config.locations;
-    this.isRepeatable = (_config$isRepeatable = config.isRepeatable) !== null && _config$isRepeatable !== undefined ? _config$isRepeatable : false;
-    this.extensions = toObjMap(config.extensions);
+    this.type = config.type;
+    this.defaultValue = config.defaultValue;
+    this.default = config.default;
+    this._memoizedCoercedDefaultValue = undefined;
+    this.deprecationReason = config.deprecationReason;
+    this.extensions = toObjMapWithSymbols(config.extensions);
     this.astNode = config.astNode;
-    Array.isArray(config.locations) || devAssert(false, `@${config.name} locations must be an Array.`);
-    const args = (_config$args = config.args) !== null && _config$args !== undefined ? _config$args : {};
-    isObjectLike(args) && !Array.isArray(args) || devAssert(false, `@${config.name} args must be an object with argument names as keys.`);
-    this.args = defineArguments(args);
   }
   get [Symbol.toStringTag]() {
-    return "GraphQLDirective";
+    return "GraphQLInputField";
   }
   toConfig() {
     return {
-      name: this.name,
       description: this.description,
-      locations: this.locations,
-      args: argsToArgsConfig(this.args),
-      isRepeatable: this.isRepeatable,
+      type: this.type,
+      defaultValue: this.defaultValue,
+      default: this.default,
+      deprecationReason: this.deprecationReason,
       extensions: this.extensions,
       astNode: this.astNode
     };
   }
   toString() {
-    return "@" + this.name;
+    return `${this.parentType}.${this.name}`;
   }
   toJSON() {
     return this.toString();
   }
 }
-var GraphQLIncludeDirective = new GraphQLDirective({
-  name: "include",
-  description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
-  locations: [
-    DirectiveLocation.FIELD,
-    DirectiveLocation.FRAGMENT_SPREAD,
-    DirectiveLocation.INLINE_FRAGMENT
-  ],
-  args: {
-    if: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      description: "Included when true."
-    }
-  }
-});
-var GraphQLSkipDirective = new GraphQLDirective({
-  name: "skip",
-  description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
-  locations: [
-    DirectiveLocation.FIELD,
-    DirectiveLocation.FRAGMENT_SPREAD,
-    DirectiveLocation.INLINE_FRAGMENT
-  ],
-  args: {
-    if: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      description: "Skipped when true."
-    }
-  }
-});
-var DEFAULT_DEPRECATION_REASON = "No longer supported";
-var GraphQLDeprecatedDirective = new GraphQLDirective({
-  name: "deprecated",
-  description: "Marks an element of a GraphQL schema as no longer supported.",
-  locations: [
-    DirectiveLocation.FIELD_DEFINITION,
-    DirectiveLocation.ARGUMENT_DEFINITION,
-    DirectiveLocation.INPUT_FIELD_DEFINITION,
-    DirectiveLocation.ENUM_VALUE
-  ],
-  args: {
-    reason: {
-      type: GraphQLString,
-      description: "Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).",
-      defaultValue: DEFAULT_DEPRECATION_REASON
-    }
-  }
-});
-var GraphQLSpecifiedByDirective = new GraphQLDirective({
-  name: "specifiedBy",
-  description: "Exposes a URL that specifies the behavior of this scalar.",
-  locations: [DirectiveLocation.SCALAR],
-  args: {
-    url: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: "The URL that specifies the behavior of this scalar."
-    }
-  }
-});
-var GraphQLOneOfDirective = new GraphQLDirective({
-  name: "oneOf",
-  description: "Indicates exactly one field must be supplied and this field must not be `null`.",
-  locations: [DirectiveLocation.INPUT_OBJECT],
-  args: {}
-});
-var specifiedDirectives = Object.freeze([
-  GraphQLIncludeDirective,
-  GraphQLSkipDirective,
-  GraphQLDeprecatedDirective,
-  GraphQLSpecifiedByDirective,
-  GraphQLOneOfDirective
-]);
-
-// node_modules/graphql/jsutils/isIterableObject.mjs
-function isIterableObject(maybeIterable) {
-  return typeof maybeIterable === "object" && typeof (maybeIterable === null || maybeIterable === undefined ? undefined : maybeIterable[Symbol.iterator]) === "function";
+function isRequiredInputField(field) {
+  return isNonNullType(field.type) && field.defaultValue === undefined && field.default === undefined;
 }
 
-// node_modules/graphql/utilities/astFromValue.mjs
-function astFromValue(value, type) {
-  if (isNonNullType(type)) {
-    const astValue = astFromValue(value, type.ofType);
-    if ((astValue === null || astValue === undefined ? undefined : astValue.kind) === Kind.NULL) {
-      return null;
-    }
-    return astValue;
-  }
-  if (value === null) {
-    return {
-      kind: Kind.NULL
-    };
-  }
-  if (value === undefined) {
-    return null;
-  }
-  if (isListType(type)) {
-    const itemType = type.ofType;
-    if (isIterableObject(value)) {
-      const valuesNodes = [];
-      for (const item of value) {
-        const itemNode = astFromValue(item, itemType);
-        if (itemNode != null) {
-          valuesNodes.push(itemNode);
-        }
-      }
-      return {
-        kind: Kind.LIST,
-        values: valuesNodes
-      };
-    }
-    return astFromValue(value, itemType);
-  }
-  if (isInputObjectType(type)) {
-    if (!isObjectLike(value)) {
-      return null;
-    }
-    const fieldNodes = [];
-    for (const field of Object.values(type.getFields())) {
-      const fieldValue = astFromValue(value[field.name], field.type);
-      if (fieldValue) {
-        fieldNodes.push({
-          kind: Kind.OBJECT_FIELD,
-          name: {
-            kind: Kind.NAME,
-            value: field.name
-          },
-          value: fieldValue
-        });
-      }
-    }
-    return {
-      kind: Kind.OBJECT,
-      fields: fieldNodes
-    };
-  }
-  if (isLeafType(type)) {
-    const serialized = type.serialize(value);
-    if (serialized == null) {
-      return null;
-    }
-    if (typeof serialized === "boolean") {
-      return {
-        kind: Kind.BOOLEAN,
-        value: serialized
-      };
-    }
-    if (typeof serialized === "number" && Number.isFinite(serialized)) {
-      const stringNum = String(serialized);
-      return integerStringRegExp.test(stringNum) ? {
-        kind: Kind.INT,
-        value: stringNum
-      } : {
-        kind: Kind.FLOAT,
-        value: stringNum
-      };
-    }
-    if (typeof serialized === "string") {
-      if (isEnumType(type)) {
-        return {
-          kind: Kind.ENUM,
-          value: serialized
-        };
-      }
-      if (type === GraphQLID && integerStringRegExp.test(serialized)) {
-        return {
-          kind: Kind.INT,
-          value: serialized
-        };
-      }
-      return {
-        kind: Kind.STRING,
-        value: serialized
-      };
-    }
-    throw new TypeError(`Cannot convert value to AST: ${inspect(serialized)}.`);
-  }
-  invariant(false, "Unexpected input type: " + inspect(type));
-}
-var integerStringRegExp = /^-?(?:0|[1-9][0-9]*)$/;
-
-// node_modules/graphql/type/introspection.mjs
-var __Schema = new GraphQLObjectType({
-  name: "__Schema",
-  description: "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.",
-  fields: () => ({
-    description: {
-      type: GraphQLString,
-      resolve: (schema) => schema.description
-    },
-    types: {
-      description: "A list of all types supported by this server.",
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__Type))),
-      resolve(schema) {
-        return Object.values(schema.getTypeMap());
-      }
-    },
-    queryType: {
-      description: "The type that query operations will be rooted at.",
-      type: new GraphQLNonNull(__Type),
-      resolve: (schema) => schema.getQueryType()
-    },
-    mutationType: {
-      description: "If this server supports mutation, the type that mutation operations will be rooted at.",
-      type: __Type,
-      resolve: (schema) => schema.getMutationType()
-    },
-    subscriptionType: {
-      description: "If this server support subscription, the type that subscription operations will be rooted at.",
-      type: __Type,
-      resolve: (schema) => schema.getSubscriptionType()
-    },
-    directives: {
-      description: "A list of all directives supported by this server.",
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__Directive))),
-      resolve: (schema) => schema.getDirectives()
-    }
-  })
-});
-var __Directive = new GraphQLObjectType({
-  name: "__Directive",
-  description: `A Directive provides a way to describe alternate runtime execution and type validation behavior in a GraphQL document.
-
-In some cases, you need to provide options to alter GraphQL's execution behavior in ways field arguments will not suffice, such as conditionally including or skipping a field. Directives provide this by describing additional information to the executor.`,
-  fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: (directive) => directive.name
-    },
-    description: {
-      type: GraphQLString,
-      resolve: (directive) => directive.description
-    },
-    isRepeatable: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      resolve: (directive) => directive.isRepeatable
-    },
-    locations: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__DirectiveLocation))),
-      resolve: (directive) => directive.locations
-    },
-    args: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__InputValue))),
-      args: {
-        includeDeprecated: {
-          type: GraphQLBoolean,
-          defaultValue: false
-        }
-      },
-      resolve(field, { includeDeprecated }) {
-        return includeDeprecated ? field.args : field.args.filter((arg) => arg.deprecationReason == null);
-      }
-    }
-  })
-});
-var __DirectiveLocation = new GraphQLEnumType({
-  name: "__DirectiveLocation",
-  description: "A Directive can be adjacent to many parts of the GraphQL language, a __DirectiveLocation describes one such possible adjacencies.",
-  values: {
-    QUERY: {
-      value: DirectiveLocation.QUERY,
-      description: "Location adjacent to a query operation."
-    },
-    MUTATION: {
-      value: DirectiveLocation.MUTATION,
-      description: "Location adjacent to a mutation operation."
-    },
-    SUBSCRIPTION: {
-      value: DirectiveLocation.SUBSCRIPTION,
-      description: "Location adjacent to a subscription operation."
-    },
-    FIELD: {
-      value: DirectiveLocation.FIELD,
-      description: "Location adjacent to a field."
-    },
-    FRAGMENT_DEFINITION: {
-      value: DirectiveLocation.FRAGMENT_DEFINITION,
-      description: "Location adjacent to a fragment definition."
-    },
-    FRAGMENT_SPREAD: {
-      value: DirectiveLocation.FRAGMENT_SPREAD,
-      description: "Location adjacent to a fragment spread."
-    },
-    INLINE_FRAGMENT: {
-      value: DirectiveLocation.INLINE_FRAGMENT,
-      description: "Location adjacent to an inline fragment."
-    },
-    VARIABLE_DEFINITION: {
-      value: DirectiveLocation.VARIABLE_DEFINITION,
-      description: "Location adjacent to a variable definition."
-    },
-    SCHEMA: {
-      value: DirectiveLocation.SCHEMA,
-      description: "Location adjacent to a schema definition."
-    },
-    SCALAR: {
-      value: DirectiveLocation.SCALAR,
-      description: "Location adjacent to a scalar definition."
-    },
-    OBJECT: {
-      value: DirectiveLocation.OBJECT,
-      description: "Location adjacent to an object type definition."
-    },
-    FIELD_DEFINITION: {
-      value: DirectiveLocation.FIELD_DEFINITION,
-      description: "Location adjacent to a field definition."
-    },
-    ARGUMENT_DEFINITION: {
-      value: DirectiveLocation.ARGUMENT_DEFINITION,
-      description: "Location adjacent to an argument definition."
-    },
-    INTERFACE: {
-      value: DirectiveLocation.INTERFACE,
-      description: "Location adjacent to an interface definition."
-    },
-    UNION: {
-      value: DirectiveLocation.UNION,
-      description: "Location adjacent to a union definition."
-    },
-    ENUM: {
-      value: DirectiveLocation.ENUM,
-      description: "Location adjacent to an enum definition."
-    },
-    ENUM_VALUE: {
-      value: DirectiveLocation.ENUM_VALUE,
-      description: "Location adjacent to an enum value definition."
-    },
-    INPUT_OBJECT: {
-      value: DirectiveLocation.INPUT_OBJECT,
-      description: "Location adjacent to an input object type definition."
-    },
-    INPUT_FIELD_DEFINITION: {
-      value: DirectiveLocation.INPUT_FIELD_DEFINITION,
-      description: "Location adjacent to an input object field definition."
-    }
-  }
-});
-var __Type = new GraphQLObjectType({
-  name: "__Type",
-  description: "The fundamental unit of any GraphQL Schema is the type. There are many kinds of types in GraphQL as represented by the `__TypeKind` enum.\n\nDepending on the kind of a type, certain fields describe information about that type. Scalar types provide no information beyond a name, description and optional `specifiedByURL`, while Enum types provide their values. Object and Interface types provide the fields they describe. Abstract types, Union and Interface, provide the Object types possible at runtime. List and NonNull types compose other types.",
-  fields: () => ({
-    kind: {
-      type: new GraphQLNonNull(__TypeKind),
-      resolve(type) {
-        if (isScalarType(type)) {
-          return TypeKind.SCALAR;
-        }
-        if (isObjectType(type)) {
-          return TypeKind.OBJECT;
-        }
-        if (isInterfaceType(type)) {
-          return TypeKind.INTERFACE;
-        }
-        if (isUnionType(type)) {
-          return TypeKind.UNION;
-        }
-        if (isEnumType(type)) {
-          return TypeKind.ENUM;
-        }
-        if (isInputObjectType(type)) {
-          return TypeKind.INPUT_OBJECT;
-        }
-        if (isListType(type)) {
-          return TypeKind.LIST;
-        }
-        if (isNonNullType(type)) {
-          return TypeKind.NON_NULL;
-        }
-        invariant(false, `Unexpected type: "${inspect(type)}".`);
-      }
-    },
-    name: {
-      type: GraphQLString,
-      resolve: (type) => ("name" in type) ? type.name : undefined
-    },
-    description: {
-      type: GraphQLString,
-      resolve: (type) => ("description" in type) ? type.description : undefined
-    },
-    specifiedByURL: {
-      type: GraphQLString,
-      resolve: (obj) => ("specifiedByURL" in obj) ? obj.specifiedByURL : undefined
-    },
-    fields: {
-      type: new GraphQLList(new GraphQLNonNull(__Field)),
-      args: {
-        includeDeprecated: {
-          type: GraphQLBoolean,
-          defaultValue: false
-        }
-      },
-      resolve(type, { includeDeprecated }) {
-        if (isObjectType(type) || isInterfaceType(type)) {
-          const fields = Object.values(type.getFields());
-          return includeDeprecated ? fields : fields.filter((field) => field.deprecationReason == null);
-        }
-      }
-    },
-    interfaces: {
-      type: new GraphQLList(new GraphQLNonNull(__Type)),
-      resolve(type) {
-        if (isObjectType(type) || isInterfaceType(type)) {
-          return type.getInterfaces();
-        }
-      }
-    },
-    possibleTypes: {
-      type: new GraphQLList(new GraphQLNonNull(__Type)),
-      resolve(type, _args, _context, { schema }) {
-        if (isAbstractType(type)) {
-          return schema.getPossibleTypes(type);
-        }
-      }
-    },
-    enumValues: {
-      type: new GraphQLList(new GraphQLNonNull(__EnumValue)),
-      args: {
-        includeDeprecated: {
-          type: GraphQLBoolean,
-          defaultValue: false
-        }
-      },
-      resolve(type, { includeDeprecated }) {
-        if (isEnumType(type)) {
-          const values = type.getValues();
-          return includeDeprecated ? values : values.filter((field) => field.deprecationReason == null);
-        }
-      }
-    },
-    inputFields: {
-      type: new GraphQLList(new GraphQLNonNull(__InputValue)),
-      args: {
-        includeDeprecated: {
-          type: GraphQLBoolean,
-          defaultValue: false
-        }
-      },
-      resolve(type, { includeDeprecated }) {
-        if (isInputObjectType(type)) {
-          const values = Object.values(type.getFields());
-          return includeDeprecated ? values : values.filter((field) => field.deprecationReason == null);
-        }
-      }
-    },
-    ofType: {
-      type: __Type,
-      resolve: (type) => ("ofType" in type) ? type.ofType : undefined
-    },
-    isOneOf: {
-      type: GraphQLBoolean,
-      resolve: (type) => {
-        if (isInputObjectType(type)) {
-          return type.isOneOf;
-        }
-      }
-    }
-  })
-});
-var __Field = new GraphQLObjectType({
-  name: "__Field",
-  description: "Object and Interface types are described by a list of Fields, each of which has a name, potentially a list of arguments, and a return type.",
-  fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: (field) => field.name
-    },
-    description: {
-      type: GraphQLString,
-      resolve: (field) => field.description
-    },
-    args: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__InputValue))),
-      args: {
-        includeDeprecated: {
-          type: GraphQLBoolean,
-          defaultValue: false
-        }
-      },
-      resolve(field, { includeDeprecated }) {
-        return includeDeprecated ? field.args : field.args.filter((arg) => arg.deprecationReason == null);
-      }
-    },
-    type: {
-      type: new GraphQLNonNull(__Type),
-      resolve: (field) => field.type
-    },
-    isDeprecated: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      resolve: (field) => field.deprecationReason != null
-    },
-    deprecationReason: {
-      type: GraphQLString,
-      resolve: (field) => field.deprecationReason
-    }
-  })
-});
-var __InputValue = new GraphQLObjectType({
-  name: "__InputValue",
-  description: "Arguments provided to Fields or Directives and the input fields of an InputObject are represented as Input Values which describe their type and optionally a default value.",
-  fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: (inputValue) => inputValue.name
-    },
-    description: {
-      type: GraphQLString,
-      resolve: (inputValue) => inputValue.description
-    },
-    type: {
-      type: new GraphQLNonNull(__Type),
-      resolve: (inputValue) => inputValue.type
-    },
-    defaultValue: {
-      type: GraphQLString,
-      description: "A GraphQL-formatted string representing the default value for this input value.",
-      resolve(inputValue) {
-        const { type, defaultValue } = inputValue;
-        const valueAST = astFromValue(defaultValue, type);
-        return valueAST ? print(valueAST) : null;
-      }
-    },
-    isDeprecated: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      resolve: (field) => field.deprecationReason != null
-    },
-    deprecationReason: {
-      type: GraphQLString,
-      resolve: (obj) => obj.deprecationReason
-    }
-  })
-});
-var __EnumValue = new GraphQLObjectType({
-  name: "__EnumValue",
-  description: "One possible value for a given Enum. Enum values are unique values, not a placeholder for a string or numeric value. However an Enum value is returned in a JSON response as a string.",
-  fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: (enumValue) => enumValue.name
-    },
-    description: {
-      type: GraphQLString,
-      resolve: (enumValue) => enumValue.description
-    },
-    isDeprecated: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      resolve: (enumValue) => enumValue.deprecationReason != null
-    },
-    deprecationReason: {
-      type: GraphQLString,
-      resolve: (enumValue) => enumValue.deprecationReason
-    }
-  })
-});
-var TypeKind;
-(function(TypeKind) {
-  TypeKind["SCALAR"] = "SCALAR";
-  TypeKind["OBJECT"] = "OBJECT";
-  TypeKind["INTERFACE"] = "INTERFACE";
-  TypeKind["UNION"] = "UNION";
-  TypeKind["ENUM"] = "ENUM";
-  TypeKind["INPUT_OBJECT"] = "INPUT_OBJECT";
-  TypeKind["LIST"] = "LIST";
-  TypeKind["NON_NULL"] = "NON_NULL";
-})(TypeKind || (TypeKind = {}));
-var __TypeKind = new GraphQLEnumType({
-  name: "__TypeKind",
-  description: "An enum describing what kind of type a given `__Type` is.",
-  values: {
-    SCALAR: {
-      value: TypeKind.SCALAR,
-      description: "Indicates this type is a scalar."
-    },
-    OBJECT: {
-      value: TypeKind.OBJECT,
-      description: "Indicates this type is an object. `fields` and `interfaces` are valid fields."
-    },
-    INTERFACE: {
-      value: TypeKind.INTERFACE,
-      description: "Indicates this type is an interface. `fields`, `interfaces`, and `possibleTypes` are valid fields."
-    },
-    UNION: {
-      value: TypeKind.UNION,
-      description: "Indicates this type is a union. `possibleTypes` is a valid field."
-    },
-    ENUM: {
-      value: TypeKind.ENUM,
-      description: "Indicates this type is an enum. `enumValues` is a valid field."
-    },
-    INPUT_OBJECT: {
-      value: TypeKind.INPUT_OBJECT,
-      description: "Indicates this type is an input object. `inputFields` is a valid field."
-    },
-    LIST: {
-      value: TypeKind.LIST,
-      description: "Indicates this type is a list. `ofType` is a valid field."
-    },
-    NON_NULL: {
-      value: TypeKind.NON_NULL,
-      description: "Indicates this type is a non-null. `ofType` is a valid field."
-    }
-  }
-});
-var SchemaMetaFieldDef = {
-  name: "__schema",
-  type: new GraphQLNonNull(__Schema),
-  description: "Access the current type schema of this server.",
-  args: [],
-  resolve: (_source, _args, _context, { schema }) => schema,
-  deprecationReason: undefined,
-  extensions: Object.create(null),
-  astNode: undefined
-};
-var TypeMetaFieldDef = {
-  name: "__type",
-  type: __Type,
-  description: "Request the type information of a single type.",
-  args: [
-    {
-      name: "name",
-      description: undefined,
-      type: new GraphQLNonNull(GraphQLString),
-      defaultValue: undefined,
-      deprecationReason: undefined,
-      extensions: Object.create(null),
-      astNode: undefined
-    }
-  ],
-  resolve: (_source, { name }, _context, { schema }) => schema.getType(name),
-  deprecationReason: undefined,
-  extensions: Object.create(null),
-  astNode: undefined
-};
-var TypeNameMetaFieldDef = {
-  name: "__typename",
-  type: new GraphQLNonNull(GraphQLString),
-  description: "The name of the current Object type at runtime.",
-  args: [],
-  resolve: (_source, _args, _context, { parentType }) => parentType.name,
-  deprecationReason: undefined,
-  extensions: Object.create(null),
-  astNode: undefined
-};
-var introspectionTypes = Object.freeze([
-  __Schema,
-  __Directive,
-  __DirectiveLocation,
-  __Type,
-  __Field,
-  __InputValue,
-  __EnumValue,
-  __TypeKind
-]);
-function isIntrospectionType(type) {
-  return introspectionTypes.some(({ name }) => type.name === name);
-}
-
-// node_modules/graphql/type/schema.mjs
-function isSchema(schema) {
-  return instanceOf(schema, GraphQLSchema);
-}
-function assertSchema(schema) {
-  if (!isSchema(schema)) {
-    throw new Error(`Expected ${inspect(schema)} to be a GraphQL schema.`);
-  }
-  return schema;
-}
-
-class GraphQLSchema {
-  constructor(config) {
-    var _config$extensionASTN, _config$directives;
-    this.__validationErrors = config.assumeValid === true ? [] : undefined;
-    isObjectLike(config) || devAssert(false, "Must provide configuration object.");
-    !config.types || Array.isArray(config.types) || devAssert(false, `"types" must be Array if provided but got: ${inspect(config.types)}.`);
-    !config.directives || Array.isArray(config.directives) || devAssert(false, '"directives" must be Array if provided but got: ' + `${inspect(config.directives)}.`);
-    this.description = config.description;
-    this.extensions = toObjMap(config.extensions);
-    this.astNode = config.astNode;
-    this.extensionASTNodes = (_config$extensionASTN = config.extensionASTNodes) !== null && _config$extensionASTN !== undefined ? _config$extensionASTN : [];
-    this._queryType = config.query;
-    this._mutationType = config.mutation;
-    this._subscriptionType = config.subscription;
-    this._directives = (_config$directives = config.directives) !== null && _config$directives !== undefined ? _config$directives : specifiedDirectives;
-    const allReferencedTypes = new Set(config.types);
-    if (config.types != null) {
-      for (const type of config.types) {
-        allReferencedTypes.delete(type);
-        collectReferencedTypes(type, allReferencedTypes);
-      }
-    }
-    if (this._queryType != null) {
-      collectReferencedTypes(this._queryType, allReferencedTypes);
-    }
-    if (this._mutationType != null) {
-      collectReferencedTypes(this._mutationType, allReferencedTypes);
-    }
-    if (this._subscriptionType != null) {
-      collectReferencedTypes(this._subscriptionType, allReferencedTypes);
-    }
-    for (const directive of this._directives) {
-      if (isDirective(directive)) {
-        for (const arg of directive.args) {
-          collectReferencedTypes(arg.type, allReferencedTypes);
-        }
-      }
-    }
-    collectReferencedTypes(__Schema, allReferencedTypes);
-    this._typeMap = Object.create(null);
-    this._subTypeMap = Object.create(null);
-    this._implementationsMap = Object.create(null);
-    for (const namedType of allReferencedTypes) {
-      if (namedType == null) {
-        continue;
-      }
-      const typeName = namedType.name;
-      typeName || devAssert(false, "One of the provided types for building the Schema is missing a name.");
-      if (this._typeMap[typeName] !== undefined) {
-        throw new Error(`Schema must contain uniquely named types but contains multiple types named "${typeName}".`);
-      }
-      this._typeMap[typeName] = namedType;
-      if (isInterfaceType(namedType)) {
-        for (const iface of namedType.getInterfaces()) {
-          if (isInterfaceType(iface)) {
-            let implementations = this._implementationsMap[iface.name];
-            if (implementations === undefined) {
-              implementations = this._implementationsMap[iface.name] = {
-                objects: [],
-                interfaces: []
-              };
-            }
-            implementations.interfaces.push(namedType);
-          }
-        }
-      } else if (isObjectType(namedType)) {
-        for (const iface of namedType.getInterfaces()) {
-          if (isInterfaceType(iface)) {
-            let implementations = this._implementationsMap[iface.name];
-            if (implementations === undefined) {
-              implementations = this._implementationsMap[iface.name] = {
-                objects: [],
-                interfaces: []
-              };
-            }
-            implementations.objects.push(namedType);
-          }
-        }
-      }
-    }
-  }
-  get [Symbol.toStringTag]() {
-    return "GraphQLSchema";
-  }
-  getQueryType() {
-    return this._queryType;
-  }
-  getMutationType() {
-    return this._mutationType;
-  }
-  getSubscriptionType() {
-    return this._subscriptionType;
-  }
-  getRootType(operation) {
-    switch (operation) {
-      case OperationTypeNode.QUERY:
-        return this.getQueryType();
-      case OperationTypeNode.MUTATION:
-        return this.getMutationType();
-      case OperationTypeNode.SUBSCRIPTION:
-        return this.getSubscriptionType();
-    }
-  }
-  getTypeMap() {
-    return this._typeMap;
-  }
-  getType(name) {
-    return this.getTypeMap()[name];
-  }
-  getPossibleTypes(abstractType) {
-    return isUnionType(abstractType) ? abstractType.getTypes() : this.getImplementations(abstractType).objects;
-  }
-  getImplementations(interfaceType) {
-    const implementations = this._implementationsMap[interfaceType.name];
-    return implementations !== null && implementations !== undefined ? implementations : {
-      objects: [],
-      interfaces: []
-    };
-  }
-  isSubType(abstractType, maybeSubType) {
-    let map = this._subTypeMap[abstractType.name];
-    if (map === undefined) {
-      map = Object.create(null);
-      if (isUnionType(abstractType)) {
-        for (const type of abstractType.getTypes()) {
-          map[type.name] = true;
-        }
-      } else {
-        const implementations = this.getImplementations(abstractType);
-        for (const type of implementations.objects) {
-          map[type.name] = true;
-        }
-        for (const type of implementations.interfaces) {
-          map[type.name] = true;
-        }
-      }
-      this._subTypeMap[abstractType.name] = map;
-    }
-    return map[maybeSubType.name] !== undefined;
-  }
-  getDirectives() {
-    return this._directives;
-  }
-  getDirective(name) {
-    return this.getDirectives().find((directive) => directive.name === name);
-  }
-  toConfig() {
-    return {
-      description: this.description,
-      query: this.getQueryType(),
-      mutation: this.getMutationType(),
-      subscription: this.getSubscriptionType(),
-      types: Object.values(this.getTypeMap()),
-      directives: this.getDirectives(),
-      extensions: this.extensions,
-      astNode: this.astNode,
-      extensionASTNodes: this.extensionASTNodes,
-      assumeValid: this.__validationErrors !== undefined
-    };
-  }
-}
-function collectReferencedTypes(type, typeSet) {
-  const namedType = getNamedType(type);
-  if (!typeSet.has(namedType)) {
-    typeSet.add(namedType);
-    if (isUnionType(namedType)) {
-      for (const memberType of namedType.getTypes()) {
-        collectReferencedTypes(memberType, typeSet);
-      }
-    } else if (isObjectType(namedType) || isInterfaceType(namedType)) {
-      for (const interfaceType of namedType.getInterfaces()) {
-        collectReferencedTypes(interfaceType, typeSet);
-      }
-      for (const field of Object.values(namedType.getFields())) {
-        collectReferencedTypes(field.type, typeSet);
-        for (const arg of field.args) {
-          collectReferencedTypes(arg.type, typeSet);
-        }
-      }
-    } else if (isInputObjectType(namedType)) {
-      for (const field of Object.values(namedType.getFields())) {
-        collectReferencedTypes(field.type, typeSet);
-      }
-    }
-  }
-  return typeSet;
-}
 // node_modules/graphql/utilities/typeComparators.mjs
 function isEqualType(typeA, typeB) {
   if (typeA === typeB) {
@@ -3076,6 +2207,1695 @@ function doTypesOverlap(schema, typeA, typeB) {
   return false;
 }
 
+// node_modules/graphql/jsutils/Path.mjs
+function addPath(prev, key, typename) {
+  return { prev, key, typename };
+}
+function pathToArray(path) {
+  const flattened = [];
+  let curr = path;
+  while (curr) {
+    flattened.push(curr.key);
+    curr = curr.prev;
+  }
+  return flattened.reverse();
+}
+
+// node_modules/graphql/utilities/valueToLiteral.mjs
+function valueToLiteral(value, type) {
+  if (isNonNullType(type)) {
+    if (value == null) {
+      return;
+    }
+    return valueToLiteral(value, type.ofType);
+  }
+  if (value == null) {
+    return { kind: NULL };
+  }
+  if (isListType(type)) {
+    if (!isIterableObject(value)) {
+      return valueToLiteral(value, type.ofType);
+    }
+    const values = [];
+    for (const itemValue of value) {
+      const itemNode = valueToLiteral(itemValue, type.ofType);
+      if (!itemNode) {
+        return;
+      }
+      values.push(itemNode);
+    }
+    return { kind: LIST, values };
+  }
+  if (isInputObjectType(type)) {
+    if (!isObjectLike(value)) {
+      return;
+    }
+    const fields = [];
+    const fieldDefs = type.getFields();
+    const hasUndefinedField = Object.keys(value).some((name) => value[name] !== undefined && !Object.hasOwn(fieldDefs, name));
+    if (hasUndefinedField) {
+      return;
+    }
+    for (const field of Object.values(type.getFields())) {
+      const fieldValue = value[field.name];
+      if (fieldValue === undefined) {
+        if (isRequiredInputField(field)) {
+          return;
+        }
+      } else {
+        const fieldNode = valueToLiteral(value[field.name], field.type);
+        if (!fieldNode) {
+          return;
+        }
+        fields.push({
+          kind: OBJECT_FIELD,
+          name: { kind: NAME, value: field.name },
+          value: fieldNode
+        });
+      }
+    }
+    return { kind: OBJECT, fields };
+  }
+  const leafType = assertLeafType(type);
+  if (leafType.valueToLiteral) {
+    try {
+      return leafType.valueToLiteral(value);
+    } catch (_error) {
+      return;
+    }
+  }
+  return defaultScalarValueToLiteral(value);
+}
+function defaultScalarValueToLiteral(value) {
+  if (value == null) {
+    return { kind: NULL };
+  }
+  switch (typeof value) {
+    case "boolean":
+      return { kind: BOOLEAN, value };
+    case "string":
+      return { kind: STRING, value, block: false };
+    case "bigint":
+      return { kind: INT, value: value.toString() };
+    case "number": {
+      if (!Number.isFinite(value)) {
+        return { kind: NULL };
+      }
+      const stringValue = String(value);
+      return /^-?(?:0|[1-9][0-9]*)$/.test(stringValue) ? { kind: INT, value: stringValue } : { kind: FLOAT, value: stringValue };
+    }
+    case "object": {
+      if (isIterableObject(value)) {
+        return {
+          kind: LIST,
+          values: Array.from(value, defaultScalarValueToLiteral)
+        };
+      }
+      const objValue = value;
+      const fields = [];
+      for (const fieldName of Object.keys(objValue)) {
+        const fieldValue = objValue[fieldName];
+        if (fieldValue !== undefined) {
+          fields.push({
+            kind: OBJECT_FIELD,
+            name: { kind: NAME, value: fieldName },
+            value: defaultScalarValueToLiteral(fieldValue)
+          });
+        }
+      }
+      return { kind: OBJECT, fields };
+    }
+  }
+  throw new TypeError(`Cannot convert value to AST: ${inspect(value)}.`);
+}
+
+// node_modules/graphql/utilities/replaceVariables.mjs
+function replaceVariables(valueNode, variableValues, fragmentVariableValues) {
+  switch (valueNode.kind) {
+    case VARIABLE: {
+      const varName = valueNode.name.value;
+      const fragmentVariableValueSource = fragmentVariableValues?.sources[varName];
+      if (fragmentVariableValueSource) {
+        const value = fragmentVariableValueSource.value;
+        if (value === undefined) {
+          const defaultValue = fragmentVariableValueSource.signature.default;
+          if (defaultValue !== undefined) {
+            return defaultValue.literal;
+          }
+          return { kind: NULL };
+        }
+        return replaceVariables(value, variableValues, fragmentVariableValueSource.fragmentVariableValues);
+      }
+      const variableValueSource = variableValues?.sources[varName];
+      if (variableValueSource == null) {
+        return { kind: NULL };
+      }
+      if (variableValueSource.value === undefined) {
+        const defaultValue = variableValueSource.signature.default;
+        if (defaultValue !== undefined) {
+          return defaultValue.literal;
+        }
+      }
+      return valueToLiteral(variableValueSource.value, variableValueSource.signature.type);
+    }
+    case OBJECT: {
+      const newFields = [];
+      for (const field of valueNode.fields) {
+        if (field.value.kind === VARIABLE) {
+          const scopedVariableSource = fragmentVariableValues?.sources[field.value.name.value] ?? variableValues?.sources[field.value.name.value];
+          if (scopedVariableSource?.value === undefined && scopedVariableSource?.signature.default === undefined) {
+            continue;
+          }
+        }
+        const newFieldNodeValue = replaceVariables(field.value, variableValues, fragmentVariableValues);
+        newFields.push({
+          ...field,
+          value: newFieldNodeValue
+        });
+      }
+      return {
+        ...valueNode,
+        fields: newFields
+      };
+    }
+    case LIST: {
+      const newValues = [];
+      for (const value of valueNode.values) {
+        const newItemNodeValue = replaceVariables(value, variableValues, fragmentVariableValues);
+        newValues.push(newItemNodeValue);
+      }
+      return {
+        ...valueNode,
+        values: newValues
+      };
+    }
+    default: {
+      return valueNode;
+    }
+  }
+}
+
+// node_modules/graphql/utilities/validateInputValue.mjs
+function validateInputValue(inputValue, type, onError, hideSuggestions) {
+  return validateInputValueImpl(inputValue, type, onError, hideSuggestions, undefined);
+}
+function validateInputValueImpl(inputValue, type, onError, hideSuggestions, path) {
+  if (isNonNullType(type)) {
+    if (inputValue === undefined) {
+      reportInvalidValue(onError, `Expected a value of non-null type "${type}" to be provided.`, path);
+      return;
+    }
+    if (inputValue === null) {
+      reportInvalidValue(onError, `Expected value of non-null type "${type}" not to be null.`, path);
+      return;
+    }
+    return validateInputValueImpl(inputValue, type.ofType, onError, hideSuggestions, path);
+  }
+  if (inputValue == null) {
+    return;
+  }
+  if (isListType(type)) {
+    if (!isIterableObject(inputValue)) {
+      validateInputValueImpl(inputValue, type.ofType, onError, hideSuggestions, path);
+    } else {
+      let index = 0;
+      for (const itemValue of inputValue) {
+        validateInputValueImpl(itemValue, type.ofType, onError, hideSuggestions, addPath(path, index++, undefined));
+      }
+    }
+  } else if (isInputObjectType(type)) {
+    if (!isObjectLike(inputValue) || Array.isArray(inputValue)) {
+      reportInvalidValue(onError, `Expected value of type "${type}" to be an object, found: ${inspect(inputValue)}.`, path);
+      return;
+    }
+    const fieldDefs = type.getFields();
+    for (const field of Object.values(fieldDefs)) {
+      const fieldValue = inputValue[field.name];
+      if (fieldValue === undefined) {
+        if (isRequiredInputField(field)) {
+          reportInvalidValue(onError, `Expected value of type "${type}" to include required field "${field.name}", found: ${inspect(inputValue)}.`, path);
+        }
+      } else {
+        validateInputValueImpl(fieldValue, field.type, onError, hideSuggestions, addPath(path, field.name, type.name));
+      }
+    }
+    const fields = [];
+    for (const fieldName of Object.keys(inputValue)) {
+      if (inputValue[fieldName] === undefined) {
+        continue;
+      }
+      if (!Object.hasOwn(fieldDefs, fieldName)) {
+        const suggestion = hideSuggestions ? "" : didYouMean(suggestionList(fieldName, Object.keys(fieldDefs)));
+        reportInvalidValue(onError, `Expected value of type "${type}" not to include unknown field "${fieldName}"${suggestion ? `.${suggestion} Found` : ", found"}: ${inspect(inputValue)}.`, path);
+        continue;
+      }
+      fields.push(fieldName);
+    }
+    if (type.isOneOf) {
+      if (fields.length !== 1) {
+        reportInvalidValue(onError, getOneOfInputObjectErrorMessage(type), path);
+      }
+      const field = fields[0];
+      const value = inputValue[field];
+      if (value === null) {
+        reportInvalidValue(onError, getOneOfInputObjectErrorMessage(type), addPath(path, field, type.name));
+      }
+    }
+  } else {
+    assertLeafType(type);
+    let result;
+    let caughtError;
+    try {
+      result = type.coerceInputValue(inputValue, hideSuggestions);
+    } catch (error) {
+      if (error instanceof GraphQLError) {
+        onError(error, pathToArray(path));
+        return;
+      }
+      caughtError = error;
+    }
+    if (result === undefined) {
+      reportInvalidValue(onError, `Expected value of type "${type}"${caughtError != null ? `, but encountered error "${getCaughtErrorMessage(caughtError)}"; found` : ", found"}: ${inspect(inputValue)}.`, path, ensureGraphQLError(caughtError));
+    }
+  }
+}
+function reportInvalidValue(onError, message, path, originalError) {
+  onError(new GraphQLError(message, { originalError }), pathToArray(path));
+}
+function validateInputLiteral(valueNode, type, onError, variables, fragmentVariableValues, hideSuggestions) {
+  const context = {
+    static: !variables && !fragmentVariableValues,
+    onError,
+    variables,
+    fragmentVariableValues
+  };
+  return validateInputLiteralImpl(context, valueNode, type, hideSuggestions, undefined);
+}
+function validateInputLiteralImpl(context, valueNode, type, hideSuggestions, path) {
+  if (valueNode.kind === VARIABLE) {
+    if (context.static) {
+      return;
+    }
+    const scopedVariableValues = getScopedVariableValues(context, valueNode);
+    const value = scopedVariableValues?.coerced[valueNode.name.value];
+    if (isNonNullType(type)) {
+      if (value === undefined) {
+        reportInvalidLiteral(context.onError, `Expected variable "$${valueNode.name.value}" provided to type "${type}" to provide a runtime value.`, valueNode, path);
+      } else if (value === null) {
+        reportInvalidLiteral(context.onError, `Expected variable "$${valueNode.name.value}" provided to non-null type "${type}" not to be null.`, valueNode, path);
+      }
+    }
+    return;
+  }
+  if (isNonNullType(type)) {
+    if (valueNode.kind === NULL) {
+      reportInvalidLiteral(context.onError, `Expected value of non-null type "${type}" not to be null.`, valueNode, path);
+      return;
+    }
+    return validateInputLiteralImpl(context, valueNode, type.ofType, hideSuggestions, path);
+  }
+  if (valueNode.kind === NULL) {
+    return;
+  }
+  if (isListType(type)) {
+    if (valueNode.kind !== LIST) {
+      validateInputLiteralImpl(context, valueNode, type.ofType, hideSuggestions, path);
+    } else {
+      let index = 0;
+      for (const itemNode of valueNode.values) {
+        validateInputLiteralImpl(context, itemNode, type.ofType, hideSuggestions, addPath(path, index++, undefined));
+      }
+    }
+  } else if (isInputObjectType(type)) {
+    if (valueNode.kind !== OBJECT) {
+      reportInvalidLiteral(context.onError, `Expected value of type "${type}" to be an object, found: ${printForError(valueNode)}.`, valueNode, path);
+      return;
+    }
+    const fieldDefs = type.getFields();
+    const fieldNodes = keyMap(valueNode.fields, (field) => field.name.value);
+    for (const field of Object.values(fieldDefs)) {
+      const fieldNode = fieldNodes[field.name];
+      if (fieldNode === undefined) {
+        if (isRequiredInputField(field)) {
+          reportInvalidLiteral(context.onError, `Expected value of type "${type}" to include required field "${field.name}", found: ${printForError(valueNode)}.`, valueNode, path);
+        }
+      } else {
+        const fieldValueNode = fieldNode.value;
+        if (fieldValueNode.kind === VARIABLE && !context.static) {
+          const scopedVariableValues = getScopedVariableValues(context, fieldValueNode);
+          const variableName = fieldValueNode.name.value;
+          const value = scopedVariableValues?.coerced[variableName];
+          if (type.isOneOf) {
+            if (value === undefined) {
+              reportInvalidLiteral(context.onError, `Expected variable "$${variableName}" provided to field "${field.name}" for OneOf Input Object type "${type}" to provide a runtime value.`, valueNode, path);
+            } else if (value === null) {
+              reportInvalidLiteral(context.onError, `Expected variable "$${variableName}" provided to field "${field.name}" for OneOf Input Object type "${type}" not to be null.`, valueNode, path);
+            }
+          } else if (value === undefined && !isRequiredInputField(field)) {
+            continue;
+          }
+        }
+        validateInputLiteralImpl(context, fieldValueNode, field.type, hideSuggestions, addPath(path, field.name, type.name));
+      }
+    }
+    const fields = valueNode.fields;
+    const knownFields = [];
+    for (const fieldNode of fields) {
+      const fieldName = fieldNode.name.value;
+      if (!Object.hasOwn(fieldDefs, fieldName)) {
+        const suggestion = hideSuggestions ? "" : didYouMean(suggestionList(fieldName, Object.keys(fieldDefs)));
+        reportInvalidLiteral(context.onError, `Expected value of type "${type}" not to include unknown field "${fieldName}"${suggestion ? `.${suggestion} Found` : ", found"}: ${printForError(valueNode)}.`, fieldNode, path);
+      } else {
+        knownFields.push(fieldNode);
+      }
+    }
+    if (type.isOneOf) {
+      const isNotExactlyOneField = knownFields.length !== 1;
+      if (isNotExactlyOneField) {
+        reportInvalidLiteral(context.onError, getOneOfInputObjectErrorMessage(type), valueNode, path);
+        return;
+      }
+      const fieldValueNode = knownFields[0].value;
+      if (fieldValueNode.kind === NULL) {
+        const fieldName = knownFields[0].name.value;
+        reportInvalidLiteral(context.onError, getOneOfInputObjectErrorMessage(type), valueNode, addPath(path, fieldName, undefined));
+      }
+    }
+  } else {
+    assertLeafType(type);
+    let result;
+    let caughtError;
+    try {
+      result = type.coerceInputLiteral ? type.coerceInputLiteral(replaceVariables(valueNode, context.variables, context.fragmentVariableValues), hideSuggestions) : type.parseLiteral(valueNode, undefined, hideSuggestions);
+    } catch (error) {
+      if (error instanceof GraphQLError) {
+        context.onError(error, pathToArray(path));
+        return;
+      }
+      caughtError = error;
+    }
+    if (result === undefined) {
+      reportInvalidLiteral(context.onError, `Expected value of type "${type}"${caughtError != null ? `, but encountered error "${getCaughtErrorMessage(caughtError)}"; found` : ", found"}: ${printForError(valueNode)}.`, valueNode, path, ensureGraphQLError(caughtError));
+    }
+  }
+}
+function getScopedVariableValues(context, valueNode) {
+  const variableName = valueNode.name.value;
+  const { fragmentVariableValues, variables } = context;
+  return fragmentVariableValues?.sources[variableName] ? fragmentVariableValues : variables;
+}
+function reportInvalidLiteral(onError, message, valueNode, path, originalError) {
+  onError(new GraphQLError(message, {
+    nodes: valueNode,
+    originalError
+  }), pathToArray(path));
+}
+function getCaughtErrorMessage(caughtError) {
+  if (isObjectLike(caughtError)) {
+    const message = caughtError.message;
+    if (typeof message === "string" && message !== "") {
+      return message;
+    }
+  }
+  return String(caughtError);
+}
+function getOneOfInputObjectErrorMessage(type) {
+  return `Within OneOf Input Object type "${type}", exactly one field must be specified, and the value for that field must be non-null.`;
+}
+
+// node_modules/graphql/language/directiveLocation.mjs
+var DirectiveLocation = {
+  QUERY: "QUERY",
+  MUTATION: "MUTATION",
+  SUBSCRIPTION: "SUBSCRIPTION",
+  FIELD: "FIELD",
+  FRAGMENT_DEFINITION: "FRAGMENT_DEFINITION",
+  FRAGMENT_SPREAD: "FRAGMENT_SPREAD",
+  INLINE_FRAGMENT: "INLINE_FRAGMENT",
+  VARIABLE_DEFINITION: "VARIABLE_DEFINITION",
+  FRAGMENT_VARIABLE_DEFINITION: "FRAGMENT_VARIABLE_DEFINITION",
+  SCHEMA: "SCHEMA",
+  SCALAR: "SCALAR",
+  OBJECT: "OBJECT",
+  FIELD_DEFINITION: "FIELD_DEFINITION",
+  ARGUMENT_DEFINITION: "ARGUMENT_DEFINITION",
+  INTERFACE: "INTERFACE",
+  UNION: "UNION",
+  ENUM: "ENUM",
+  ENUM_VALUE: "ENUM_VALUE",
+  INPUT_OBJECT: "INPUT_OBJECT",
+  INPUT_FIELD_DEFINITION: "INPUT_FIELD_DEFINITION",
+  DIRECTIVE_DEFINITION: "DIRECTIVE_DEFINITION"
+};
+
+// node_modules/graphql/type/scalars.mjs
+var GRAPHQL_MAX_INT = 2147483647;
+var GRAPHQL_MIN_INT = -2147483648;
+var GraphQLInt = new GraphQLScalarType({
+  name: "Int",
+  description: "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+  coerceOutputValue(outputValue) {
+    const coercedValue = coerceOutputValueObject(outputValue);
+    if (typeof coercedValue === "number") {
+      return coerceIntFromNumber(coercedValue);
+    }
+    if (typeof coercedValue === "boolean") {
+      return coercedValue ? 1 : 0;
+    }
+    if (typeof coercedValue === "string") {
+      return coerceIntFromString(coercedValue);
+    }
+    if (typeof coercedValue === "bigint") {
+      return coerceIntFromBigInt(coercedValue);
+    }
+    throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(coercedValue)}`);
+  },
+  coerceInputValue(inputValue) {
+    if (typeof inputValue === "number") {
+      return coerceIntFromNumber(inputValue);
+    }
+    if (typeof inputValue === "bigint") {
+      return coerceIntFromBigInt(inputValue);
+    }
+    throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(inputValue)}`);
+  },
+  coerceInputLiteral(valueNode) {
+    if (valueNode.kind !== INT) {
+      throw new GraphQLError(`Int cannot represent non-integer value: ${printForError(valueNode)}`, { nodes: valueNode });
+    }
+    const num = parseInt(valueNode.value, 10);
+    if (num > GRAPHQL_MAX_INT || num < GRAPHQL_MIN_INT) {
+      throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${valueNode.value}`, { nodes: valueNode });
+    }
+    return num;
+  },
+  valueToLiteral(value) {
+    if ((typeof value === "number" && Number.isInteger(value) || typeof value === "bigint") && value <= GRAPHQL_MAX_INT && value >= GRAPHQL_MIN_INT) {
+      return { kind: INT, value: String(value) };
+    }
+  }
+});
+var GraphQLFloat = new GraphQLScalarType({
+  name: "Float",
+  description: "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
+  coerceOutputValue(outputValue) {
+    const coercedValue = coerceOutputValueObject(outputValue);
+    if (typeof coercedValue === "number") {
+      return coerceFloatFromNumber(coercedValue);
+    }
+    if (typeof coercedValue === "boolean") {
+      return coercedValue ? 1 : 0;
+    }
+    if (typeof coercedValue === "string") {
+      return coerceFloatFromString(coercedValue);
+    }
+    if (typeof coercedValue === "bigint") {
+      return coerceFloatFromBigInt(coercedValue);
+    }
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(coercedValue)}`);
+  },
+  coerceInputValue(inputValue) {
+    if (typeof inputValue === "number") {
+      return coerceFloatFromNumber(inputValue);
+    }
+    if (typeof inputValue === "bigint") {
+      return coerceFloatFromBigInt(inputValue);
+    }
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(inputValue)}`);
+  },
+  coerceInputLiteral(valueNode) {
+    if (valueNode.kind !== FLOAT && valueNode.kind !== INT) {
+      throw new GraphQLError(`Float cannot represent non numeric value: ${printForError(valueNode)}`, { nodes: valueNode });
+    }
+    return parseFloat(valueNode.value);
+  },
+  valueToLiteral(value) {
+    const literal = defaultScalarValueToLiteral(value);
+    if (literal.kind === FLOAT || literal.kind === INT) {
+      return literal;
+    }
+  }
+});
+var GraphQLString = new GraphQLScalarType({
+  name: "String",
+  description: "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+  coerceOutputValue(outputValue) {
+    const coercedValue = coerceOutputValueObject(outputValue);
+    if (typeof coercedValue === "string") {
+      return coercedValue;
+    }
+    if (typeof coercedValue === "boolean") {
+      return coercedValue ? "true" : "false";
+    }
+    if (typeof coercedValue === "number") {
+      return coerceStringFromNumber(coercedValue);
+    }
+    if (typeof coercedValue === "bigint") {
+      return String(coercedValue);
+    }
+    throw new GraphQLError(`String cannot represent value: ${inspect(outputValue)}`);
+  },
+  coerceInputValue(inputValue) {
+    if (typeof inputValue !== "string") {
+      throw new GraphQLError(`String cannot represent a non string value: ${inspect(inputValue)}`);
+    }
+    return inputValue;
+  },
+  coerceInputLiteral(valueNode) {
+    if (valueNode.kind !== STRING) {
+      throw new GraphQLError(`String cannot represent a non string value: ${printForError(valueNode)}`, { nodes: valueNode });
+    }
+    return valueNode.value;
+  },
+  valueToLiteral(value) {
+    const literal = defaultScalarValueToLiteral(value);
+    if (literal.kind === STRING) {
+      return literal;
+    }
+  }
+});
+var GraphQLBoolean = new GraphQLScalarType({
+  name: "Boolean",
+  description: "The `Boolean` scalar type represents `true` or `false`.",
+  coerceOutputValue(outputValue) {
+    const coercedValue = coerceOutputValueObject(outputValue);
+    if (typeof coercedValue === "boolean") {
+      return coercedValue;
+    }
+    if (typeof coercedValue === "number") {
+      return coerceBooleanFromNumber(coercedValue);
+    }
+    if (typeof coercedValue === "bigint") {
+      return coercedValue !== 0n;
+    }
+    throw new GraphQLError(`Boolean cannot represent a non boolean value: ${inspect(coercedValue)}`);
+  },
+  coerceInputValue(inputValue) {
+    if (typeof inputValue !== "boolean") {
+      throw new GraphQLError(`Boolean cannot represent a non boolean value: ${inspect(inputValue)}`);
+    }
+    return inputValue;
+  },
+  coerceInputLiteral(valueNode) {
+    if (valueNode.kind !== BOOLEAN) {
+      throw new GraphQLError(`Boolean cannot represent a non boolean value: ${printForError(valueNode)}`, { nodes: valueNode });
+    }
+    return valueNode.value;
+  },
+  valueToLiteral(value) {
+    const literal = defaultScalarValueToLiteral(value);
+    if (literal.kind === BOOLEAN) {
+      return literal;
+    }
+  }
+});
+var GraphQLID = new GraphQLScalarType({
+  name: "ID",
+  description: 'The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.',
+  coerceOutputValue(outputValue) {
+    const coercedValue = coerceOutputValueObject(outputValue);
+    if (typeof coercedValue === "string") {
+      return coercedValue;
+    }
+    if (typeof coercedValue === "number") {
+      return coerceIDFromNumber(coercedValue);
+    }
+    if (typeof coercedValue === "bigint") {
+      return String(coercedValue);
+    }
+    throw new GraphQLError(`ID cannot represent value: ${inspect(outputValue)}`);
+  },
+  coerceInputValue(inputValue) {
+    if (typeof inputValue === "string") {
+      return inputValue;
+    }
+    if (typeof inputValue === "number") {
+      return coerceIDFromNumber(inputValue);
+    }
+    if (typeof inputValue === "bigint") {
+      return String(inputValue);
+    }
+    throw new GraphQLError(`ID cannot represent value: ${inspect(inputValue)}`);
+  },
+  coerceInputLiteral(valueNode) {
+    if (valueNode.kind !== STRING && valueNode.kind !== INT) {
+      throw new GraphQLError("ID cannot represent a non-string and non-integer value: " + printForError(valueNode), { nodes: valueNode });
+    }
+    return valueNode.value;
+  },
+  valueToLiteral(value) {
+    if (typeof value === "string") {
+      return /^-?(?:0|[1-9][0-9]*)$/.test(value) ? { kind: INT, value } : { kind: STRING, value, block: false };
+    }
+    if (typeof value === "number") {
+      return { kind: INT, value: coerceIDFromNumber(value) };
+    }
+    if (typeof value === "bigint") {
+      return { kind: INT, value: String(value) };
+    }
+  }
+});
+var specifiedScalarTypes = Object.freeze([
+  GraphQLString,
+  GraphQLInt,
+  GraphQLFloat,
+  GraphQLBoolean,
+  GraphQLID
+]);
+function isSpecifiedScalarType(type) {
+  return specifiedScalarTypes.some(({ name }) => type.name === name);
+}
+function coerceOutputValueObject(outputValue) {
+  if (isObjectLike(outputValue)) {
+    if (typeof outputValue.valueOf === "function") {
+      const valueOfResult = outputValue.valueOf();
+      if (!isObjectLike(valueOfResult)) {
+        return valueOfResult;
+      }
+    }
+    if (typeof outputValue.toJSON === "function") {
+      return outputValue.toJSON();
+    }
+  }
+  return outputValue;
+}
+function coerceIntFromNumber(value) {
+  if (!Number.isInteger(value)) {
+    throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(value)}`);
+  }
+  if (value > GRAPHQL_MAX_INT || value < GRAPHQL_MIN_INT) {
+    throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${inspect(value)}`);
+  }
+  return value;
+}
+function coerceIntFromString(value) {
+  if (value === "") {
+    throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(value)}`);
+  }
+  const num = Number(value);
+  if (!Number.isInteger(num)) {
+    throw new GraphQLError(`Int cannot represent non-integer value: ${inspect(value)}`);
+  }
+  if (num > GRAPHQL_MAX_INT || num < GRAPHQL_MIN_INT) {
+    throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${inspect(value)}`);
+  }
+  return num;
+}
+function coerceIntFromBigInt(value) {
+  if (value > GRAPHQL_MAX_INT || value < GRAPHQL_MIN_INT) {
+    throw new GraphQLError(`Int cannot represent non 32-bit signed integer value: ${String(value)}`);
+  }
+  return Number(value);
+}
+function coerceFloatFromNumber(value) {
+  if (!Number.isFinite(value)) {
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(value)}`);
+  }
+  return value;
+}
+function coerceFloatFromString(value) {
+  if (value === "") {
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(value)}`);
+  }
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(value)}`);
+  }
+  return num;
+}
+function coerceFloatFromBigInt(coercedValue) {
+  const num = Number(coercedValue);
+  if (!Number.isFinite(num)) {
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(coercedValue)} (value is too large)`);
+  }
+  if (BigInt(num) !== coercedValue) {
+    throw new GraphQLError(`Float cannot represent non numeric value: ${inspect(coercedValue)} (value would lose precision)`);
+  }
+  return num;
+}
+function coerceStringFromNumber(value) {
+  if (!Number.isFinite(value)) {
+    throw new GraphQLError(`String cannot represent value: ${inspect(value)}`);
+  }
+  return String(value);
+}
+function coerceBooleanFromNumber(value) {
+  if (!Number.isFinite(value)) {
+    throw new GraphQLError(`Boolean cannot represent a non boolean value: ${inspect(value)}`);
+  }
+  return value !== 0;
+}
+function coerceIDFromNumber(value) {
+  if (!Number.isInteger(value)) {
+    throw new GraphQLError(`ID cannot represent value: ${inspect(value)}`);
+  }
+  return String(value);
+}
+
+// node_modules/graphql/type/directives.mjs
+var directiveSymbol = Symbol("Directive");
+function isDirective(directive) {
+  return instanceOf(directive, directiveSymbol, GraphQLDirective);
+}
+class GraphQLDirective {
+  constructor(config) {
+    this.__kind = directiveSymbol;
+    this.name = assertName(config.name);
+    this.description = config.description;
+    this.locations = config.locations;
+    this.isRepeatable = config.isRepeatable ?? false;
+    this.deprecationReason = config.deprecationReason;
+    this.extensions = toObjMapWithSymbols(config.extensions);
+    this.astNode = config.astNode;
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    if (!Array.isArray(config.locations))
+      devAssert(false, `@${this.name} locations must be an Array.`);
+    const args = config.args ?? {};
+    if (!(isObjectLike(args) && !Array.isArray(args)))
+      devAssert(false, `@${this.name} args must be an object with argument names as keys.`);
+    this.args = Object.entries(args).map(([argName, argConfig]) => new GraphQLArgument(this, argName, argConfig));
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLDirective";
+  }
+  toConfig() {
+    return {
+      name: this.name,
+      description: this.description,
+      locations: this.locations,
+      args: keyValMap(this.args, (arg) => arg.name, (arg) => arg.toConfig()),
+      isRepeatable: this.isRepeatable,
+      deprecationReason: this.deprecationReason,
+      extensions: this.extensions,
+      astNode: this.astNode,
+      extensionASTNodes: this.extensionASTNodes
+    };
+  }
+  toString() {
+    return "@" + this.name;
+  }
+  toJSON() {
+    return this.toString();
+  }
+}
+var GraphQLIncludeDirective = new GraphQLDirective({
+  name: "include",
+  description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
+  locations: [
+    DirectiveLocation.FIELD,
+    DirectiveLocation.FRAGMENT_SPREAD,
+    DirectiveLocation.INLINE_FRAGMENT
+  ],
+  args: {
+    if: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: "Included when true."
+    }
+  }
+});
+var GraphQLSkipDirective = new GraphQLDirective({
+  name: "skip",
+  description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
+  locations: [
+    DirectiveLocation.FIELD,
+    DirectiveLocation.FRAGMENT_SPREAD,
+    DirectiveLocation.INLINE_FRAGMENT
+  ],
+  args: {
+    if: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: "Skipped when true."
+    }
+  }
+});
+var GraphQLDeferDirective = new GraphQLDirective({
+  name: "defer",
+  description: "Directs the executor to defer this fragment when the `if` argument is true or undefined.",
+  locations: [
+    DirectiveLocation.FRAGMENT_SPREAD,
+    DirectiveLocation.INLINE_FRAGMENT
+  ],
+  args: {
+    if: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: "Deferred when true or undefined.",
+      default: { value: true }
+    },
+    label: {
+      type: GraphQLString,
+      description: "Unique name"
+    }
+  }
+});
+var GraphQLStreamDirective = new GraphQLDirective({
+  name: "stream",
+  description: "Directs the executor to stream plural fields when the `if` argument is true or undefined.",
+  locations: [DirectiveLocation.FIELD],
+  args: {
+    initialCount: {
+      default: { value: 0 },
+      type: new GraphQLNonNull(GraphQLInt),
+      description: "Number of items to return immediately"
+    },
+    if: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: "Stream when true or undefined.",
+      default: { value: true }
+    },
+    label: {
+      type: GraphQLString,
+      description: "Unique name"
+    }
+  }
+});
+var DEFAULT_DEPRECATION_REASON = "No longer supported";
+var GraphQLDeprecatedDirective = new GraphQLDirective({
+  name: "deprecated",
+  description: "Marks an element of a GraphQL schema as no longer supported.",
+  locations: [
+    DirectiveLocation.FIELD_DEFINITION,
+    DirectiveLocation.ARGUMENT_DEFINITION,
+    DirectiveLocation.INPUT_FIELD_DEFINITION,
+    DirectiveLocation.ENUM_VALUE,
+    DirectiveLocation.DIRECTIVE_DEFINITION
+  ],
+  args: {
+    reason: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: "Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).",
+      default: { value: DEFAULT_DEPRECATION_REASON }
+    }
+  }
+});
+var GraphQLSpecifiedByDirective = new GraphQLDirective({
+  name: "specifiedBy",
+  description: "Exposes a URL that specifies the behavior of this scalar.",
+  locations: [DirectiveLocation.SCALAR],
+  args: {
+    url: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: "The URL that specifies the behavior of this scalar."
+    }
+  }
+});
+var GraphQLOneOfDirective = new GraphQLDirective({
+  name: "oneOf",
+  description: "Indicates exactly one field must be supplied and this field must not be `null`.",
+  locations: [DirectiveLocation.INPUT_OBJECT],
+  args: {}
+});
+var GraphQLDisableErrorPropagationDirective = new GraphQLDirective({
+  name: "experimental_disableErrorPropagation",
+  description: "Disables error propagation.",
+  locations: [
+    DirectiveLocation.QUERY,
+    DirectiveLocation.MUTATION,
+    DirectiveLocation.SUBSCRIPTION
+  ]
+});
+var specifiedDirectives = Object.freeze([
+  GraphQLIncludeDirective,
+  GraphQLSkipDirective,
+  GraphQLDeprecatedDirective,
+  GraphQLSpecifiedByDirective,
+  GraphQLOneOfDirective
+]);
+function isSpecifiedDirective(directive) {
+  return specifiedDirectives.some(({ name }) => name === directive.name);
+}
+
+// node_modules/graphql/utilities/astFromValue.mjs
+function astFromValue(value, type) {
+  if (isNonNullType(type)) {
+    const astValue = astFromValue(value, type.ofType);
+    if (astValue?.kind === NULL) {
+      return null;
+    }
+    return astValue;
+  }
+  if (value === null) {
+    return { kind: NULL };
+  }
+  if (value === undefined) {
+    return null;
+  }
+  if (isListType(type)) {
+    const itemType = type.ofType;
+    if (isIterableObject(value)) {
+      const valuesNodes = [];
+      for (const item of value) {
+        const itemNode = astFromValue(item, itemType);
+        if (itemNode != null) {
+          valuesNodes.push(itemNode);
+        }
+      }
+      return { kind: LIST, values: valuesNodes };
+    }
+    return astFromValue(value, itemType);
+  }
+  if (isInputObjectType(type)) {
+    if (!isObjectLike(value)) {
+      return null;
+    }
+    const fieldNodes = [];
+    for (const field of Object.values(type.getFields())) {
+      const fieldValue = astFromValue(value[field.name], field.type);
+      if (fieldValue) {
+        fieldNodes.push({
+          kind: OBJECT_FIELD,
+          name: { kind: NAME, value: field.name },
+          value: fieldValue
+        });
+      }
+    }
+    return { kind: OBJECT, fields: fieldNodes };
+  }
+  if (isLeafType(type)) {
+    const coerced = type.coerceOutputValue(value);
+    if (coerced == null) {
+      return null;
+    }
+    if (typeof coerced === "boolean") {
+      return { kind: BOOLEAN, value: coerced };
+    }
+    if (typeof coerced === "number" && Number.isFinite(coerced)) {
+      const stringNum = String(coerced);
+      return integerStringRegExp.test(stringNum) ? { kind: INT, value: stringNum } : { kind: FLOAT, value: stringNum };
+    }
+    if (typeof coerced === "bigint") {
+      return { kind: INT, value: String(coerced) };
+    }
+    if (typeof coerced === "string") {
+      if (isEnumType(type)) {
+        return { kind: ENUM, value: coerced };
+      }
+      if (type === GraphQLID && integerStringRegExp.test(coerced)) {
+        return { kind: INT, value: coerced };
+      }
+      return {
+        kind: STRING,
+        value: coerced
+      };
+    }
+    throw new TypeError(`Cannot convert value to AST: ${inspect(coerced)}.`);
+  }
+  invariant(false, "Unexpected input type: " + inspect(type));
+}
+var integerStringRegExp = /^-?(?:0|[1-9][0-9]*)$/;
+
+// node_modules/graphql/utilities/getDefaultValueAST.mjs
+function getDefaultValueAST(argOrInputField) {
+  const type = argOrInputField.type;
+  const defaultInput = argOrInputField.default;
+  if (defaultInput) {
+    const literal = defaultInput.literal ?? valueToLiteral(defaultInput.value, type);
+    if (!(literal != null))
+      invariant(false, "Invalid default value");
+    return literal;
+  }
+  const defaultValue = argOrInputField.defaultValue;
+  if (defaultValue !== undefined) {
+    const valueAST = astFromValue(defaultValue, type);
+    if (!(valueAST != null))
+      invariant(false, "Invalid default value");
+    return valueAST;
+  }
+  return;
+}
+
+// node_modules/graphql/type/introspection.mjs
+var __Schema = new GraphQLObjectType({
+  name: "__Schema",
+  description: "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.",
+  fields: () => ({
+    description: {
+      type: GraphQLString,
+      resolve: (schema) => schema.description
+    },
+    types: {
+      description: "A list of all types supported by this server.",
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__Type))),
+      resolve(schema) {
+        return Object.values(schema.getTypeMap());
+      }
+    },
+    queryType: {
+      description: "The type that query operations will be rooted at.",
+      type: new GraphQLNonNull(__Type),
+      resolve: (schema) => schema.getQueryType()
+    },
+    mutationType: {
+      description: "If this server supports mutation, the type that mutation operations will be rooted at.",
+      type: __Type,
+      resolve: (schema) => schema.getMutationType()
+    },
+    subscriptionType: {
+      description: "If this server support subscription, the type that subscription operations will be rooted at.",
+      type: __Type,
+      resolve: (schema) => schema.getSubscriptionType()
+    },
+    directives: {
+      description: "A list of all directives supported by this server.",
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__Directive))),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve: (schema, { includeDeprecated }) => includeDeprecated === true ? schema.getDirectives() : schema.getDirectives().filter((directive) => directive.deprecationReason == null)
+    }
+  })
+});
+var __Directive = new GraphQLObjectType({
+  name: "__Directive",
+  description: `A Directive provides a way to describe alternate runtime execution and type validation behavior in a GraphQL document.
+
+In some cases, you need to provide options to alter GraphQL's execution behavior in ways field arguments will not suffice, such as conditionally including or skipping a field. Directives provide this by describing additional information to the executor.`,
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (directive) => directive.name
+    },
+    description: {
+      type: GraphQLString,
+      resolve: (directive) => directive.description
+    },
+    isRepeatable: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (directive) => directive.isRepeatable
+    },
+    locations: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__DirectiveLocation))),
+      resolve: (directive) => directive.locations
+    },
+    args: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__InputValue))),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve(field, { includeDeprecated }) {
+        return includeDeprecated === true ? field.args : field.args.filter((arg) => arg.deprecationReason == null);
+      }
+    },
+    isDeprecated: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (directive) => directive.deprecationReason != null
+    },
+    deprecationReason: {
+      type: GraphQLString,
+      resolve: (directive) => directive.deprecationReason
+    }
+  })
+});
+var __DirectiveLocation = new GraphQLEnumType({
+  name: "__DirectiveLocation",
+  description: "A Directive can be adjacent to many parts of the GraphQL language, a __DirectiveLocation describes one such possible adjacencies.",
+  values: {
+    QUERY: {
+      value: DirectiveLocation.QUERY,
+      description: "Location adjacent to a query operation."
+    },
+    MUTATION: {
+      value: DirectiveLocation.MUTATION,
+      description: "Location adjacent to a mutation operation."
+    },
+    SUBSCRIPTION: {
+      value: DirectiveLocation.SUBSCRIPTION,
+      description: "Location adjacent to a subscription operation."
+    },
+    FIELD: {
+      value: DirectiveLocation.FIELD,
+      description: "Location adjacent to a field."
+    },
+    FRAGMENT_DEFINITION: {
+      value: DirectiveLocation.FRAGMENT_DEFINITION,
+      description: "Location adjacent to a fragment definition."
+    },
+    FRAGMENT_SPREAD: {
+      value: DirectiveLocation.FRAGMENT_SPREAD,
+      description: "Location adjacent to a fragment spread."
+    },
+    INLINE_FRAGMENT: {
+      value: DirectiveLocation.INLINE_FRAGMENT,
+      description: "Location adjacent to an inline fragment."
+    },
+    VARIABLE_DEFINITION: {
+      value: DirectiveLocation.VARIABLE_DEFINITION,
+      description: "Location adjacent to an operation variable definition."
+    },
+    FRAGMENT_VARIABLE_DEFINITION: {
+      value: DirectiveLocation.FRAGMENT_VARIABLE_DEFINITION,
+      description: "Location adjacent to a fragment variable definition."
+    },
+    SCHEMA: {
+      value: DirectiveLocation.SCHEMA,
+      description: "Location adjacent to a schema definition."
+    },
+    SCALAR: {
+      value: DirectiveLocation.SCALAR,
+      description: "Location adjacent to a scalar definition."
+    },
+    OBJECT: {
+      value: DirectiveLocation.OBJECT,
+      description: "Location adjacent to an object type definition."
+    },
+    FIELD_DEFINITION: {
+      value: DirectiveLocation.FIELD_DEFINITION,
+      description: "Location adjacent to a field definition."
+    },
+    ARGUMENT_DEFINITION: {
+      value: DirectiveLocation.ARGUMENT_DEFINITION,
+      description: "Location adjacent to an argument definition."
+    },
+    INTERFACE: {
+      value: DirectiveLocation.INTERFACE,
+      description: "Location adjacent to an interface definition."
+    },
+    UNION: {
+      value: DirectiveLocation.UNION,
+      description: "Location adjacent to a union definition."
+    },
+    ENUM: {
+      value: DirectiveLocation.ENUM,
+      description: "Location adjacent to an enum definition."
+    },
+    ENUM_VALUE: {
+      value: DirectiveLocation.ENUM_VALUE,
+      description: "Location adjacent to an enum value definition."
+    },
+    INPUT_OBJECT: {
+      value: DirectiveLocation.INPUT_OBJECT,
+      description: "Location adjacent to an input object type definition."
+    },
+    INPUT_FIELD_DEFINITION: {
+      value: DirectiveLocation.INPUT_FIELD_DEFINITION,
+      description: "Location adjacent to an input object field definition."
+    },
+    DIRECTIVE_DEFINITION: {
+      value: DirectiveLocation.DIRECTIVE_DEFINITION,
+      description: "Location adjacent to a directive definition."
+    }
+  }
+});
+var __Type = new GraphQLObjectType({
+  name: "__Type",
+  description: "The fundamental unit of any GraphQL Schema is the type. There are many kinds of types in GraphQL as represented by the `__TypeKind` enum.\n\nDepending on the kind of a type, certain fields describe information about that type. Scalar types provide no information beyond a name, description and optional `specifiedByURL`, while Enum types provide their values. Object and Interface types provide the fields they describe. Abstract types, Union and Interface, provide the Object types possible at runtime. List and NonNull types compose other types.",
+  fields: () => ({
+    kind: {
+      type: new GraphQLNonNull(__TypeKind),
+      resolve(type) {
+        if (isScalarType(type)) {
+          return TypeKind.SCALAR;
+        }
+        if (isObjectType(type)) {
+          return TypeKind.OBJECT;
+        }
+        if (isInterfaceType(type)) {
+          return TypeKind.INTERFACE;
+        }
+        if (isUnionType(type)) {
+          return TypeKind.UNION;
+        }
+        if (isEnumType(type)) {
+          return TypeKind.ENUM;
+        }
+        if (isInputObjectType(type)) {
+          return TypeKind.INPUT_OBJECT;
+        }
+        if (isListType(type)) {
+          return TypeKind.LIST;
+        }
+        if (isNonNullType(type)) {
+          return TypeKind.NON_NULL;
+        }
+        invariant(false, `Unexpected type: "${inspect(type)}".`);
+      }
+    },
+    name: {
+      type: GraphQLString,
+      resolve: (type) => ("name" in type) ? type.name : undefined
+    },
+    description: {
+      type: GraphQLString,
+      resolve: (type) => ("description" in type) ? type.description : undefined
+    },
+    specifiedByURL: {
+      type: GraphQLString,
+      resolve: (obj) => ("specifiedByURL" in obj) ? obj.specifiedByURL : undefined
+    },
+    fields: {
+      type: new GraphQLList(new GraphQLNonNull(__Field)),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve(type, { includeDeprecated }) {
+        if (isObjectType(type) || isInterfaceType(type)) {
+          const fields = Object.values(type.getFields());
+          return includeDeprecated === true ? fields : fields.filter((field) => field.deprecationReason == null);
+        }
+      }
+    },
+    interfaces: {
+      type: new GraphQLList(new GraphQLNonNull(__Type)),
+      resolve(type) {
+        if (isObjectType(type) || isInterfaceType(type)) {
+          return type.getInterfaces();
+        }
+      }
+    },
+    possibleTypes: {
+      type: new GraphQLList(new GraphQLNonNull(__Type)),
+      resolve(type, _args, _context, { schema }) {
+        if (isAbstractType(type)) {
+          return schema.getPossibleTypes(type);
+        }
+      }
+    },
+    enumValues: {
+      type: new GraphQLList(new GraphQLNonNull(__EnumValue)),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve(type, { includeDeprecated }) {
+        if (isEnumType(type)) {
+          const values = type.getValues();
+          return includeDeprecated === true ? values : values.filter((field) => field.deprecationReason == null);
+        }
+      }
+    },
+    inputFields: {
+      type: new GraphQLList(new GraphQLNonNull(__InputValue)),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve(type, { includeDeprecated }) {
+        if (isInputObjectType(type)) {
+          const values = Object.values(type.getFields());
+          return includeDeprecated === true ? values : values.filter((field) => field.deprecationReason == null);
+        }
+      }
+    },
+    ofType: {
+      type: __Type,
+      resolve: (type) => ("ofType" in type) ? type.ofType : undefined
+    },
+    isOneOf: {
+      type: GraphQLBoolean,
+      resolve: (type) => {
+        if (isInputObjectType(type)) {
+          return type.isOneOf;
+        }
+      }
+    }
+  })
+});
+var __Field = new GraphQLObjectType({
+  name: "__Field",
+  description: "Object and Interface types are described by a list of Fields, each of which has a name, potentially a list of arguments, and a return type.",
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (field) => field.name
+    },
+    description: {
+      type: GraphQLString,
+      resolve: (field) => field.description
+    },
+    args: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(__InputValue))),
+      args: {
+        includeDeprecated: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          default: { value: false }
+        }
+      },
+      resolve(field, { includeDeprecated }) {
+        return includeDeprecated === true ? field.args : field.args.filter((arg) => arg.deprecationReason == null);
+      }
+    },
+    type: {
+      type: new GraphQLNonNull(__Type),
+      resolve: (field) => field.type
+    },
+    isDeprecated: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (field) => field.deprecationReason != null
+    },
+    deprecationReason: {
+      type: GraphQLString,
+      resolve: (field) => field.deprecationReason
+    }
+  })
+});
+var __InputValue = new GraphQLObjectType({
+  name: "__InputValue",
+  description: "Arguments provided to Fields or Directives and the input fields of an InputObject are represented as Input Values which describe their type and optionally a default value.",
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (inputValue) => inputValue.name
+    },
+    description: {
+      type: GraphQLString,
+      resolve: (inputValue) => inputValue.description
+    },
+    type: {
+      type: new GraphQLNonNull(__Type),
+      resolve: (inputValue) => inputValue.type
+    },
+    defaultValue: {
+      type: GraphQLString,
+      description: "A GraphQL-formatted string representing the default value for this input value.",
+      resolve(inputValue) {
+        const ast = getDefaultValueAST(inputValue);
+        if (ast) {
+          return print(ast);
+        }
+        return null;
+      }
+    },
+    isDeprecated: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (field) => field.deprecationReason != null
+    },
+    deprecationReason: {
+      type: GraphQLString,
+      resolve: (obj) => obj.deprecationReason
+    }
+  })
+});
+var __EnumValue = new GraphQLObjectType({
+  name: "__EnumValue",
+  description: "One possible value for a given Enum. Enum values are unique values, not a placeholder for a string or numeric value. However an Enum value is returned in a JSON response as a string.",
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (enumValue) => enumValue.name
+    },
+    description: {
+      type: GraphQLString,
+      resolve: (enumValue) => enumValue.description
+    },
+    isDeprecated: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (enumValue) => enumValue.deprecationReason != null
+    },
+    deprecationReason: {
+      type: GraphQLString,
+      resolve: (enumValue) => enumValue.deprecationReason
+    }
+  })
+});
+var TypeKind = {
+  SCALAR: "SCALAR",
+  OBJECT: "OBJECT",
+  INTERFACE: "INTERFACE",
+  UNION: "UNION",
+  ENUM: "ENUM",
+  INPUT_OBJECT: "INPUT_OBJECT",
+  LIST: "LIST",
+  NON_NULL: "NON_NULL"
+};
+var __TypeKind = new GraphQLEnumType({
+  name: "__TypeKind",
+  description: "An enum describing what kind of type a given `__Type` is.",
+  values: {
+    SCALAR: {
+      value: TypeKind.SCALAR,
+      description: "Indicates this type is a scalar."
+    },
+    OBJECT: {
+      value: TypeKind.OBJECT,
+      description: "Indicates this type is an object. `fields` and `interfaces` are valid fields."
+    },
+    INTERFACE: {
+      value: TypeKind.INTERFACE,
+      description: "Indicates this type is an interface. `fields`, `interfaces`, and `possibleTypes` are valid fields."
+    },
+    UNION: {
+      value: TypeKind.UNION,
+      description: "Indicates this type is a union. `possibleTypes` is a valid field."
+    },
+    ENUM: {
+      value: TypeKind.ENUM,
+      description: "Indicates this type is an enum. `enumValues` is a valid field."
+    },
+    INPUT_OBJECT: {
+      value: TypeKind.INPUT_OBJECT,
+      description: "Indicates this type is an input object. `inputFields` is a valid field."
+    },
+    LIST: {
+      value: TypeKind.LIST,
+      description: "Indicates this type is a list. `ofType` is a valid field."
+    },
+    NON_NULL: {
+      value: TypeKind.NON_NULL,
+      description: "Indicates this type is a non-null. `ofType` is a valid field."
+    }
+  }
+});
+var SchemaMetaFieldDef = new GraphQLField(undefined, "__schema", {
+  type: new GraphQLNonNull(__Schema),
+  description: "Access the current type schema of this server.",
+  resolve: (_source, _args, _context, { schema }) => schema
+});
+var TypeMetaFieldDef = new GraphQLField(undefined, "__type", {
+  type: __Type,
+  description: "Request the type information of a single type.",
+  args: { name: { type: new GraphQLNonNull(GraphQLString) } },
+  resolve: (_source, { name }, _context, { schema }) => schema.getType(name)
+});
+var TypeNameMetaFieldDef = new GraphQLField(undefined, "__typename", {
+  type: new GraphQLNonNull(GraphQLString),
+  description: "The name of the current Object type at runtime.",
+  resolve: (_source, _args, _context, { parentType }) => parentType.name
+});
+var introspectionTypes = Object.freeze([
+  __Schema,
+  __Directive,
+  __DirectiveLocation,
+  __Type,
+  __Field,
+  __InputValue,
+  __EnumValue,
+  __TypeKind
+]);
+function isIntrospectionType(type) {
+  return introspectionTypes.some(({ name }) => type.name === name);
+}
+
+// node_modules/graphql/type/schema.mjs
+function isSchema(schema) {
+  return instanceOf(schema, schemaSymbol, GraphQLSchema);
+}
+function assertSchema(schema) {
+  if (!isSchema(schema)) {
+    throw new Error(`Expected ${inspect(schema)} to be a GraphQL schema.`);
+  }
+  return schema;
+}
+var schemaSymbol = Symbol("Schema");
+
+class GraphQLSchema {
+  constructor(config) {
+    this.__kind = schemaSymbol;
+    this.assumeValid = config.assumeValid ?? false;
+    this.__validationErrors = config.assumeValid === true ? [] : undefined;
+    this.description = config.description;
+    this.extensions = toObjMapWithSymbols(config.extensions);
+    this.astNode = config.astNode;
+    this.extensionASTNodes = config.extensionASTNodes ?? [];
+    this._queryType = config.query;
+    this._mutationType = config.mutation;
+    this._subscriptionType = config.subscription;
+    this._directives = config.directives ?? specifiedDirectives;
+    const allReferencedTypes = new Set(config.types);
+    if (config.types != null) {
+      for (const type of config.types) {
+        allReferencedTypes.delete(type);
+        collectReferencedTypes(type, allReferencedTypes);
+      }
+    }
+    if (this._queryType != null) {
+      collectReferencedTypes(this._queryType, allReferencedTypes);
+    }
+    if (this._mutationType != null) {
+      collectReferencedTypes(this._mutationType, allReferencedTypes);
+    }
+    if (this._subscriptionType != null) {
+      collectReferencedTypes(this._subscriptionType, allReferencedTypes);
+    }
+    for (const directive of this._directives) {
+      if (isDirective(directive)) {
+        for (const arg of directive.args) {
+          collectReferencedTypes(arg.type, allReferencedTypes);
+        }
+      }
+    }
+    collectReferencedTypes(__Schema, allReferencedTypes);
+    this._typeMap = Object.create(null);
+    this._subTypeMap = new Map;
+    this._implementationsMap = Object.create(null);
+    for (const namedType of allReferencedTypes) {
+      if (namedType == null) {
+        continue;
+      }
+      const typeName = namedType.name;
+      if (this._typeMap[typeName] !== undefined) {
+        throw new Error(`Schema must contain uniquely named types but contains multiple types named "${typeName}".`);
+      }
+      this._typeMap[typeName] = namedType;
+      if (isInterfaceType(namedType)) {
+        for (const iface of namedType.getInterfaces()) {
+          if (isInterfaceType(iface)) {
+            let implementations = this._implementationsMap[iface.name];
+            implementations ??= this._implementationsMap[iface.name] = {
+              objects: [],
+              interfaces: []
+            };
+            implementations.interfaces.push(namedType);
+          }
+        }
+      } else if (isObjectType(namedType)) {
+        for (const iface of namedType.getInterfaces()) {
+          if (isInterfaceType(iface)) {
+            let implementations = this._implementationsMap[iface.name];
+            implementations ??= this._implementationsMap[iface.name] = {
+              objects: [],
+              interfaces: []
+            };
+            implementations.objects.push(namedType);
+          }
+        }
+      }
+    }
+  }
+  get [Symbol.toStringTag]() {
+    return "GraphQLSchema";
+  }
+  getQueryType() {
+    return this._queryType;
+  }
+  getMutationType() {
+    return this._mutationType;
+  }
+  getSubscriptionType() {
+    return this._subscriptionType;
+  }
+  getRootType(operation) {
+    switch (operation) {
+      case OperationTypeNode.QUERY:
+        return this.getQueryType();
+      case OperationTypeNode.MUTATION:
+        return this.getMutationType();
+      case OperationTypeNode.SUBSCRIPTION:
+        return this.getSubscriptionType();
+    }
+  }
+  getTypeMap() {
+    return this._typeMap;
+  }
+  getType(name) {
+    return this.getTypeMap()[name];
+  }
+  getPossibleTypes(abstractType) {
+    return isUnionType(abstractType) ? abstractType.getTypes() : this.getImplementations(abstractType).objects;
+  }
+  getImplementations(interfaceType) {
+    const implementations = this._implementationsMap[interfaceType.name];
+    return implementations ?? { objects: [], interfaces: [] };
+  }
+  isSubType(abstractType, maybeSubType) {
+    let set = this._subTypeMap.get(abstractType);
+    if (set === undefined) {
+      if (isUnionType(abstractType)) {
+        set = new Set(abstractType.getTypes());
+      } else {
+        const implementations = this.getImplementations(abstractType);
+        set = new Set([
+          ...implementations.objects,
+          ...implementations.interfaces
+        ]);
+      }
+      this._subTypeMap.set(abstractType, set);
+    }
+    return set.has(maybeSubType);
+  }
+  getDirectives() {
+    return this._directives;
+  }
+  getDirective(name) {
+    return this.getDirectives().find((directive) => directive.name === name);
+  }
+  getField(parentType, fieldName) {
+    switch (fieldName) {
+      case SchemaMetaFieldDef.name:
+        return this.getQueryType() === parentType ? SchemaMetaFieldDef : undefined;
+      case TypeMetaFieldDef.name:
+        return this.getQueryType() === parentType ? TypeMetaFieldDef : undefined;
+      case TypeNameMetaFieldDef.name:
+        return TypeNameMetaFieldDef;
+    }
+    if ("getFields" in parentType) {
+      return parentType.getFields()[fieldName];
+    }
+    return;
+  }
+  toConfig() {
+    return {
+      description: this.description,
+      query: this.getQueryType(),
+      mutation: this.getMutationType(),
+      subscription: this.getSubscriptionType(),
+      types: Object.values(this.getTypeMap()),
+      directives: this.getDirectives(),
+      extensions: this.extensions,
+      astNode: this.astNode,
+      extensionASTNodes: this.extensionASTNodes,
+      assumeValid: this.assumeValid
+    };
+  }
+}
+function collectReferencedTypes(type, typeSet) {
+  const namedType = getNamedType(type);
+  if (!typeSet.has(namedType)) {
+    typeSet.add(namedType);
+    if (isUnionType(namedType)) {
+      for (const memberType of namedType.getTypes()) {
+        collectReferencedTypes(memberType, typeSet);
+      }
+    } else if (isObjectType(namedType) || isInterfaceType(namedType)) {
+      for (const interfaceType of namedType.getInterfaces()) {
+        collectReferencedTypes(interfaceType, typeSet);
+      }
+      for (const field of Object.values(namedType.getFields())) {
+        collectReferencedTypes(field.type, typeSet);
+        for (const arg of field.args) {
+          collectReferencedTypes(arg.type, typeSet);
+        }
+      }
+    } else if (isInputObjectType(namedType)) {
+      for (const field of Object.values(namedType.getFields())) {
+        collectReferencedTypes(field.type, typeSet);
+      }
+    }
+  }
+  return typeSet;
+}
+
 // node_modules/graphql/type/validate.mjs
 function validateSchema(schema) {
   assertSchema(schema);
@@ -3106,9 +3926,7 @@ class SchemaValidationContext {
   }
   reportError(message, nodes) {
     const _nodes = Array.isArray(nodes) ? nodes.filter(Boolean) : nodes;
-    this._errors.push(new GraphQLError(message, {
-      nodes: _nodes
-    }));
+    this._errors.push(new GraphQLError(message, { nodes: _nodes }));
   }
   getErrors() {
     return this._errors;
@@ -3116,55 +3934,118 @@ class SchemaValidationContext {
 }
 function validateRootTypes(context) {
   const schema = context.schema;
-  const queryType = schema.getQueryType();
-  if (!queryType) {
+  if (schema.getQueryType() == null) {
     context.reportError("Query root type must be provided.", schema.astNode);
-  } else if (!isObjectType(queryType)) {
-    var _getOperationTypeNode;
-    context.reportError(`Query root type must be Object type, it cannot be ${inspect(queryType)}.`, (_getOperationTypeNode = getOperationTypeNode(schema, OperationTypeNode.QUERY)) !== null && _getOperationTypeNode !== undefined ? _getOperationTypeNode : queryType.astNode);
   }
-  const mutationType = schema.getMutationType();
-  if (mutationType && !isObjectType(mutationType)) {
-    var _getOperationTypeNode2;
-    context.reportError("Mutation root type must be Object type if provided, it cannot be " + `${inspect(mutationType)}.`, (_getOperationTypeNode2 = getOperationTypeNode(schema, OperationTypeNode.MUTATION)) !== null && _getOperationTypeNode2 !== undefined ? _getOperationTypeNode2 : mutationType.astNode);
+  const rootTypesMap = new AccumulatorMap;
+  for (const operationType of Object.values(OperationTypeNode)) {
+    const rootType = schema.getRootType(operationType);
+    if (rootType != null) {
+      if (!isObjectType(rootType)) {
+        const operationTypeStr = capitalize(operationType);
+        const rootTypeStr = inspect(rootType);
+        context.reportError(operationType === OperationTypeNode.QUERY ? `${operationTypeStr} root type must be Object type, it cannot be ${rootTypeStr}.` : `${operationTypeStr} root type must be Object type if provided, it cannot be ${rootTypeStr}.`, getOperationTypeNode(schema, operationType) ?? rootType.astNode);
+      } else {
+        rootTypesMap.add(rootType, operationType);
+      }
+    }
   }
-  const subscriptionType = schema.getSubscriptionType();
-  if (subscriptionType && !isObjectType(subscriptionType)) {
-    var _getOperationTypeNode3;
-    context.reportError("Subscription root type must be Object type if provided, it cannot be " + `${inspect(subscriptionType)}.`, (_getOperationTypeNode3 = getOperationTypeNode(schema, OperationTypeNode.SUBSCRIPTION)) !== null && _getOperationTypeNode3 !== undefined ? _getOperationTypeNode3 : subscriptionType.astNode);
+  for (const [rootType, operationTypes] of rootTypesMap) {
+    if (operationTypes.length > 1) {
+      const operationList = andList(operationTypes);
+      context.reportError(`All root types must be different, "${rootType}" type is used as ${operationList} root types.`, operationTypes.map((operationType) => getOperationTypeNode(schema, operationType)));
+    }
   }
 }
 function getOperationTypeNode(schema, operation) {
-  var _flatMap$find;
-  return (_flatMap$find = [schema.astNode, ...schema.extensionASTNodes].flatMap((schemaNode) => {
-    var _schemaNode$operation;
-    return (_schemaNode$operation = schemaNode === null || schemaNode === undefined ? undefined : schemaNode.operationTypes) !== null && _schemaNode$operation !== undefined ? _schemaNode$operation : [];
-  }).find((operationNode) => operationNode.operation === operation)) === null || _flatMap$find === undefined ? undefined : _flatMap$find.type;
+  return [schema.astNode, ...schema.extensionASTNodes].flatMap((schemaNode) => schemaNode?.operationTypes ?? []).find((operationNode) => operationNode.operation === operation)?.type;
 }
 function validateDirectives(context) {
   for (const directive of context.schema.getDirectives()) {
     if (!isDirective(directive)) {
-      context.reportError(`Expected directive but got: ${inspect(directive)}.`, directive === null || directive === undefined ? undefined : directive.astNode);
+      context.reportError(`Expected directive but got: ${inspect(directive)}.`, directive?.astNode);
       continue;
     }
     validateName(context, directive);
     if (directive.locations.length === 0) {
-      context.reportError(`Directive @${directive.name} must include 1 or more locations.`, directive.astNode);
+      context.reportError(`Directive ${directive} must include 1 or more locations.`, directive.astNode);
     }
     for (const arg of directive.args) {
       validateName(context, arg);
       if (!isInputType(arg.type)) {
-        context.reportError(`The type of @${directive.name}(${arg.name}:) must be Input Type ` + `but got: ${inspect(arg.type)}.`, arg.astNode);
+        context.reportError(`The type of ${arg} must be Input Type ` + `but got: ${inspect(arg.type)}.`, arg.astNode);
       }
       if (isRequiredArgument(arg) && arg.deprecationReason != null) {
-        var _arg$astNode;
-        context.reportError(`Required argument @${directive.name}(${arg.name}:) cannot be deprecated.`, [
+        context.reportError(`Required argument ${arg} cannot be deprecated.`, [
           getDeprecatedDirectiveNode(arg.astNode),
-          (_arg$astNode = arg.astNode) === null || _arg$astNode === undefined ? undefined : _arg$astNode.type
+          arg.astNode?.type
         ]);
       }
+      validateDefaultValue(context, arg);
     }
   }
+}
+function validateDefaultValue(context, inputValue) {
+  const defaultInput = inputValue.default;
+  if (!defaultInput) {
+    return;
+  }
+  const errors = [];
+  validateDefaultInput(defaultInput, inputValue.type, (error, path) => {
+    errors.push([error, path]);
+  });
+  if (errors.length === 0) {
+    return;
+  }
+  if (!defaultInput.literal) {
+    try {
+      const uncoercedValue = uncoerceDefaultValue(defaultInput.value, inputValue.type);
+      const uncoercedErrors = [];
+      validateInputValue(uncoercedValue, inputValue.type, (error, path) => {
+        uncoercedErrors.push([error, path]);
+      });
+      if (uncoercedErrors.length === 0) {
+        context.reportError(`${inputValue} has invalid default value: ${inspect(defaultInput.value)}. Did you mean: ${inspect(uncoercedValue)}?`, inputValue.astNode?.defaultValue);
+        return;
+      }
+    } catch (_error) {}
+  }
+  for (const [error, path] of errors) {
+    context.reportError(`${inputValue} has invalid default value${printPathArray(path)}: ${error.message}`, error.nodes ?? inputValue.astNode?.defaultValue);
+  }
+}
+function validateDefaultInput(defaultInput, inputType, onError, hideSuggestions) {
+  if (defaultInput.literal) {
+    validateInputLiteral(defaultInput.literal, inputType, onError, undefined, undefined, hideSuggestions);
+    return;
+  }
+  validateInputValue(defaultInput.value, inputType, onError, hideSuggestions);
+}
+function uncoerceDefaultValue(value, type) {
+  if (isNonNullType(type)) {
+    return uncoerceDefaultValue(value, type.ofType);
+  }
+  if (value === null) {
+    return null;
+  }
+  if (isListType(type)) {
+    if (isIterableObject(value)) {
+      return Array.from(value, (itemValue) => uncoerceDefaultValue(itemValue, type.ofType));
+    }
+    return [uncoerceDefaultValue(value, type.ofType)];
+  }
+  if (isInputObjectType(type)) {
+    if (!isObjectLike(value))
+      invariant(false);
+    const fieldDefs = type.getFields();
+    return mapValue(value, (fieldValue, fieldName) => {
+      if (!(fieldName in fieldDefs))
+        invariant(false);
+      return uncoerceDefaultValue(fieldValue, fieldDefs[fieldName].type);
+    });
+  }
+  assertLeafType(type);
+  return type.coerceOutputValue(value);
 }
 function validateName(context, node) {
   if (node.name.startsWith("__")) {
@@ -3172,8 +4053,9 @@ function validateName(context, node) {
   }
 }
 function validateTypes(context) {
-  const validateInputObjectCircularRefs = createInputObjectCircularRefsValidator(context);
+  const validateInputObjectDefaultValueCircularRefs = createInputObjectDefaultValueCircularRefsValidator(context);
   const typeMap = context.schema.getTypeMap();
+  const finiteValueStates = new Map;
   for (const type of Object.values(typeMap)) {
     if (!isNamedType(type)) {
       context.reportError(`Expected GraphQL named type but got: ${inspect(type)}.`, type.astNode);
@@ -3194,14 +4076,25 @@ function validateTypes(context) {
       validateEnumValues(context, type);
     } else if (isInputObjectType(type)) {
       validateInputFields(context, type);
-      validateInputObjectCircularRefs(type);
+      initializeInputObjectFiniteValueState(type);
+      validateInputObjectDefaultValueCircularRefs(type);
     }
+  }
+  detectInputObjectNonFiniteValues(context, finiteValueStates);
+  function initializeInputObjectFiniteValueState(inputObj) {
+    finiteValueStates.set(inputObj, {
+      inputObj,
+      targets: [],
+      dependents: [],
+      unresolvedTargetCount: 0,
+      hasFiniteValue: false
+    });
   }
 }
 function validateFields(context, type) {
   const fields = Object.values(type.getFields());
   if (fields.length === 0) {
-    context.reportError(`Type ${type.name} must define one or more fields.`, [
+    context.reportError(`Type ${type} must define one or more fields.`, [
       type.astNode,
       ...type.extensionASTNodes
     ]);
@@ -3209,42 +4102,39 @@ function validateFields(context, type) {
   for (const field of fields) {
     validateName(context, field);
     if (!isOutputType(field.type)) {
-      var _field$astNode;
-      context.reportError(`The type of ${type.name}.${field.name} must be Output Type ` + `but got: ${inspect(field.type)}.`, (_field$astNode = field.astNode) === null || _field$astNode === undefined ? undefined : _field$astNode.type);
+      context.reportError(`The type of ${field} must be Output Type ` + `but got: ${inspect(field.type)}.`, field.astNode?.type);
     }
     for (const arg of field.args) {
-      const argName = arg.name;
       validateName(context, arg);
       if (!isInputType(arg.type)) {
-        var _arg$astNode2;
-        context.reportError(`The type of ${type.name}.${field.name}(${argName}:) must be Input ` + `Type but got: ${inspect(arg.type)}.`, (_arg$astNode2 = arg.astNode) === null || _arg$astNode2 === undefined ? undefined : _arg$astNode2.type);
+        context.reportError(`The type of ${arg} must be Input Type but got: ${inspect(arg.type)}.`, arg.astNode?.type);
       }
       if (isRequiredArgument(arg) && arg.deprecationReason != null) {
-        var _arg$astNode3;
-        context.reportError(`Required argument ${type.name}.${field.name}(${argName}:) cannot be deprecated.`, [
+        context.reportError(`Required argument ${arg} cannot be deprecated.`, [
           getDeprecatedDirectiveNode(arg.astNode),
-          (_arg$astNode3 = arg.astNode) === null || _arg$astNode3 === undefined ? undefined : _arg$astNode3.type
+          arg.astNode?.type
         ]);
       }
+      validateDefaultValue(context, arg);
     }
   }
 }
 function validateInterfaces(context, type) {
-  const ifaceTypeNames = Object.create(null);
+  const ifaceTypeNames = new Set;
   for (const iface of type.getInterfaces()) {
     if (!isInterfaceType(iface)) {
-      context.reportError(`Type ${inspect(type)} must only implement Interface types, ` + `it cannot implement ${inspect(iface)}.`, getAllImplementsInterfaceNodes(type, iface));
+      context.reportError(`Type ${type} must only implement Interface types, ` + `it cannot implement ${inspect(iface)}.`, getAllImplementsInterfaceNodes(type, iface));
       continue;
     }
     if (type === iface) {
-      context.reportError(`Type ${type.name} cannot implement itself because it would create a circular reference.`, getAllImplementsInterfaceNodes(type, iface));
+      context.reportError(`Type ${type} cannot implement itself because it would create a circular reference.`, getAllImplementsInterfaceNodes(type, iface));
       continue;
     }
-    if (ifaceTypeNames[iface.name]) {
-      context.reportError(`Type ${type.name} can only implement ${iface.name} once.`, getAllImplementsInterfaceNodes(type, iface));
+    if (ifaceTypeNames.has(iface.name)) {
+      context.reportError(`Type ${type} can only implement ${iface} once.`, getAllImplementsInterfaceNodes(type, iface));
       continue;
     }
-    ifaceTypeNames[iface.name] = true;
+    ifaceTypeNames.add(iface.name);
     validateTypeImplementsAncestors(context, type, iface);
     validateTypeImplementsInterface(context, type, iface);
   }
@@ -3252,40 +4142,37 @@ function validateInterfaces(context, type) {
 function validateTypeImplementsInterface(context, type, iface) {
   const typeFieldMap = type.getFields();
   for (const ifaceField of Object.values(iface.getFields())) {
-    const fieldName = ifaceField.name;
-    const typeField = typeFieldMap[fieldName];
-    if (!typeField) {
-      context.reportError(`Interface field ${iface.name}.${fieldName} expected but ${type.name} does not provide it.`, [ifaceField.astNode, type.astNode, ...type.extensionASTNodes]);
+    const typeField = typeFieldMap[ifaceField.name];
+    if (typeField == null) {
+      context.reportError(`Interface field ${ifaceField} expected but ${type} does not provide it.`, [ifaceField.astNode, type.astNode, ...type.extensionASTNodes]);
       continue;
     }
     if (!isTypeSubTypeOf(context.schema, typeField.type, ifaceField.type)) {
-      var _ifaceField$astNode, _typeField$astNode;
-      context.reportError(`Interface field ${iface.name}.${fieldName} expects type ` + `${inspect(ifaceField.type)} but ${type.name}.${fieldName} ` + `is type ${inspect(typeField.type)}.`, [
-        (_ifaceField$astNode = ifaceField.astNode) === null || _ifaceField$astNode === undefined ? undefined : _ifaceField$astNode.type,
-        (_typeField$astNode = typeField.astNode) === null || _typeField$astNode === undefined ? undefined : _typeField$astNode.type
-      ]);
+      context.reportError(`Interface field ${ifaceField} expects type ${ifaceField.type} ` + `but ${typeField} is type ${typeField.type}.`, [ifaceField.astNode?.type, typeField.astNode?.type]);
     }
     for (const ifaceArg of ifaceField.args) {
-      const argName = ifaceArg.name;
-      const typeArg = typeField.args.find((arg) => arg.name === argName);
+      const typeArg = typeField.args.find((arg) => arg.name === ifaceArg.name);
       if (!typeArg) {
-        context.reportError(`Interface field argument ${iface.name}.${fieldName}(${argName}:) expected but ${type.name}.${fieldName} does not provide it.`, [ifaceArg.astNode, typeField.astNode]);
+        context.reportError(`Interface field argument ${ifaceArg} expected but ${typeField} does not provide it.`, [ifaceArg.astNode, typeField.astNode]);
         continue;
       }
       if (!isEqualType(ifaceArg.type, typeArg.type)) {
-        var _ifaceArg$astNode, _typeArg$astNode;
-        context.reportError(`Interface field argument ${iface.name}.${fieldName}(${argName}:) ` + `expects type ${inspect(ifaceArg.type)} but ` + `${type.name}.${fieldName}(${argName}:) is type ` + `${inspect(typeArg.type)}.`, [
-          (_ifaceArg$astNode = ifaceArg.astNode) === null || _ifaceArg$astNode === undefined ? undefined : _ifaceArg$astNode.type,
-          (_typeArg$astNode = typeArg.astNode) === null || _typeArg$astNode === undefined ? undefined : _typeArg$astNode.type
-        ]);
+        context.reportError(`Interface field argument ${ifaceArg} expects type ${ifaceArg.type} ` + `but ${typeArg} is type ${typeArg.type}.`, [ifaceArg.astNode?.type, typeArg.astNode?.type]);
       }
     }
     for (const typeArg of typeField.args) {
-      const argName = typeArg.name;
-      const ifaceArg = ifaceField.args.find((arg) => arg.name === argName);
-      if (!ifaceArg && isRequiredArgument(typeArg)) {
-        context.reportError(`Object field ${type.name}.${fieldName} includes required argument ${argName} that is missing from the Interface field ${iface.name}.${fieldName}.`, [typeArg.astNode, ifaceField.astNode]);
+      if (isRequiredArgument(typeArg)) {
+        const ifaceArg = ifaceField.args.find((arg) => arg.name === typeArg.name);
+        if (!ifaceArg) {
+          context.reportError(`Argument "${typeArg}" must not be required type "${typeArg.type}" ` + `if not provided by the Interface field "${ifaceField}".`, [typeArg.astNode, ifaceField.astNode]);
+        }
       }
+    }
+    if (typeField.deprecationReason != null && ifaceField.deprecationReason == null) {
+      context.reportError(`Interface field ${iface.name}.${ifaceField.name} is not deprecated, so ` + `implementation field ${type.name}.${typeField.name} must not be deprecated.`, [
+        getDeprecatedDirectiveNode(typeField.astNode),
+        typeField.astNode?.type
+      ]);
     }
   }
 }
@@ -3293,7 +4180,7 @@ function validateTypeImplementsAncestors(context, type, iface) {
   const ifaceInterfaces = type.getInterfaces();
   for (const transitive of iface.getInterfaces()) {
     if (!ifaceInterfaces.includes(transitive)) {
-      context.reportError(transitive === type ? `Type ${type.name} cannot implement ${iface.name} because it would create a circular reference.` : `Type ${type.name} must implement ${transitive.name} because it is implemented by ${iface.name}.`, [
+      context.reportError(transitive === type ? `Type ${type} cannot implement ${iface} because it would create a circular reference.` : `Type ${type} must implement ${transitive} because it is implemented by ${iface}.`, [
         ...getAllImplementsInterfaceNodes(iface, transitive),
         ...getAllImplementsInterfaceNodes(type, iface)
       ]);
@@ -3303,24 +4190,24 @@ function validateTypeImplementsAncestors(context, type, iface) {
 function validateUnionMembers(context, union) {
   const memberTypes = union.getTypes();
   if (memberTypes.length === 0) {
-    context.reportError(`Union type ${union.name} must define one or more member types.`, [union.astNode, ...union.extensionASTNodes]);
+    context.reportError(`Union type ${union} must define one or more member types.`, [union.astNode, ...union.extensionASTNodes]);
   }
-  const includedTypeNames = Object.create(null);
+  const includedTypeNames = new Set;
   for (const memberType of memberTypes) {
-    if (includedTypeNames[memberType.name]) {
-      context.reportError(`Union type ${union.name} can only include type ${memberType.name} once.`, getUnionMemberTypeNodes(union, memberType.name));
+    if (includedTypeNames.has(memberType.name)) {
+      context.reportError(`Union type ${union} can only include type ${memberType} once.`, getUnionMemberTypeNodes(union, memberType.name));
       continue;
     }
-    includedTypeNames[memberType.name] = true;
+    includedTypeNames.add(memberType.name);
     if (!isObjectType(memberType)) {
-      context.reportError(`Union type ${union.name} can only include Object types, ` + `it cannot include ${inspect(memberType)}.`, getUnionMemberTypeNodes(union, String(memberType)));
+      context.reportError(`Union type ${union} can only include Object types, ` + `it cannot include ${inspect(memberType)}.`, getUnionMemberTypeNodes(union, String(memberType)));
     }
   }
 }
 function validateEnumValues(context, enumType) {
   const enumValues = enumType.getValues();
   if (enumValues.length === 0) {
-    context.reportError(`Enum type ${enumType.name} must define one or more values.`, [enumType.astNode, ...enumType.extensionASTNodes]);
+    context.reportError(`Enum type ${enumType} must define one or more values.`, [enumType.astNode, ...enumType.extensionASTNodes]);
   }
   for (const enumValue of enumValues) {
     validateName(context, enumValue);
@@ -3329,21 +4216,17 @@ function validateEnumValues(context, enumType) {
 function validateInputFields(context, inputObj) {
   const fields = Object.values(inputObj.getFields());
   if (fields.length === 0) {
-    context.reportError(`Input Object type ${inputObj.name} must define one or more fields.`, [inputObj.astNode, ...inputObj.extensionASTNodes]);
+    context.reportError(`Input Object type ${inputObj} must define one or more fields.`, [inputObj.astNode, ...inputObj.extensionASTNodes]);
   }
   for (const field of fields) {
     validateName(context, field);
     if (!isInputType(field.type)) {
-      var _field$astNode2;
-      context.reportError(`The type of ${inputObj.name}.${field.name} must be Input Type ` + `but got: ${inspect(field.type)}.`, (_field$astNode2 = field.astNode) === null || _field$astNode2 === undefined ? undefined : _field$astNode2.type);
+      context.reportError(`The type of ${field} must be Input Type ` + `but got: ${inspect(field.type)}.`, field.astNode?.type);
     }
     if (isRequiredInputField(field) && field.deprecationReason != null) {
-      var _field$astNode3;
-      context.reportError(`Required input field ${inputObj.name}.${field.name} cannot be deprecated.`, [
-        getDeprecatedDirectiveNode(field.astNode),
-        (_field$astNode3 = field.astNode) === null || _field$astNode3 === undefined ? undefined : _field$astNode3.type
-      ]);
+      context.reportError(`Required input field ${field} cannot be deprecated.`, [getDeprecatedDirectiveNode(field.astNode), field.astNode?.type]);
     }
+    validateDefaultValue(context, field);
     if (inputObj.isOneOf) {
       validateOneOfInputObjectField(inputObj, field, context);
     }
@@ -3351,109 +4234,198 @@ function validateInputFields(context, inputObj) {
 }
 function validateOneOfInputObjectField(type, field, context) {
   if (isNonNullType(field.type)) {
-    var _field$astNode4;
-    context.reportError(`OneOf input field ${type.name}.${field.name} must be nullable.`, (_field$astNode4 = field.astNode) === null || _field$astNode4 === undefined ? undefined : _field$astNode4.type);
+    context.reportError(`OneOf input field ${type}.${field.name} must be nullable.`, field.astNode?.type);
   }
-  if (field.defaultValue !== undefined) {
-    context.reportError(`OneOf input field ${type.name}.${field.name} cannot have a default value.`, field.astNode);
+  if (field.default !== undefined || field.defaultValue !== undefined) {
+    context.reportError(`OneOf input field ${type}.${field.name} cannot have a default value.`, field.astNode);
   }
 }
-function createInputObjectCircularRefsValidator(context) {
-  const visitedTypes = Object.create(null);
-  const fieldPath = [];
-  const fieldPathIndexByTypeName = Object.create(null);
-  return detectCycleRecursive;
-  function detectCycleRecursive(inputObj) {
-    if (visitedTypes[inputObj.name]) {
-      return;
-    }
-    visitedTypes[inputObj.name] = true;
-    fieldPathIndexByTypeName[inputObj.name] = fieldPath.length;
+function detectInputObjectNonFiniteValues(context, finiteValueStates) {
+  const inputObjectsWithFiniteValues = [];
+  for (const state of finiteValueStates.values()) {
+    const inputObj = state.inputObj;
     const fields = Object.values(inputObj.getFields());
     for (const field of fields) {
-      if (isNonNullType(field.type) && isInputObjectType(field.type.ofType)) {
-        const fieldType = field.type.ofType;
-        const cycleIndex = fieldPathIndexByTypeName[fieldType.name];
-        fieldPath.push(field);
-        if (cycleIndex === undefined) {
-          detectCycleRecursive(fieldType);
-        } else {
-          const cyclePath = fieldPath.slice(cycleIndex);
-          const pathStr = cyclePath.map((fieldObj) => fieldObj.name).join(".");
-          context.reportError(`Cannot reference Input Object "${fieldType.name}" within itself through a series of non-null fields: "${pathStr}".`, cyclePath.map((fieldObj) => fieldObj.astNode));
-        }
-        fieldPath.pop();
+      const target = getFiniteValueTarget(inputObj, field.type);
+      if (target === undefined) {
+        continue;
+      }
+      state.targets.push({ field, target });
+      const targetState = finiteValueStates.get(target);
+      if (targetState !== undefined) {
+        targetState.dependents.push(state);
       }
     }
-    fieldPathIndexByTypeName[inputObj.name] = undefined;
+    if (inputObj.isOneOf) {
+      if (fields.length === 0 || state.targets.length < fields.length) {
+        markInputObjectHasFiniteValue(state);
+      }
+    } else {
+      state.unresolvedTargetCount = state.targets.length;
+      if (state.targets.length === 0) {
+        markInputObjectHasFiniteValue(state);
+      }
+    }
+  }
+  let nextFiniteValueState;
+  while ((nextFiniteValueState = inputObjectsWithFiniteValues.pop()) !== undefined) {
+    for (const dependentState of nextFiniteValueState.dependents) {
+      if (dependentState.hasFiniteValue) {
+        continue;
+      }
+      if (dependentState.inputObj.isOneOf) {
+        markInputObjectHasFiniteValue(dependentState);
+        continue;
+      }
+      --dependentState.unresolvedTargetCount;
+      if (dependentState.unresolvedTargetCount === 0) {
+        markInputObjectHasFiniteValue(dependentState);
+      }
+    }
+  }
+  const visitedTypes = new Set;
+  const fieldPath = [];
+  const fieldPathIndexByType = new Map;
+  for (const state of finiteValueStates.values()) {
+    if (!state.hasFiniteValue) {
+      reportCycleRecursive(state);
+    }
+  }
+  function markInputObjectHasFiniteValue(finiteValueState) {
+    if (!finiteValueState.hasFiniteValue) {
+      finiteValueState.hasFiniteValue = true;
+      inputObjectsWithFiniteValues.push(finiteValueState);
+    }
+  }
+  function reportCycleRecursive(state) {
+    const inputObj = state.inputObj;
+    if (visitedTypes.has(inputObj)) {
+      return;
+    }
+    visitedTypes.add(inputObj);
+    fieldPathIndexByType.set(inputObj, fieldPath.length);
+    for (const { field, target } of state.targets) {
+      const targetState = finiteValueStates.get(target);
+      if (targetState?.hasFiniteValue !== false) {
+        continue;
+      }
+      const cycleIndex = fieldPathIndexByType.get(target);
+      fieldPath.push({
+        fieldStr: `${inputObj}.${field.name}`,
+        astNode: field.astNode
+      });
+      if (cycleIndex === undefined) {
+        reportCycleRecursive(targetState);
+      } else {
+        const cyclePath = fieldPath.slice(cycleIndex);
+        const pathStr = cyclePath.map((p) => p.fieldStr).join(", ");
+        context.reportError(`Input Object ${target} cannot be provided a finite value because it references itself through fields: ${pathStr}.`, cyclePath.map((p) => p.astNode));
+      }
+      fieldPath.pop();
+    }
+    fieldPathIndexByType.delete(inputObj);
+  }
+}
+function getFiniteValueTarget(inputObj, fieldType) {
+  if (inputObj.isOneOf) {
+    if (isInputObjectType(fieldType)) {
+      return fieldType;
+    }
+    return;
+  }
+  if (isNonNullType(fieldType) && isInputObjectType(fieldType.ofType)) {
+    return fieldType.ofType;
+  }
+}
+function createInputObjectDefaultValueCircularRefsValidator(context) {
+  const visitedFields = Object.create(null);
+  const fieldPath = [];
+  const fieldPathIndex = Object.create(null);
+  return function validateInputObjectDefaultValueCircularRefs(inputObj) {
+    return detectValueDefaultValueCycle(inputObj, Object.create(null));
+  };
+  function detectValueDefaultValueCycle(inputObj, defaultValue) {
+    if (isIterableObject(defaultValue)) {
+      for (const itemValue of defaultValue) {
+        detectValueDefaultValueCycle(inputObj, itemValue);
+      }
+      return;
+    } else if (!isObjectLike(defaultValue)) {
+      return;
+    }
+    for (const field of Object.values(inputObj.getFields())) {
+      const namedFieldType = getNamedType(field.type);
+      if (!isInputObjectType(namedFieldType)) {
+        continue;
+      }
+      if (Object.hasOwn(defaultValue, field.name)) {
+        detectValueDefaultValueCycle(namedFieldType, defaultValue[field.name]);
+      } else {
+        detectFieldDefaultValueCycle(field, namedFieldType, `${inputObj}.${field.name}`);
+      }
+    }
+  }
+  function detectLiteralDefaultValueCycle(inputObj, defaultValue) {
+    if (defaultValue.kind === LIST) {
+      for (const itemLiteral of defaultValue.values) {
+        detectLiteralDefaultValueCycle(inputObj, itemLiteral);
+      }
+      return;
+    } else if (defaultValue.kind !== OBJECT) {
+      return;
+    }
+    const fieldNodes = keyMap(defaultValue.fields, (field) => field.name.value);
+    for (const field of Object.values(inputObj.getFields())) {
+      const namedFieldType = getNamedType(field.type);
+      if (!isInputObjectType(namedFieldType)) {
+        continue;
+      }
+      if (Object.hasOwn(fieldNodes, field.name)) {
+        detectLiteralDefaultValueCycle(namedFieldType, fieldNodes[field.name].value);
+      } else {
+        detectFieldDefaultValueCycle(field, namedFieldType, `${inputObj}.${field.name}`);
+      }
+    }
+  }
+  function detectFieldDefaultValueCycle(field, fieldType, fieldStr) {
+    const defaultInput = field.default;
+    if (defaultInput === undefined) {
+      return;
+    }
+    const cycleIndex = fieldPathIndex[fieldStr];
+    if (cycleIndex !== undefined) {
+      context.reportError(`Invalid circular reference. The default value of Input Object field ${fieldStr} references itself${cycleIndex < fieldPath.length ? ` via the default values of: ${fieldPath.slice(cycleIndex).map(([stringForMessage]) => stringForMessage).join(", ")}` : ""}.`, fieldPath.slice(cycleIndex - 1).map(([, node]) => node));
+      return;
+    }
+    if (visitedFields[fieldStr] === undefined) {
+      visitedFields[fieldStr] = true;
+      fieldPathIndex[fieldStr] = fieldPath.push([
+        fieldStr,
+        field.astNode?.defaultValue
+      ]);
+      if (defaultInput.literal) {
+        detectLiteralDefaultValueCycle(fieldType, defaultInput.literal);
+      } else {
+        detectValueDefaultValueCycle(fieldType, defaultInput.value);
+      }
+      fieldPath.pop();
+      fieldPathIndex[fieldStr] = undefined;
+    }
   }
 }
 function getAllImplementsInterfaceNodes(type, iface) {
   const { astNode, extensionASTNodes } = type;
   const nodes = astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes;
-  return nodes.flatMap((typeNode) => {
-    var _typeNode$interfaces;
-    return (_typeNode$interfaces = typeNode.interfaces) !== null && _typeNode$interfaces !== undefined ? _typeNode$interfaces : [];
-  }).filter((ifaceNode) => ifaceNode.name.value === iface.name);
+  return nodes.flatMap((typeNode) => typeNode.interfaces ?? []).filter((ifaceNode) => ifaceNode.name.value === iface.name);
 }
 function getUnionMemberTypeNodes(union, typeName) {
   const { astNode, extensionASTNodes } = union;
   const nodes = astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes;
-  return nodes.flatMap((unionNode) => {
-    var _unionNode$types;
-    return (_unionNode$types = unionNode.types) !== null && _unionNode$types !== undefined ? _unionNode$types : [];
-  }).filter((typeNode) => typeNode.name.value === typeName);
+  return nodes.flatMap((unionNode) => unionNode.types ?? []).filter((typeNode) => typeNode.name.value === typeName);
 }
 function getDeprecatedDirectiveNode(definitionNode) {
-  var _definitionNode$direc;
-  return definitionNode === null || definitionNode === undefined ? undefined : (_definitionNode$direc = definitionNode.directives) === null || _definitionNode$direc === undefined ? undefined : _definitionNode$direc.find((node) => node.name.value === GraphQLDeprecatedDirective.name);
+  return definitionNode?.directives?.find((node) => node.name.value === GraphQLDeprecatedDirective.name);
 }
-// node_modules/graphql/language/source.mjs
-class Source {
-  constructor(body, name = "GraphQL request", locationOffset = {
-    line: 1,
-    column: 1
-  }) {
-    typeof body === "string" || devAssert(false, `Body must be a string. Received: ${inspect(body)}.`);
-    this.body = body;
-    this.name = name;
-    this.locationOffset = locationOffset;
-    this.locationOffset.line > 0 || devAssert(false, "line in locationOffset is 1-indexed and must be positive.");
-    this.locationOffset.column > 0 || devAssert(false, "column in locationOffset is 1-indexed and must be positive.");
-  }
-  get [Symbol.toStringTag]() {
-    return "Source";
-  }
-}
-function isSource(source) {
-  return instanceOf(source, Source);
-}
-// node_modules/graphql/language/tokenKind.mjs
-var TokenKind;
-(function(TokenKind) {
-  TokenKind["SOF"] = "<SOF>";
-  TokenKind["EOF"] = "<EOF>";
-  TokenKind["BANG"] = "!";
-  TokenKind["DOLLAR"] = "$";
-  TokenKind["AMP"] = "&";
-  TokenKind["PAREN_L"] = "(";
-  TokenKind["PAREN_R"] = ")";
-  TokenKind["SPREAD"] = "...";
-  TokenKind["COLON"] = ":";
-  TokenKind["EQUALS"] = "=";
-  TokenKind["AT"] = "@";
-  TokenKind["BRACKET_L"] = "[";
-  TokenKind["BRACKET_R"] = "]";
-  TokenKind["BRACE_L"] = "{";
-  TokenKind["PIPE"] = "|";
-  TokenKind["BRACE_R"] = "}";
-  TokenKind["NAME"] = "Name";
-  TokenKind["INT"] = "Int";
-  TokenKind["FLOAT"] = "Float";
-  TokenKind["STRING"] = "String";
-  TokenKind["BLOCK_STRING"] = "BlockString";
-  TokenKind["COMMENT"] = "Comment";
-})(TokenKind || (TokenKind = {}));
 
 // node_modules/graphql/error/syntaxError.mjs
 function syntaxError(source, position, description) {
@@ -3462,6 +4434,69 @@ function syntaxError(source, position, description) {
     positions: [position]
   });
 }
+
+// node_modules/graphql/diagnostics.mjs
+function resolveDiagnosticsChannel() {
+  let dc;
+  try {
+    const processRef = globalThis.process;
+    if (typeof processRef?.getBuiltinModule === "function") {
+      dc = processRef.getBuiltinModule("node:diagnostics_channel");
+    }
+  } catch {}
+  return dc;
+}
+var dc = resolveDiagnosticsChannel();
+var parseChannel = dc?.tracingChannel("graphql:parse");
+var validateChannel = dc?.tracingChannel("graphql:validate");
+var executeChannel = dc?.tracingChannel("graphql:execute");
+var executeVariableCoercionChannel = dc?.tracingChannel("graphql:execute:variableCoercion");
+var executeRootSelectionSetChannel = dc?.tracingChannel("graphql:execute:rootSelectionSet");
+var subscribeChannel = dc?.tracingChannel("graphql:subscribe");
+var resolveChannel = dc?.tracingChannel("graphql:resolve");
+var SUB_CHANNEL_KEYS = ["start", "end", "asyncStart", "asyncEnd", "error"];
+function shouldTrace(channel) {
+  if (channel == null) {
+    return false;
+  }
+  const aggregate = channel.hasSubscribers;
+  if (aggregate !== undefined) {
+    return aggregate;
+  }
+  for (const key of SUB_CHANNEL_KEYS) {
+    if (channel[key].hasSubscribers) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// node_modules/graphql/language/tokenKind.mjs
+var TokenKind = {
+  SOF: "<SOF>",
+  EOF: "<EOF>",
+  BANG: "!",
+  DOLLAR: "$",
+  AMP: "&",
+  PAREN_L: "(",
+  PAREN_R: ")",
+  DOT: ".",
+  SPREAD: "...",
+  COLON: ":",
+  EQUALS: "=",
+  AT: "@",
+  BRACKET_L: "[",
+  BRACKET_R: "]",
+  BRACE_L: "{",
+  PIPE: "|",
+  BRACE_R: "}",
+  NAME: "Name",
+  INT: "Int",
+  FLOAT: "Float",
+  STRING: "String",
+  BLOCK_STRING: "BlockString",
+  COMMENT: "Comment"
+};
 
 // node_modules/graphql/language/lexer.mjs
 class Lexer {
@@ -3472,6 +4507,8 @@ class Lexer {
     this.token = startOfFileToken;
     this.line = 1;
     this.lineStart = 0;
+    this._maxComments = undefined;
+    this._commentCount = 0;
   }
   get [Symbol.toStringTag]() {
     return "Lexer";
@@ -3499,7 +4536,7 @@ class Lexer {
   }
 }
 function isPunctuatorTokenKind(kind) {
-  return kind === TokenKind.BANG || kind === TokenKind.DOLLAR || kind === TokenKind.AMP || kind === TokenKind.PAREN_L || kind === TokenKind.PAREN_R || kind === TokenKind.SPREAD || kind === TokenKind.COLON || kind === TokenKind.EQUALS || kind === TokenKind.AT || kind === TokenKind.BRACKET_L || kind === TokenKind.BRACKET_R || kind === TokenKind.BRACE_L || kind === TokenKind.PIPE || kind === TokenKind.BRACE_R;
+  return kind === TokenKind.BANG || kind === TokenKind.DOLLAR || kind === TokenKind.AMP || kind === TokenKind.PAREN_L || kind === TokenKind.PAREN_R || kind === TokenKind.DOT || kind === TokenKind.SPREAD || kind === TokenKind.COLON || kind === TokenKind.EQUALS || kind === TokenKind.AT || kind === TokenKind.BRACKET_L || kind === TokenKind.BRACKET_R || kind === TokenKind.BRACE_L || kind === TokenKind.PIPE || kind === TokenKind.BRACE_R;
 }
 function isUnicodeScalarValue(code) {
   return code >= 0 && code <= 55295 || code >= 57344 && code <= 1114111;
@@ -3567,11 +4604,19 @@ function readNextToken(lexer, start) {
         return createToken(lexer, TokenKind.PAREN_L, position, position + 1);
       case 41:
         return createToken(lexer, TokenKind.PAREN_R, position, position + 1);
-      case 46:
-        if (body.charCodeAt(position + 1) === 46 && body.charCodeAt(position + 2) === 46) {
+      case 46: {
+        const nextCode = body.charCodeAt(position + 1);
+        if (nextCode === 46 && body.charCodeAt(position + 2) === 46) {
           return createToken(lexer, TokenKind.SPREAD, position, position + 3);
         }
+        if (nextCode === 46) {
+          throw syntaxError(lexer.source, position, 'Unexpected "..", did you mean "..."?');
+        } else if (isDigit2(nextCode)) {
+          const digits = lexer.source.body.slice(position + 1, readDigits(lexer, position + 1, nextCode));
+          throw syntaxError(lexer.source, position, `Invalid number, expected digit before ".", did you mean "0.${digits}"?`);
+        }
         break;
+      }
       case 58:
         return createToken(lexer, TokenKind.COLON, position, position + 1);
       case 61:
@@ -3605,6 +4650,14 @@ function readNextToken(lexer, start) {
   return createToken(lexer, TokenKind.EOF, bodyLength, bodyLength);
 }
 function readComment(lexer, start) {
+  const maxComments = lexer._maxComments;
+  if (maxComments !== undefined) {
+    const nextCommentCount = lexer._commentCount + 1;
+    if (nextCommentCount > maxComments) {
+      throw syntaxError(lexer.source, start, `Document contains more than ${maxComments} comments. Parsing aborted.`);
+    }
+    lexer._commentCount = nextCommentCount;
+  }
   const body = lexer.source.body;
   const bodyLength = body.length;
   let position = start + 1;
@@ -3714,10 +4767,7 @@ function readEscapedUnicodeVariableWidth(lexer, position) {
       if (size < 5 || !isUnicodeScalarValue(point)) {
         break;
       }
-      return {
-        value: String.fromCodePoint(point),
-        size
-      };
+      return { value: String.fromCodePoint(point), size };
     }
     point = point << 4 | readHexDigit(code);
     if (point < 0) {
@@ -3730,19 +4780,13 @@ function readEscapedUnicodeFixedWidth(lexer, position) {
   const body = lexer.source.body;
   const code = read16BitHexCode(body, position + 2);
   if (isUnicodeScalarValue(code)) {
-    return {
-      value: String.fromCodePoint(code),
-      size: 6
-    };
+    return { value: String.fromCodePoint(code), size: 6 };
   }
   if (isLeadingSurrogate(code)) {
     if (body.charCodeAt(position + 6) === 92 && body.charCodeAt(position + 7) === 117) {
       const trailingCode = read16BitHexCode(body, position + 8);
       if (isTrailingSurrogate(trailingCode)) {
-        return {
-          value: String.fromCodePoint(code, trailingCode),
-          size: 12
-        };
+        return { value: String.fromCodePoint(code, trailingCode), size: 12 };
       }
     }
   }
@@ -3759,46 +4803,22 @@ function readEscapedCharacter(lexer, position) {
   const code = body.charCodeAt(position + 1);
   switch (code) {
     case 34:
-      return {
-        value: '"',
-        size: 2
-      };
+      return { value: '"', size: 2 };
     case 92:
-      return {
-        value: "\\",
-        size: 2
-      };
+      return { value: "\\", size: 2 };
     case 47:
-      return {
-        value: "/",
-        size: 2
-      };
+      return { value: "/", size: 2 };
     case 98:
-      return {
-        value: "\b",
-        size: 2
-      };
+      return { value: "\b", size: 2 };
     case 102:
-      return {
-        value: "\f",
-        size: 2
-      };
+      return { value: "\f", size: 2 };
     case 110:
-      return {
-        value: `
-`,
-        size: 2
-      };
+      return { value: `
+`, size: 2 };
     case 114:
-      return {
-        value: "\r",
-        size: 2
-      };
+      return { value: "\r", size: 2 };
     case 116:
-      return {
-        value: "\t",
-        size: 2
-      };
+      return { value: "\t", size: 2 };
   }
   throw syntaxError(lexer.source, position, `Invalid character escape sequence: "${body.slice(position, position + 2)}".`);
 }
@@ -3865,8 +4885,33 @@ function readName(lexer, start) {
   return createToken(lexer, TokenKind.NAME, start, position, body.slice(start, position));
 }
 
+// node_modules/graphql/language/source.mjs
+var sourceSymbol = Symbol("Source");
+
+class Source {
+  constructor(body, name = "GraphQL request", locationOffset = { line: 1, column: 1 }) {
+    this.__kind = sourceSymbol;
+    this.body = body;
+    this.name = name;
+    this.locationOffset = locationOffset;
+    if (!(this.locationOffset.line > 0))
+      devAssert(false, "line in locationOffset is 1-indexed and must be positive.");
+    if (!(this.locationOffset.column > 0))
+      devAssert(false, "column in locationOffset is 1-indexed and must be positive.");
+  }
+  get [Symbol.toStringTag]() {
+    return "Source";
+  }
+}
+function isSource(source) {
+  return instanceOf(source, sourceSymbol, Source);
+}
+
 // node_modules/graphql/language/parser.mjs
 function parse(source, options) {
+  return shouldTrace(parseChannel) ? parseChannel.traceSync(() => parseImpl(source, options), { source }) : parseImpl(source, options);
+}
+function parseImpl(source, options) {
   const parser = new Parser(source, options);
   const document = parser.parseDocument();
   Object.defineProperty(document, "tokenCount", {
@@ -3882,13 +4927,23 @@ function parseType(source, options) {
   parser.expectToken(TokenKind.EOF);
   return type;
 }
-
 class Parser {
   constructor(source, options = {}) {
-    const sourceObj = isSource(source) ? source : new Source(source);
-    this._lexer = new Lexer(sourceObj);
-    this._options = options;
+    const { lexer, ..._options } = options;
+    if (lexer) {
+      this._lexer = lexer;
+    } else {
+      const sourceObj = isSource(source) ? source : new Source(source);
+      this._lexer = new Lexer(sourceObj);
+    }
+    this._options = _options;
     this._tokenCounter = 0;
+    this._lexer._maxComments = _options.maxComments;
+    this._lexer._commentCount = 0;
+    const maxSourceLength = _options.maxSourceLength;
+    if (maxSourceLength !== undefined && this._lexer.source.body.length > maxSourceLength) {
+      throw syntaxError(this._lexer.source, maxSourceLength, `Source contains more than ${maxSourceLength} UTF-16 code units. Parsing aborted.`);
+    }
   }
   get tokenCount() {
     return this._tokenCounter;
@@ -3896,13 +4951,13 @@ class Parser {
   parseName() {
     const token = this.expectToken(TokenKind.NAME);
     return this.node(token, {
-      kind: Kind.NAME,
+      kind: NAME,
       value: token.value
     });
   }
   parseDocument() {
     return this.node(this._lexer.token, {
-      kind: Kind.DOCUMENT,
+      kind: DOCUMENT,
       definitions: this.many(TokenKind.SOF, this.parseDefinition, TokenKind.EOF)
     });
   }
@@ -3912,6 +4967,9 @@ class Parser {
     }
     const hasDescription = this.peekDescription();
     const keywordToken = hasDescription ? this._lexer.lookahead() : this._lexer.token;
+    if (hasDescription && keywordToken.kind === TokenKind.BRACE_L) {
+      throw syntaxError(this._lexer.source, this._lexer.token.start, "Unexpected description, descriptions are not supported on shorthand queries.");
+    }
     if (keywordToken.kind === TokenKind.NAME) {
       switch (keywordToken.value) {
         case "schema":
@@ -3931,9 +4989,6 @@ class Parser {
         case "directive":
           return this.parseDirectiveDefinition();
       }
-      if (hasDescription) {
-        throw syntaxError(this._lexer.source, this._lexer.token.start, "Unexpected description, descriptions are supported only on type definitions.");
-      }
       switch (keywordToken.value) {
         case "query":
         case "mutation":
@@ -3941,6 +4996,11 @@ class Parser {
           return this.parseOperationDefinition();
         case "fragment":
           return this.parseFragmentDefinition();
+      }
+      if (hasDescription) {
+        throw syntaxError(this._lexer.source, this._lexer.token.start, "Unexpected description, only GraphQL definitions support descriptions.");
+      }
+      switch (keywordToken.value) {
         case "extend":
           return this.parseTypeSystemExtension();
       }
@@ -3951,22 +5011,25 @@ class Parser {
     const start = this._lexer.token;
     if (this.peek(TokenKind.BRACE_L)) {
       return this.node(start, {
-        kind: Kind.OPERATION_DEFINITION,
+        kind: OPERATION_DEFINITION,
         operation: OperationTypeNode.QUERY,
+        description: undefined,
         name: undefined,
-        variableDefinitions: [],
-        directives: [],
+        variableDefinitions: undefined,
+        directives: undefined,
         selectionSet: this.parseSelectionSet()
       });
     }
+    const description = this.parseDescription();
     const operation = this.parseOperationType();
     let name;
     if (this.peek(TokenKind.NAME)) {
       name = this.parseName();
     }
     return this.node(start, {
-      kind: Kind.OPERATION_DEFINITION,
+      kind: OPERATION_DEFINITION,
       operation,
+      description,
       name,
       variableDefinitions: this.parseVariableDefinitions(),
       directives: this.parseDirectives(false),
@@ -3990,7 +5053,8 @@ class Parser {
   }
   parseVariableDefinition() {
     return this.node(this._lexer.token, {
-      kind: Kind.VARIABLE_DEFINITION,
+      kind: VARIABLE_DEFINITION,
+      description: this.parseDescription(),
       variable: this.parseVariable(),
       type: (this.expectToken(TokenKind.COLON), this.parseTypeReference()),
       defaultValue: this.expectOptionalToken(TokenKind.EQUALS) ? this.parseConstValueLiteral() : undefined,
@@ -4001,14 +5065,14 @@ class Parser {
     const start = this._lexer.token;
     this.expectToken(TokenKind.DOLLAR);
     return this.node(start, {
-      kind: Kind.VARIABLE,
+      kind: VARIABLE,
       name: this.parseName()
     });
   }
   parseSelectionSet() {
     return this.node(this._lexer.token, {
-      kind: Kind.SELECTION_SET,
-      selections: this.many(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R)
+      kind: SELECTION_SET,
+      selections: this._options.allowEmptySelectionSets === false ? this.many(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R) : this.any(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R)
     });
   }
   parseSelection() {
@@ -4026,7 +5090,7 @@ class Parser {
       name = nameOrAlias;
     }
     return this.node(start, {
-      kind: Kind.FIELD,
+      kind: FIELD,
       alias,
       name,
       arguments: this.parseArguments(false),
@@ -4038,12 +5102,16 @@ class Parser {
     const item = isConst ? this.parseConstArgument : this.parseArgument;
     return this.optionalMany(TokenKind.PAREN_L, item, TokenKind.PAREN_R);
   }
+  parseFragmentArguments() {
+    const item = this.parseFragmentArgument;
+    return this.optionalMany(TokenKind.PAREN_L, item, TokenKind.PAREN_R);
+  }
   parseArgument(isConst = false) {
     const start = this._lexer.token;
     const name = this.parseName();
     this.expectToken(TokenKind.COLON);
     return this.node(start, {
-      kind: Kind.ARGUMENT,
+      kind: ARGUMENT,
       name,
       value: this.parseValueLiteral(isConst)
     });
@@ -4051,19 +5119,38 @@ class Parser {
   parseConstArgument() {
     return this.parseArgument(true);
   }
+  parseFragmentArgument() {
+    const start = this._lexer.token;
+    const name = this.parseName();
+    this.expectToken(TokenKind.COLON);
+    return this.node(start, {
+      kind: FRAGMENT_ARGUMENT,
+      name,
+      value: this.parseValueLiteral(false)
+    });
+  }
   parseFragment() {
     const start = this._lexer.token;
     this.expectToken(TokenKind.SPREAD);
     const hasTypeCondition = this.expectOptionalKeyword("on");
     if (!hasTypeCondition && this.peek(TokenKind.NAME)) {
+      const name = this.parseFragmentName();
+      if (this.peek(TokenKind.PAREN_L) && this._options.experimentalFragmentArguments) {
+        return this.node(start, {
+          kind: FRAGMENT_SPREAD,
+          name,
+          arguments: this.parseFragmentArguments(),
+          directives: this.parseDirectives(false)
+        });
+      }
       return this.node(start, {
-        kind: Kind.FRAGMENT_SPREAD,
-        name: this.parseFragmentName(),
+        kind: FRAGMENT_SPREAD,
+        name,
         directives: this.parseDirectives(false)
       });
     }
     return this.node(start, {
-      kind: Kind.INLINE_FRAGMENT,
+      kind: INLINE_FRAGMENT,
       typeCondition: hasTypeCondition ? this.parseNamedType() : undefined,
       directives: this.parseDirectives(false),
       selectionSet: this.parseSelectionSet()
@@ -4071,10 +5158,12 @@ class Parser {
   }
   parseFragmentDefinition() {
     const start = this._lexer.token;
+    const description = this.parseDescription();
     this.expectKeyword("fragment");
-    if (this._options.allowLegacyFragmentVariables === true) {
+    if (this._options.experimentalFragmentArguments === true) {
       return this.node(start, {
-        kind: Kind.FRAGMENT_DEFINITION,
+        kind: FRAGMENT_DEFINITION,
+        description,
         name: this.parseFragmentName(),
         variableDefinitions: this.parseVariableDefinitions(),
         typeCondition: (this.expectKeyword("on"), this.parseNamedType()),
@@ -4083,7 +5172,8 @@ class Parser {
       });
     }
     return this.node(start, {
-      kind: Kind.FRAGMENT_DEFINITION,
+      kind: FRAGMENT_DEFINITION,
+      description,
       name: this.parseFragmentName(),
       typeCondition: (this.expectKeyword("on"), this.parseNamedType()),
       directives: this.parseDirectives(false),
@@ -4106,13 +5196,13 @@ class Parser {
       case TokenKind.INT:
         this.advanceLexer();
         return this.node(token, {
-          kind: Kind.INT,
+          kind: INT,
           value: token.value
         });
       case TokenKind.FLOAT:
         this.advanceLexer();
         return this.node(token, {
-          kind: Kind.FLOAT,
+          kind: FLOAT,
           value: token.value
         });
       case TokenKind.STRING:
@@ -4123,21 +5213,19 @@ class Parser {
         switch (token.value) {
           case "true":
             return this.node(token, {
-              kind: Kind.BOOLEAN,
+              kind: BOOLEAN,
               value: true
             });
           case "false":
             return this.node(token, {
-              kind: Kind.BOOLEAN,
+              kind: BOOLEAN,
               value: false
             });
           case "null":
-            return this.node(token, {
-              kind: Kind.NULL
-            });
+            return this.node(token, { kind: NULL });
           default:
             return this.node(token, {
-              kind: Kind.ENUM,
+              kind: ENUM,
               value: token.value
             });
         }
@@ -4163,7 +5251,7 @@ class Parser {
     const token = this._lexer.token;
     this.advanceLexer();
     return this.node(token, {
-      kind: Kind.STRING,
+      kind: STRING,
       value: token.value,
       block: token.kind === TokenKind.BLOCK_STRING
     });
@@ -4171,14 +5259,14 @@ class Parser {
   parseList(isConst) {
     const item = () => this.parseValueLiteral(isConst);
     return this.node(this._lexer.token, {
-      kind: Kind.LIST,
+      kind: LIST,
       values: this.any(TokenKind.BRACKET_L, item, TokenKind.BRACKET_R)
     });
   }
   parseObject(isConst) {
     const item = () => this.parseObjectField(isConst);
     return this.node(this._lexer.token, {
-      kind: Kind.OBJECT,
+      kind: OBJECT,
       fields: this.any(TokenKind.BRACE_L, item, TokenKind.BRACE_R)
     });
   }
@@ -4187,7 +5275,7 @@ class Parser {
     const name = this.parseName();
     this.expectToken(TokenKind.COLON);
     return this.node(start, {
-      kind: Kind.OBJECT_FIELD,
+      kind: OBJECT_FIELD,
       name,
       value: this.parseValueLiteral(isConst)
     });
@@ -4197,7 +5285,10 @@ class Parser {
     while (this.peek(TokenKind.AT)) {
       directives.push(this.parseDirective(isConst));
     }
-    return directives;
+    if (directives.length) {
+      return directives;
+    }
+    return;
   }
   parseConstDirectives() {
     return this.parseDirectives(true);
@@ -4206,7 +5297,7 @@ class Parser {
     const start = this._lexer.token;
     this.expectToken(TokenKind.AT);
     return this.node(start, {
-      kind: Kind.DIRECTIVE,
+      kind: DIRECTIVE,
       name: this.parseName(),
       arguments: this.parseArguments(isConst)
     });
@@ -4218,7 +5309,7 @@ class Parser {
       const innerType = this.parseTypeReference();
       this.expectToken(TokenKind.BRACKET_R);
       type = this.node(start, {
-        kind: Kind.LIST_TYPE,
+        kind: LIST_TYPE,
         type: innerType
       });
     } else {
@@ -4226,7 +5317,7 @@ class Parser {
     }
     if (this.expectOptionalToken(TokenKind.BANG)) {
       return this.node(start, {
-        kind: Kind.NON_NULL_TYPE,
+        kind: NON_NULL_TYPE,
         type
       });
     }
@@ -4234,7 +5325,7 @@ class Parser {
   }
   parseNamedType() {
     return this.node(this._lexer.token, {
-      kind: Kind.NAMED_TYPE,
+      kind: NAMED_TYPE,
       name: this.parseName()
     });
   }
@@ -4253,7 +5344,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const operationTypes = this.many(TokenKind.BRACE_L, this.parseOperationTypeDefinition, TokenKind.BRACE_R);
     return this.node(start, {
-      kind: Kind.SCHEMA_DEFINITION,
+      kind: SCHEMA_DEFINITION,
       description,
       directives,
       operationTypes
@@ -4265,7 +5356,7 @@ class Parser {
     this.expectToken(TokenKind.COLON);
     const type = this.parseNamedType();
     return this.node(start, {
-      kind: Kind.OPERATION_TYPE_DEFINITION,
+      kind: OPERATION_TYPE_DEFINITION,
       operation,
       type
     });
@@ -4277,7 +5368,7 @@ class Parser {
     const name = this.parseName();
     const directives = this.parseConstDirectives();
     return this.node(start, {
-      kind: Kind.SCALAR_TYPE_DEFINITION,
+      kind: SCALAR_TYPE_DEFINITION,
       description,
       name,
       directives
@@ -4292,7 +5383,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const fields = this.parseFieldsDefinition();
     return this.node(start, {
-      kind: Kind.OBJECT_TYPE_DEFINITION,
+      kind: OBJECT_TYPE_DEFINITION,
       description,
       name,
       interfaces,
@@ -4301,7 +5392,7 @@ class Parser {
     });
   }
   parseImplementsInterfaces() {
-    return this.expectOptionalKeyword("implements") ? this.delimitedMany(TokenKind.AMP, this.parseNamedType) : [];
+    return this.expectOptionalKeyword("implements") ? this.delimitedMany(TokenKind.AMP, this.parseNamedType) : undefined;
   }
   parseFieldsDefinition() {
     return this.optionalMany(TokenKind.BRACE_L, this.parseFieldDefinition, TokenKind.BRACE_R);
@@ -4315,7 +5406,7 @@ class Parser {
     const type = this.parseTypeReference();
     const directives = this.parseConstDirectives();
     return this.node(start, {
-      kind: Kind.FIELD_DEFINITION,
+      kind: FIELD_DEFINITION,
       description,
       name,
       arguments: args,
@@ -4338,7 +5429,7 @@ class Parser {
     }
     const directives = this.parseConstDirectives();
     return this.node(start, {
-      kind: Kind.INPUT_VALUE_DEFINITION,
+      kind: INPUT_VALUE_DEFINITION,
       description,
       name,
       type,
@@ -4355,7 +5446,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const fields = this.parseFieldsDefinition();
     return this.node(start, {
-      kind: Kind.INTERFACE_TYPE_DEFINITION,
+      kind: INTERFACE_TYPE_DEFINITION,
       description,
       name,
       interfaces,
@@ -4371,7 +5462,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const types = this.parseUnionMemberTypes();
     return this.node(start, {
-      kind: Kind.UNION_TYPE_DEFINITION,
+      kind: UNION_TYPE_DEFINITION,
       description,
       name,
       directives,
@@ -4379,7 +5470,7 @@ class Parser {
     });
   }
   parseUnionMemberTypes() {
-    return this.expectOptionalToken(TokenKind.EQUALS) ? this.delimitedMany(TokenKind.PIPE, this.parseNamedType) : [];
+    return this.expectOptionalToken(TokenKind.EQUALS) ? this.delimitedMany(TokenKind.PIPE, this.parseNamedType) : undefined;
   }
   parseEnumTypeDefinition() {
     const start = this._lexer.token;
@@ -4389,7 +5480,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const values = this.parseEnumValuesDefinition();
     return this.node(start, {
-      kind: Kind.ENUM_TYPE_DEFINITION,
+      kind: ENUM_TYPE_DEFINITION,
       description,
       name,
       directives,
@@ -4405,7 +5496,7 @@ class Parser {
     const name = this.parseEnumValueName();
     const directives = this.parseConstDirectives();
     return this.node(start, {
-      kind: Kind.ENUM_VALUE_DEFINITION,
+      kind: ENUM_VALUE_DEFINITION,
       description,
       name,
       directives
@@ -4425,7 +5516,7 @@ class Parser {
     const directives = this.parseConstDirectives();
     const fields = this.parseInputFieldsDefinition();
     return this.node(start, {
-      kind: Kind.INPUT_OBJECT_TYPE_DEFINITION,
+      kind: INPUT_OBJECT_TYPE_DEFINITION,
       description,
       name,
       directives,
@@ -4453,6 +5544,8 @@ class Parser {
           return this.parseEnumTypeExtension();
         case "input":
           return this.parseInputObjectTypeExtension();
+        case "directive":
+          return this.parseDirectiveExtension();
       }
     }
     throw this.unexpected(keywordToken);
@@ -4463,11 +5556,11 @@ class Parser {
     this.expectKeyword("schema");
     const directives = this.parseConstDirectives();
     const operationTypes = this.optionalMany(TokenKind.BRACE_L, this.parseOperationTypeDefinition, TokenKind.BRACE_R);
-    if (directives.length === 0 && operationTypes.length === 0) {
+    if (directives === undefined && operationTypes === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.SCHEMA_EXTENSION,
+      kind: SCHEMA_EXTENSION,
       directives,
       operationTypes
     });
@@ -4478,11 +5571,11 @@ class Parser {
     this.expectKeyword("scalar");
     const name = this.parseName();
     const directives = this.parseConstDirectives();
-    if (directives.length === 0) {
+    if (directives === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.SCALAR_TYPE_EXTENSION,
+      kind: SCALAR_TYPE_EXTENSION,
       name,
       directives
     });
@@ -4495,11 +5588,11 @@ class Parser {
     const interfaces = this.parseImplementsInterfaces();
     const directives = this.parseConstDirectives();
     const fields = this.parseFieldsDefinition();
-    if (interfaces.length === 0 && directives.length === 0 && fields.length === 0) {
+    if (interfaces === undefined && directives === undefined && fields === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.OBJECT_TYPE_EXTENSION,
+      kind: OBJECT_TYPE_EXTENSION,
       name,
       interfaces,
       directives,
@@ -4514,11 +5607,11 @@ class Parser {
     const interfaces = this.parseImplementsInterfaces();
     const directives = this.parseConstDirectives();
     const fields = this.parseFieldsDefinition();
-    if (interfaces.length === 0 && directives.length === 0 && fields.length === 0) {
+    if (interfaces === undefined && directives === undefined && fields === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.INTERFACE_TYPE_EXTENSION,
+      kind: INTERFACE_TYPE_EXTENSION,
       name,
       interfaces,
       directives,
@@ -4532,11 +5625,11 @@ class Parser {
     const name = this.parseName();
     const directives = this.parseConstDirectives();
     const types = this.parseUnionMemberTypes();
-    if (directives.length === 0 && types.length === 0) {
+    if (directives === undefined && types === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.UNION_TYPE_EXTENSION,
+      kind: UNION_TYPE_EXTENSION,
       name,
       directives,
       types
@@ -4549,11 +5642,11 @@ class Parser {
     const name = this.parseName();
     const directives = this.parseConstDirectives();
     const values = this.parseEnumValuesDefinition();
-    if (directives.length === 0 && values.length === 0) {
+    if (directives === undefined && values === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.ENUM_TYPE_EXTENSION,
+      kind: ENUM_TYPE_EXTENSION,
       name,
       directives,
       values
@@ -4566,14 +5659,30 @@ class Parser {
     const name = this.parseName();
     const directives = this.parseConstDirectives();
     const fields = this.parseInputFieldsDefinition();
-    if (directives.length === 0 && fields.length === 0) {
+    if (directives === undefined && fields === undefined) {
       throw this.unexpected();
     }
     return this.node(start, {
-      kind: Kind.INPUT_OBJECT_TYPE_EXTENSION,
+      kind: INPUT_OBJECT_TYPE_EXTENSION,
       name,
       directives,
       fields
+    });
+  }
+  parseDirectiveExtension() {
+    const start = this._lexer.token;
+    this.expectKeyword("extend");
+    this.expectKeyword("directive");
+    this.expectToken(TokenKind.AT);
+    const name = this.parseName();
+    const directives = this.parseConstDirectives();
+    if (directives === undefined) {
+      throw this.unexpected();
+    }
+    return this.node(start, {
+      kind: DIRECTIVE_EXTENSION,
+      name,
+      directives
     });
   }
   parseDirectiveDefinition() {
@@ -4583,14 +5692,16 @@ class Parser {
     this.expectToken(TokenKind.AT);
     const name = this.parseName();
     const args = this.parseArgumentDefs();
+    const directives = this.parseConstDirectives();
     const repeatable = this.expectOptionalKeyword("repeatable");
     this.expectKeyword("on");
     const locations = this.parseDirectiveLocations();
     return this.node(start, {
-      kind: Kind.DIRECTIVE_DEFINITION,
+      kind: DIRECTIVE_DEFINITION,
       description,
       name,
       arguments: args,
+      directives,
       repeatable,
       locations
     });
@@ -4601,10 +5712,56 @@ class Parser {
   parseDirectiveLocation() {
     const start = this._lexer.token;
     const name = this.parseName();
-    if (Object.prototype.hasOwnProperty.call(DirectiveLocation, name.value)) {
+    if (Object.hasOwn(DirectiveLocation, name.value)) {
       return name;
     }
     throw this.unexpected(start);
+  }
+  parseSchemaCoordinate() {
+    const start = this._lexer.token;
+    const ofDirective = this.expectOptionalToken(TokenKind.AT);
+    const name = this.parseName();
+    let memberName;
+    if (!ofDirective && this.expectOptionalToken(TokenKind.DOT)) {
+      memberName = this.parseName();
+    }
+    let argumentName;
+    if ((ofDirective || memberName) && this.expectOptionalToken(TokenKind.PAREN_L)) {
+      argumentName = this.parseName();
+      this.expectToken(TokenKind.COLON);
+      this.expectToken(TokenKind.PAREN_R);
+    }
+    if (ofDirective) {
+      if (argumentName) {
+        return this.node(start, {
+          kind: DIRECTIVE_ARGUMENT_COORDINATE,
+          name,
+          argumentName
+        });
+      }
+      return this.node(start, {
+        kind: DIRECTIVE_COORDINATE,
+        name
+      });
+    } else if (memberName) {
+      if (argumentName) {
+        return this.node(start, {
+          kind: ARGUMENT_COORDINATE,
+          name,
+          fieldName: memberName,
+          argumentName
+        });
+      }
+      return this.node(start, {
+        kind: MEMBER_COORDINATE,
+        name,
+        memberName
+      });
+    }
+    return this.node(start, {
+      kind: TYPE_COORDINATE,
+      name
+    });
   }
   node(startToken, node) {
     if (this._options.noLocation !== true) {
@@ -4648,7 +5805,7 @@ class Parser {
     return false;
   }
   unexpected(atToken) {
-    const token = atToken !== null && atToken !== undefined ? atToken : this._lexer.token;
+    const token = atToken ?? this._lexer.token;
     return syntaxError(this._lexer.source, token.start, `Unexpected ${getTokenDesc(token)}.`);
   }
   any(openKind, parseFn, closeKind) {
@@ -4667,7 +5824,7 @@ class Parser {
       } while (!this.expectOptionalToken(closeKind));
       return nodes;
     }
-    return [];
+    return;
   }
   many(openKind, parseFn, closeKind) {
     this.expectToken(openKind);
@@ -4686,12 +5843,12 @@ class Parser {
     return nodes;
   }
   advanceLexer() {
-    const { maxTokens } = this._options;
+    const { maxLexicalTokens = this._options.maxTokens } = this._options;
     const token = this._lexer.advance();
     if (token.kind !== TokenKind.EOF) {
       ++this._tokenCounter;
-      if (maxTokens !== undefined && this._tokenCounter > maxTokens) {
-        throw syntaxError(this._lexer.source, token.start, `Document contains more that ${maxTokens} tokens. Parsing aborted.`);
+      if (maxLexicalTokens !== undefined && this._tokenCounter > maxLexicalTokens) {
+        throw syntaxError(this._lexer.source, token.start, `Document contains more than ${maxLexicalTokens} tokens. Parsing aborted.`);
       }
     }
   }
@@ -4703,41 +5860,199 @@ function getTokenDesc(token) {
 function getTokenKindDesc(kind) {
   return isPunctuatorTokenKind(kind) ? `"${kind}"` : kind;
 }
-// node_modules/graphql/language/predicates.mjs
-function isExecutableDefinitionNode(node) {
-  return node.kind === Kind.OPERATION_DEFINITION || node.kind === Kind.FRAGMENT_DEFINITION;
+
+// node_modules/graphql/language/visitor.mjs
+var allKinds = Object.values(exports_kinds_);
+var BREAK = Object.freeze({});
+function visit(root, visitor, visitorKeys = QueryDocumentKeys) {
+  const enterLeaveMap = new Map;
+  for (const kind of allKinds) {
+    enterLeaveMap.set(kind, getEnterLeaveForKind(visitor, kind));
+  }
+  let stack = undefined;
+  let inArray = Array.isArray(root);
+  let keys = [root];
+  let index = -1;
+  let edits;
+  let node = root;
+  let key = undefined;
+  let parent = undefined;
+  const path = [];
+  const ancestors = [];
+  do {
+    index++;
+    const isLeaving = index === keys.length;
+    const isEdited = isLeaving && edits !== undefined;
+    if (isLeaving) {
+      key = ancestors.length === 0 ? undefined : path[path.length - 1];
+      node = parent;
+      parent = ancestors.pop();
+      if (edits !== undefined) {
+        if (inArray) {
+          node = node.slice();
+          let editOffset = 0;
+          for (let editIndex = 0;editIndex < edits.length; editIndex += 2) {
+            const editKey = edits[editIndex];
+            const editValue = edits[editIndex + 1];
+            const arrayKey = editKey - editOffset;
+            if (editValue === null) {
+              node.splice(arrayKey, 1);
+              editOffset++;
+            } else {
+              node[arrayKey] = editValue;
+            }
+          }
+        } else {
+          node = { ...node };
+          for (let editIndex = 0;editIndex < edits.length; editIndex += 2) {
+            node[edits[editIndex]] = edits[editIndex + 1];
+          }
+        }
+      }
+      index = stack.index;
+      keys = stack.keys;
+      edits = stack.edits;
+      inArray = stack.inArray;
+      stack = stack.prev;
+    } else if (parent != null) {
+      key = inArray ? index : keys[index];
+      node = parent[key];
+      if (node === null || node === undefined) {
+        continue;
+      }
+      path.push(key);
+    }
+    let result;
+    let nodeIsArray = Array.isArray(node);
+    if (!nodeIsArray) {
+      if (!isNode(node))
+        devAssert(false, `Invalid AST Node: ${inspect(node)}.`);
+      const visitFn = isLeaving ? enterLeaveMap.get(node.kind)?.leave : enterLeaveMap.get(node.kind)?.enter;
+      result = visitFn?.call(visitor, node, key, parent, path, ancestors);
+      if (result === BREAK) {
+        break;
+      }
+      if (result === false) {
+        if (!isLeaving) {
+          path.pop();
+          continue;
+        }
+      } else if (result !== undefined) {
+        (edits ??= []).push(key, result);
+        if (!isLeaving) {
+          if (isNode(result)) {
+            node = result;
+            nodeIsArray = Array.isArray(node);
+          } else {
+            path.pop();
+            continue;
+          }
+        }
+      }
+    }
+    if (result === undefined && isEdited) {
+      (edits ??= []).push(key, node);
+    }
+    if (isLeaving) {
+      path.pop();
+    } else {
+      stack = { inArray, index, keys, edits, prev: stack };
+      inArray = nodeIsArray;
+      keys = inArray ? node : visitorKeys[node.kind] ?? [];
+      index = -1;
+      edits = undefined;
+      if (parent != null) {
+        ancestors.push(parent);
+      }
+      parent = node;
+    }
+  } while (stack !== undefined);
+  if (edits !== undefined) {
+    return edits.at(-1);
+  }
+  return root;
 }
-function isTypeSystemDefinitionNode(node) {
-  return node.kind === Kind.SCHEMA_DEFINITION || isTypeDefinitionNode(node) || node.kind === Kind.DIRECTIVE_DEFINITION;
+function visitInParallel(visitors) {
+  const skipping = new Array(visitors.length).fill(null);
+  const mergedVisitor = Object.create(null);
+  for (const kind of allKinds) {
+    let hasVisitor = false;
+    const enterList = new Array(visitors.length).fill(undefined);
+    const leaveList = new Array(visitors.length).fill(undefined);
+    for (let i = 0;i < visitors.length; ++i) {
+      const { enter, leave } = getEnterLeaveForKind(visitors[i], kind);
+      hasVisitor ||= enter != null || leave != null;
+      enterList[i] = enter;
+      leaveList[i] = leave;
+    }
+    if (!hasVisitor) {
+      continue;
+    }
+    const mergedEnterLeave = {
+      enter(...args) {
+        const node = args[0];
+        for (let i = 0;i < visitors.length; i++) {
+          if (skipping[i] === null) {
+            const result = enterList[i]?.apply(visitors[i], args);
+            if (result === false) {
+              skipping[i] = node;
+            } else if (result === BREAK) {
+              skipping[i] = BREAK;
+            } else if (result !== undefined) {
+              return result;
+            }
+          }
+        }
+      },
+      leave(...args) {
+        const node = args[0];
+        for (let i = 0;i < visitors.length; i++) {
+          if (skipping[i] === null) {
+            const result = leaveList[i]?.apply(visitors[i], args);
+            if (result === BREAK) {
+              skipping[i] = BREAK;
+            } else if (result !== undefined && result !== false) {
+              return result;
+            }
+          } else if (skipping[i] === node) {
+            skipping[i] = null;
+          }
+        }
+      }
+    };
+    mergedVisitor[kind] = mergedEnterLeave;
+  }
+  return mergedVisitor;
 }
-function isTypeDefinitionNode(node) {
-  return node.kind === Kind.SCALAR_TYPE_DEFINITION || node.kind === Kind.OBJECT_TYPE_DEFINITION || node.kind === Kind.INTERFACE_TYPE_DEFINITION || node.kind === Kind.UNION_TYPE_DEFINITION || node.kind === Kind.ENUM_TYPE_DEFINITION || node.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION;
+function getEnterLeaveForKind(visitor, kind) {
+  const kindVisitor = visitor[kind];
+  if (typeof kindVisitor === "object") {
+    return kindVisitor;
+  } else if (typeof kindVisitor === "function") {
+    return { enter: kindVisitor, leave: undefined };
+  }
+  return { enter: visitor.enter, leave: visitor.leave };
 }
-function isTypeSystemExtensionNode(node) {
-  return node.kind === Kind.SCHEMA_EXTENSION || isTypeExtensionNode(node);
-}
-function isTypeExtensionNode(node) {
-  return node.kind === Kind.SCALAR_TYPE_EXTENSION || node.kind === Kind.OBJECT_TYPE_EXTENSION || node.kind === Kind.INTERFACE_TYPE_EXTENSION || node.kind === Kind.UNION_TYPE_EXTENSION || node.kind === Kind.ENUM_TYPE_EXTENSION || node.kind === Kind.INPUT_OBJECT_TYPE_EXTENSION;
-}
+
 // node_modules/graphql/utilities/typeFromAST.mjs
 function typeFromAST(schema, typeNode) {
   switch (typeNode.kind) {
-    case Kind.LIST_TYPE: {
+    case LIST_TYPE: {
       const innerType = typeFromAST(schema, typeNode.type);
       return innerType && new GraphQLList(innerType);
     }
-    case Kind.NON_NULL_TYPE: {
+    case NON_NULL_TYPE: {
       const innerType = typeFromAST(schema, typeNode.type);
       return innerType && new GraphQLNonNull(innerType);
     }
-    case Kind.NAMED_TYPE:
+    case NAMED_TYPE:
       return schema.getType(typeNode.name.value);
   }
 }
 
 // node_modules/graphql/utilities/TypeInfo.mjs
 class TypeInfo {
-  constructor(schema, initialType, getFieldDefFn) {
+  constructor(schema, initialType, fragmentSignatures) {
     this._schema = schema;
     this._typeStack = [];
     this._parentTypeStack = [];
@@ -4747,7 +6062,9 @@ class TypeInfo {
     this._directive = null;
     this._argument = null;
     this._enumValue = null;
-    this._getFieldDef = getFieldDefFn !== null && getFieldDefFn !== undefined ? getFieldDefFn : getFieldDef;
+    this._fragmentSignaturesByName = fragmentSignatures ?? (() => null);
+    this._fragmentSignature = null;
+    this._fragmentArgument = null;
     if (initialType) {
       if (isInputType(initialType)) {
         this._inputTypeStack.push(initialType);
@@ -4764,34 +6081,22 @@ class TypeInfo {
     return "TypeInfo";
   }
   getType() {
-    if (this._typeStack.length > 0) {
-      return this._typeStack[this._typeStack.length - 1];
-    }
+    return this._typeStack.at(-1);
   }
   getParentType() {
-    if (this._parentTypeStack.length > 0) {
-      return this._parentTypeStack[this._parentTypeStack.length - 1];
-    }
+    return this._parentTypeStack.at(-1);
   }
   getInputType() {
-    if (this._inputTypeStack.length > 0) {
-      return this._inputTypeStack[this._inputTypeStack.length - 1];
-    }
+    return this._inputTypeStack.at(-1);
   }
   getParentInputType() {
-    if (this._inputTypeStack.length > 1) {
-      return this._inputTypeStack[this._inputTypeStack.length - 2];
-    }
+    return this._inputTypeStack.at(-2);
   }
   getFieldDef() {
-    if (this._fieldDefStack.length > 0) {
-      return this._fieldDefStack[this._fieldDefStack.length - 1];
-    }
+    return this._fieldDefStack.at(-1);
   }
   getDefaultValue() {
-    if (this._defaultValueStack.length > 0) {
-      return this._defaultValueStack[this._defaultValueStack.length - 1];
-    }
+    return this._defaultValueStack.at(-1);
   }
   getDirective() {
     return this._directive;
@@ -4799,23 +6104,37 @@ class TypeInfo {
   getArgument() {
     return this._argument;
   }
+  getFragmentSignature() {
+    return this._fragmentSignature;
+  }
+  getFragmentSignatureByName() {
+    return this._fragmentSignaturesByName;
+  }
+  getFragmentArgument() {
+    return this._fragmentArgument;
+  }
   getEnumValue() {
     return this._enumValue;
   }
   enter(node) {
     const schema = this._schema;
     switch (node.kind) {
-      case Kind.SELECTION_SET: {
+      case DOCUMENT: {
+        const fragmentSignatures = getFragmentSignatures(node);
+        this._fragmentSignaturesByName = (fragmentName) => fragmentSignatures.get(fragmentName);
+        break;
+      }
+      case SELECTION_SET: {
         const namedType = getNamedType(this.getType());
         this._parentTypeStack.push(isCompositeType(namedType) ? namedType : undefined);
         break;
       }
-      case Kind.FIELD: {
+      case FIELD: {
         const parentType = this.getParentType();
         let fieldDef;
         let fieldType;
         if (parentType) {
-          fieldDef = this._getFieldDef(schema, parentType, node);
+          fieldDef = schema.getField(parentType, node.name.value);
           if (fieldDef) {
             fieldType = fieldDef.type;
           }
@@ -4824,31 +6143,34 @@ class TypeInfo {
         this._typeStack.push(isOutputType(fieldType) ? fieldType : undefined);
         break;
       }
-      case Kind.DIRECTIVE:
+      case DIRECTIVE:
         this._directive = schema.getDirective(node.name.value);
         break;
-      case Kind.OPERATION_DEFINITION: {
+      case OPERATION_DEFINITION: {
         const rootType = schema.getRootType(node.operation);
         this._typeStack.push(isObjectType(rootType) ? rootType : undefined);
         break;
       }
-      case Kind.INLINE_FRAGMENT:
-      case Kind.FRAGMENT_DEFINITION: {
+      case FRAGMENT_SPREAD: {
+        this._fragmentSignature = this.getFragmentSignatureByName()(node.name.value);
+        break;
+      }
+      case INLINE_FRAGMENT:
+      case FRAGMENT_DEFINITION: {
         const typeConditionAST = node.typeCondition;
         const outputType = typeConditionAST ? typeFromAST(schema, typeConditionAST) : getNamedType(this.getType());
         this._typeStack.push(isOutputType(outputType) ? outputType : undefined);
         break;
       }
-      case Kind.VARIABLE_DEFINITION: {
+      case VARIABLE_DEFINITION: {
         const inputType = typeFromAST(schema, node.type);
         this._inputTypeStack.push(isInputType(inputType) ? inputType : undefined);
         break;
       }
-      case Kind.ARGUMENT: {
-        var _this$getDirective;
+      case ARGUMENT: {
         let argDef;
         let argType;
-        const fieldOrDirective = (_this$getDirective = this.getDirective()) !== null && _this$getDirective !== undefined ? _this$getDirective : this.getFieldDef();
+        const fieldOrDirective = this.getDirective() ?? this.getFieldDef();
         if (fieldOrDirective) {
           argDef = fieldOrDirective.args.find((arg) => arg.name === node.name.value);
           if (argDef) {
@@ -4856,32 +6178,43 @@ class TypeInfo {
           }
         }
         this._argument = argDef;
-        this._defaultValueStack.push(argDef ? argDef.defaultValue : undefined);
+        this._defaultValueStack.push(argDef?.default ?? argDef?.defaultValue ?? undefined);
         this._inputTypeStack.push(isInputType(argType) ? argType : undefined);
         break;
       }
-      case Kind.LIST: {
-        const listType = getNullableType(this.getInputType());
-        const itemType = isListType(listType) ? listType.ofType : listType;
-        this._defaultValueStack.push(undefined);
-        this._inputTypeStack.push(isInputType(itemType) ? itemType : undefined);
+      case FRAGMENT_ARGUMENT: {
+        const fragmentSignature = this.getFragmentSignature();
+        const argDef = fragmentSignature?.variableDefinitions.get(node.name.value);
+        this._fragmentArgument = argDef;
+        let argType;
+        if (argDef) {
+          argType = typeFromAST(this._schema, argDef.type);
+        }
+        this._inputTypeStack.push(isInputType(argType) ? argType : undefined);
         break;
       }
-      case Kind.OBJECT_FIELD: {
+      case LIST: {
+        const inputType = this.getInputType();
+        const listType = inputType && getNullableType(inputType);
+        this._defaultValueStack.push(undefined);
+        this._inputTypeStack.push(listType && isListType(listType) ? listType.ofType : undefined);
+        break;
+      }
+      case OBJECT_FIELD: {
         const objectType = getNamedType(this.getInputType());
         let inputFieldType;
         let inputField;
         if (isInputObjectType(objectType)) {
           inputField = objectType.getFields()[node.name.value];
-          if (inputField) {
+          if (inputField != null) {
             inputFieldType = inputField.type;
           }
         }
-        this._defaultValueStack.push(inputField ? inputField.defaultValue : undefined);
+        this._defaultValueStack.push(inputField?.default ?? inputField?.defaultValue ?? undefined);
         this._inputTypeStack.push(isInputType(inputFieldType) ? inputFieldType : undefined);
         break;
       }
-      case Kind.ENUM: {
+      case ENUM: {
         const enumType = getNamedType(this.getInputType());
         let enumValue;
         if (isEnumType(enumType)) {
@@ -4895,55 +6228,68 @@ class TypeInfo {
   }
   leave(node) {
     switch (node.kind) {
-      case Kind.SELECTION_SET:
+      case DOCUMENT:
+        this._fragmentSignaturesByName = () => null;
+        break;
+      case SELECTION_SET:
         this._parentTypeStack.pop();
         break;
-      case Kind.FIELD:
+      case FIELD:
         this._fieldDefStack.pop();
         this._typeStack.pop();
         break;
-      case Kind.DIRECTIVE:
+      case DIRECTIVE:
         this._directive = null;
         break;
-      case Kind.OPERATION_DEFINITION:
-      case Kind.INLINE_FRAGMENT:
-      case Kind.FRAGMENT_DEFINITION:
+      case FRAGMENT_SPREAD:
+        this._fragmentSignature = null;
+        break;
+      case OPERATION_DEFINITION:
+      case INLINE_FRAGMENT:
+      case FRAGMENT_DEFINITION:
         this._typeStack.pop();
         break;
-      case Kind.VARIABLE_DEFINITION:
+      case VARIABLE_DEFINITION:
         this._inputTypeStack.pop();
         break;
-      case Kind.ARGUMENT:
+      case ARGUMENT:
         this._argument = null;
         this._defaultValueStack.pop();
         this._inputTypeStack.pop();
         break;
-      case Kind.LIST:
-      case Kind.OBJECT_FIELD:
+      case FRAGMENT_ARGUMENT: {
+        this._fragmentArgument = null;
         this._defaultValueStack.pop();
         this._inputTypeStack.pop();
         break;
-      case Kind.ENUM:
+      }
+      case LIST:
+      case OBJECT_FIELD:
+        this._defaultValueStack.pop();
+        this._inputTypeStack.pop();
+        break;
+      case ENUM:
         this._enumValue = null;
         break;
       default:
     }
   }
 }
-function getFieldDef(schema, parentType, fieldNode) {
-  const name = fieldNode.name.value;
-  if (name === SchemaMetaFieldDef.name && schema.getQueryType() === parentType) {
-    return SchemaMetaFieldDef;
+function getFragmentSignatures(document) {
+  const fragmentSignatures = new Map;
+  for (const definition of document.definitions) {
+    if (definition.kind === FRAGMENT_DEFINITION) {
+      const variableDefinitions = new Map;
+      if (definition.variableDefinitions) {
+        for (const varDef of definition.variableDefinitions) {
+          variableDefinitions.set(varDef.variable.name.value, varDef);
+        }
+      }
+      const signature = { definition, variableDefinitions };
+      fragmentSignatures.set(definition.name.value, signature);
+    }
   }
-  if (name === TypeMetaFieldDef.name && schema.getQueryType() === parentType) {
-    return TypeMetaFieldDef;
-  }
-  if (name === TypeNameMetaFieldDef.name && isCompositeType(parentType)) {
-    return TypeNameMetaFieldDef;
-  }
-  if (isObjectType(parentType) || isInterfaceType(parentType)) {
-    return parentType.getFields()[name];
-  }
+  return fragmentSignatures;
 }
 function visitWithTypeInfo(typeInfo, visitor) {
   return {
@@ -4975,13 +6321,257 @@ function visitWithTypeInfo(typeInfo, visitor) {
   };
 }
 
+// node_modules/graphql/validation/rules/DeferStreamDirectiveLabelRule.mjs
+function DeferStreamDirectiveLabelRule(context) {
+  const knownLabels = new Map;
+  return {
+    Directive(node) {
+      if (node.name.value === GraphQLDeferDirective.name || node.name.value === GraphQLStreamDirective.name) {
+        const labelArgument = node.arguments?.find((arg) => arg.name.value === "label");
+        const labelValue = labelArgument?.value;
+        if (!labelValue || labelValue.kind === NULL) {
+          return;
+        }
+        if (labelValue.kind !== STRING) {
+          context.reportError(new GraphQLError(`Argument "@${node.name.value}(label:)" must be a static string.`, { nodes: node }));
+          return;
+        }
+        const knownLabel = knownLabels.get(labelValue.value);
+        if (knownLabel != null) {
+          context.reportError(new GraphQLError('Value for arguments "defer(label:)" and "stream(label:)" must be unique across all Defer/Stream directive usages.', { nodes: [knownLabel, node] }));
+        } else {
+          knownLabels.set(labelValue.value, node);
+        }
+      }
+    }
+  };
+}
+
+// node_modules/graphql/validation/rules/DeferStreamDirectiveOnRootFieldRule.mjs
+function DeferStreamDirectiveOnRootFieldRule(context) {
+  const checkedFragments = new Set;
+  return {
+    OperationDefinition(node) {
+      if (node.operation !== "subscription" && node.operation !== "mutation") {
+        return;
+      }
+      const schema = context.getSchema();
+      const rootType = schema.getRootType(node.operation);
+      if (rootType) {
+        const visitedFragments = new Set;
+        if (forbidDeferStream({
+          context,
+          operationType: node.operation,
+          rootType,
+          checkedFragments,
+          selectionSet: node.selectionSet,
+          visitedFragments
+        })) {
+          for (const name of visitedFragments) {
+            checkedFragments.add(name);
+          }
+        }
+      }
+    }
+  };
+}
+function forbidDeferStream({ context, operationType, rootType, checkedFragments, selectionSet, visitedFragments }) {
+  let valid = true;
+  for (const selection of selectionSet.selections) {
+    if (selection.kind === "Field") {
+      const stream = selection.directives?.find((d) => d.name.value === GraphQLStreamDirective.name);
+      if (stream) {
+        valid = false;
+        context.reportError(new GraphQLError(`Stream directive cannot be used on root ${operationType} type "${rootType}".`, { nodes: stream }));
+      }
+    } else if (selection.kind === "FragmentSpread") {
+      const fragmentName = selection.name.value;
+      if (visitedFragments.has(fragmentName)) {
+        continue;
+      }
+      visitedFragments.add(fragmentName);
+      const fragment = context.getFragment(fragmentName);
+      if (fragment) {
+        const defer = getDeferDirective(selection);
+        if (defer !== undefined) {
+          valid = false;
+          context.reportError(new GraphQLError(`Defer directive cannot be used on root ${operationType} type "${rootType}".`, { nodes: defer }));
+        }
+        if (!checkedFragments.has(fragmentName)) {
+          valid = forbidDeferStream({
+            context,
+            operationType,
+            rootType,
+            checkedFragments,
+            selectionSet: fragment.selectionSet,
+            visitedFragments
+          }) && valid;
+        }
+      }
+    } else if (selection.kind === "InlineFragment") {
+      const defer = getDeferDirective(selection);
+      if (defer !== undefined) {
+        valid = false;
+        context.reportError(new GraphQLError(`Defer directive cannot be used on root ${operationType} type "${rootType}".`, { nodes: defer }));
+      }
+      valid = forbidDeferStream({
+        context,
+        operationType,
+        rootType,
+        checkedFragments,
+        selectionSet: selection.selectionSet,
+        visitedFragments
+      }) && valid;
+    }
+  }
+  return valid;
+}
+function getDeferDirective(fragment) {
+  return fragment.directives?.find((d) => d.name.value === GraphQLDeferDirective.name);
+}
+
+// node_modules/graphql/validation/rules/DeferStreamDirectiveOnValidOperationsRule.mjs
+function ifArgumentCanBeFalse(node) {
+  const ifArgument = node.arguments?.find((arg) => arg.name.value === "if");
+  if (!ifArgument) {
+    return false;
+  }
+  if (ifArgument.value.kind === BOOLEAN) {
+    if (ifArgument.value.value) {
+      return false;
+    }
+  } else if (ifArgument.value.kind !== VARIABLE) {
+    return false;
+  }
+  return true;
+}
+function canBeSkippedViaSkipDirective(node) {
+  const ifArgument = node.arguments?.find((arg) => arg.name.value === "if");
+  if (!ifArgument) {
+    return true;
+  }
+  if (ifArgument.value.kind === BOOLEAN) {
+    if (ifArgument.value.value) {
+      return true;
+    }
+    return false;
+  }
+  return true;
+}
+function canBeSkippedViaIncludeDirective(node) {
+  const ifArgument = node.arguments?.find((arg) => arg.name.value === "if");
+  if (!ifArgument) {
+    return false;
+  }
+  if (ifArgument?.value.kind === BOOLEAN) {
+    if (ifArgument.value.value) {
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+function DeferStreamDirectiveOnValidOperationsRule(context) {
+  const checkedFragments = new Set;
+  return {
+    OperationDefinition(operation) {
+      if (operation.operation !== OperationTypeNode.SUBSCRIPTION) {
+        return;
+      }
+      const visitedFragments = new Set;
+      if (forbidUnconditionalDeferStream({
+        context,
+        checkedFragments,
+        selectionSet: operation.selectionSet,
+        parentNodes: [],
+        visitedFragments
+      })) {
+        for (const name of visitedFragments) {
+          checkedFragments.add(name);
+        }
+      }
+    }
+  };
+}
+function forbidUnconditionalDeferStream({ context, checkedFragments, selectionSet, parentNodes, visitedFragments }) {
+  let valid = true;
+  for (const selection of selectionSet.selections) {
+    const skip = selection.directives?.find((d) => d.name.value === GraphQLSkipDirective.name);
+    if (skip && canBeSkippedViaSkipDirective(skip)) {
+      continue;
+    }
+    const include = selection.directives?.find((d) => d.name.value === GraphQLIncludeDirective.name);
+    if (include && canBeSkippedViaIncludeDirective(include)) {
+      continue;
+    }
+    for (const directive of selection.directives ?? []) {
+      if (directive.name.value === GraphQLDeferDirective.name) {
+        if (!ifArgumentCanBeFalse(directive)) {
+          valid = false;
+          context.reportError(new GraphQLError("Defer directive not supported on subscription operations. Disable `@defer` by setting the `if` argument to `false`.", { nodes: [directive, ...parentNodes.toReversed()] }));
+        }
+      } else if (directive.name.value === GraphQLStreamDirective.name) {
+        if (!ifArgumentCanBeFalse(directive)) {
+          valid = false;
+          context.reportError(new GraphQLError("Stream directive not supported on subscription operations. Disable `@stream` by setting the `if` argument to `false`.", { nodes: [directive, ...parentNodes.toReversed()] }));
+        }
+      }
+    }
+    if (selection.kind === "FragmentSpread") {
+      const fragmentName = selection.name.value;
+      if (visitedFragments.has(fragmentName) || checkedFragments.has(fragmentName)) {
+        continue;
+      }
+      visitedFragments.add(fragmentName);
+      const fragment = context.getFragment(fragmentName);
+      if (fragment) {
+        parentNodes.push(selection);
+        valid = forbidUnconditionalDeferStream({
+          context,
+          checkedFragments,
+          parentNodes,
+          selectionSet: fragment.selectionSet,
+          visitedFragments
+        }) && valid;
+        parentNodes.pop();
+      }
+    } else if (selection.selectionSet) {
+      valid = forbidUnconditionalDeferStream({
+        context,
+        checkedFragments,
+        selectionSet: selection.selectionSet,
+        parentNodes,
+        visitedFragments
+      }) && valid;
+    }
+  }
+  return valid;
+}
+
+// node_modules/graphql/language/predicates.mjs
+function isExecutableDefinitionNode(node) {
+  return node.kind === OPERATION_DEFINITION || node.kind === FRAGMENT_DEFINITION;
+}
+function isTypeSystemDefinitionNode(node) {
+  return node.kind === SCHEMA_DEFINITION || isTypeDefinitionNode(node) || node.kind === DIRECTIVE_DEFINITION;
+}
+function isTypeDefinitionNode(node) {
+  return node.kind === SCALAR_TYPE_DEFINITION || node.kind === OBJECT_TYPE_DEFINITION || node.kind === INTERFACE_TYPE_DEFINITION || node.kind === UNION_TYPE_DEFINITION || node.kind === ENUM_TYPE_DEFINITION || node.kind === INPUT_OBJECT_TYPE_DEFINITION;
+}
+function isTypeSystemExtensionNode(node) {
+  return node.kind === SCHEMA_EXTENSION || node.kind === DIRECTIVE_EXTENSION || isTypeExtensionNode(node);
+}
+function isTypeExtensionNode(node) {
+  return node.kind === SCALAR_TYPE_EXTENSION || node.kind === OBJECT_TYPE_EXTENSION || node.kind === INTERFACE_TYPE_EXTENSION || node.kind === UNION_TYPE_EXTENSION || node.kind === ENUM_TYPE_EXTENSION || node.kind === INPUT_OBJECT_TYPE_EXTENSION;
+}
+
 // node_modules/graphql/validation/rules/ExecutableDefinitionsRule.mjs
 function ExecutableDefinitionsRule(context) {
   return {
     Document(node) {
       for (const definition of node.definitions) {
         if (!isExecutableDefinitionNode(definition)) {
-          const defName = definition.kind === Kind.SCHEMA_DEFINITION || definition.kind === Kind.SCHEMA_EXTENSION ? "schema" : '"' + definition.name.value + '"';
+          const defName = definition.kind === SCHEMA_DEFINITION || definition.kind === SCHEMA_EXTENSION ? "schema" : '"' + definition.name.value + '"';
           context.reportError(new GraphQLError(`The ${defName} definition is not executable.`, {
             nodes: definition
           }));
@@ -5002,13 +6592,11 @@ function FieldsOnCorrectTypeRule(context) {
         if (!fieldDef) {
           const schema = context.getSchema();
           const fieldName = node.name.value;
-          let suggestion = didYouMean("to use an inline fragment on", getSuggestedTypeNames(schema, type, fieldName));
+          let suggestion = didYouMean("to use an inline fragment on", context.hideSuggestions ? [] : getSuggestedTypeNames(schema, type, fieldName));
           if (suggestion === "") {
-            suggestion = didYouMean(getSuggestedFieldNames(type, fieldName));
+            suggestion = didYouMean(context.hideSuggestions ? [] : getSuggestedFieldNames(type, fieldName));
           }
-          context.reportError(new GraphQLError(`Cannot query field "${fieldName}" on type "${type.name}".` + suggestion, {
-            nodes: node
-          }));
+          context.reportError(new GraphQLError(`Cannot query field "${fieldName}" on type "${type}".` + suggestion, { nodes: node }));
         }
       }
     }
@@ -5021,18 +6609,17 @@ function getSuggestedTypeNames(schema, type, fieldName) {
   const suggestedTypes = new Set;
   const usageCount = Object.create(null);
   for (const possibleType of schema.getPossibleTypes(type)) {
-    if (!possibleType.getFields()[fieldName]) {
+    if (possibleType.getFields()[fieldName] == null) {
       continue;
     }
     suggestedTypes.add(possibleType);
     usageCount[possibleType.name] = 1;
     for (const possibleInterface of possibleType.getInterfaces()) {
-      var _usageCount$possibleI;
-      if (!possibleInterface.getFields()[fieldName]) {
+      if (possibleInterface.getFields()[fieldName] == null) {
         continue;
       }
       suggestedTypes.add(possibleInterface);
-      usageCount[possibleInterface.name] = ((_usageCount$possibleI = usageCount[possibleInterface.name]) !== null && _usageCount$possibleI !== undefined ? _usageCount$possibleI : 0) + 1;
+      usageCount[possibleInterface.name] = (usageCount[possibleInterface.name] ?? 0) + 1;
     }
   }
   return [...suggestedTypes].sort((typeA, typeB) => {
@@ -5066,9 +6653,7 @@ function FragmentsOnCompositeTypesRule(context) {
         const type = typeFromAST(context.getSchema(), typeCondition);
         if (type && !isCompositeType(type)) {
           const typeStr = print(typeCondition);
-          context.reportError(new GraphQLError(`Fragment cannot condition on non composite type "${typeStr}".`, {
-            nodes: typeCondition
-          }));
+          context.reportError(new GraphQLError(`Fragment cannot condition on non composite type "${typeStr}".`, { nodes: typeCondition }));
         }
       }
     },
@@ -5076,9 +6661,7 @@ function FragmentsOnCompositeTypesRule(context) {
       const type = typeFromAST(context.getSchema(), node.typeCondition);
       if (type && !isCompositeType(type)) {
         const typeStr = print(node.typeCondition);
-        context.reportError(new GraphQLError(`Fragment "${node.name.value}" cannot condition on non composite type "${typeStr}".`, {
-          nodes: node.typeCondition
-        }));
+        context.reportError(new GraphQLError(`Fragment "${node.name.value}" cannot condition on non composite type "${typeStr}".`, { nodes: node.typeCondition }));
       }
     }
   };
@@ -5088,48 +6671,52 @@ function FragmentsOnCompositeTypesRule(context) {
 function KnownArgumentNamesRule(context) {
   return {
     ...KnownArgumentNamesOnDirectivesRule(context),
+    FragmentArgument(argNode) {
+      const fragmentSignature = context.getFragmentSignature();
+      if (fragmentSignature) {
+        const varDef = fragmentSignature.variableDefinitions.get(argNode.name.value);
+        if (!varDef) {
+          const argName = argNode.name.value;
+          const suggestions = context.hideSuggestions ? [] : suggestionList(argName, Array.from(fragmentSignature.variableDefinitions.values()).map((varSignature) => varSignature.variable.name.value));
+          context.reportError(new GraphQLError(`Unknown argument "${argName}" on fragment "${fragmentSignature.definition.name.value}".` + didYouMean(suggestions), { nodes: argNode }));
+        }
+      }
+    },
     Argument(argNode) {
       const argDef = context.getArgument();
       const fieldDef = context.getFieldDef();
-      const parentType = context.getParentType();
-      if (!argDef && fieldDef && parentType) {
+      if (!argDef && fieldDef) {
         const argName = argNode.name.value;
-        const knownArgsNames = fieldDef.args.map((arg) => arg.name);
-        const suggestions = suggestionList(argName, knownArgsNames);
-        context.reportError(new GraphQLError(`Unknown argument "${argName}" on field "${parentType.name}.${fieldDef.name}".` + didYouMean(suggestions), {
-          nodes: argNode
-        }));
+        const suggestions = context.hideSuggestions ? [] : suggestionList(argName, fieldDef.args.map((arg) => arg.name));
+        context.reportError(new GraphQLError(`Unknown argument "${argName}" on field "${fieldDef}".` + didYouMean(suggestions), { nodes: argNode }));
       }
     }
   };
 }
 function KnownArgumentNamesOnDirectivesRule(context) {
-  const directiveArgs = Object.create(null);
+  const directiveArgs = new Map;
   const schema = context.getSchema();
   const definedDirectives = schema ? schema.getDirectives() : specifiedDirectives;
   for (const directive of definedDirectives) {
-    directiveArgs[directive.name] = directive.args.map((arg) => arg.name);
+    directiveArgs.set(directive.name, new Set(directive.args.map((arg) => arg.name)));
   }
   const astDefinitions = context.getDocument().definitions;
   for (const def of astDefinitions) {
-    if (def.kind === Kind.DIRECTIVE_DEFINITION) {
-      var _def$arguments;
-      const argsNodes = (_def$arguments = def.arguments) !== null && _def$arguments !== undefined ? _def$arguments : [];
-      directiveArgs[def.name.value] = argsNodes.map((arg) => arg.name.value);
+    if (def.kind === DIRECTIVE_DEFINITION) {
+      const argsNodes = def.arguments ?? [];
+      directiveArgs.set(def.name.value, new Set(argsNodes.map((arg) => arg.name.value)));
     }
   }
   return {
     Directive(directiveNode) {
       const directiveName = directiveNode.name.value;
-      const knownArgs = directiveArgs[directiveName];
-      if (directiveNode.arguments && knownArgs) {
+      const knownArgs = directiveArgs.get(directiveName);
+      if (directiveNode.arguments != null && knownArgs != null) {
         for (const argNode of directiveNode.arguments) {
           const argName = argNode.name.value;
-          if (!knownArgs.includes(argName)) {
-            const suggestions = suggestionList(argName, knownArgs);
-            context.reportError(new GraphQLError(`Unknown argument "${argName}" on directive "@${directiveName}".` + didYouMean(suggestions), {
-              nodes: argNode
-            }));
+          if (!knownArgs.has(argName)) {
+            const suggestions = context.hideSuggestions ? [] : suggestionList(argName, [...knownArgs]);
+            context.reportError(new GraphQLError(`Unknown argument "${argName}" on directive "@${directiveName}".` + (context.hideSuggestions ? "" : didYouMean(suggestions)), { nodes: argNode }));
           }
         }
       }
@@ -5140,83 +6727,88 @@ function KnownArgumentNamesOnDirectivesRule(context) {
 
 // node_modules/graphql/validation/rules/KnownDirectivesRule.mjs
 function KnownDirectivesRule(context) {
-  const locationsMap = Object.create(null);
+  const locationsMap = new Map;
   const schema = context.getSchema();
   const definedDirectives = schema ? schema.getDirectives() : specifiedDirectives;
   for (const directive of definedDirectives) {
-    locationsMap[directive.name] = directive.locations;
+    locationsMap.set(directive.name, new Set(directive.locations));
   }
   const astDefinitions = context.getDocument().definitions;
   for (const def of astDefinitions) {
-    if (def.kind === Kind.DIRECTIVE_DEFINITION) {
-      locationsMap[def.name.value] = def.locations.map((name) => name.value);
+    if (def.kind === DIRECTIVE_DEFINITION) {
+      locationsMap.set(def.name.value, new Set(def.locations.map((name) => name.value)));
     }
   }
   return {
     Directive(node, _key, _parent, _path, ancestors) {
       const name = node.name.value;
-      const locations = locationsMap[name];
-      if (!locations) {
-        context.reportError(new GraphQLError(`Unknown directive "@${name}".`, {
-          nodes: node
-        }));
+      const locations = locationsMap.get(name);
+      if (locations == null) {
+        context.reportError(new GraphQLError(`Unknown directive "@${name}".`, { nodes: node }));
         return;
       }
       const candidateLocation = getDirectiveLocationForASTPath(ancestors);
-      if (candidateLocation && !locations.includes(candidateLocation)) {
-        context.reportError(new GraphQLError(`Directive "@${name}" may not be used on ${candidateLocation}.`, {
-          nodes: node
-        }));
+      if (candidateLocation != null && !locations.has(candidateLocation)) {
+        context.reportError(new GraphQLError(`Directive "@${name}" may not be used on ${candidateLocation}.`, { nodes: node }));
       }
     }
   };
 }
 function getDirectiveLocationForASTPath(ancestors) {
-  const appliedTo = ancestors[ancestors.length - 1];
-  "kind" in appliedTo || invariant(false);
+  const appliedTo = ancestors.at(-1);
+  if (!(appliedTo != null && ("kind" in appliedTo)))
+    invariant(false);
   switch (appliedTo.kind) {
-    case Kind.OPERATION_DEFINITION:
+    case OPERATION_DEFINITION:
       return getDirectiveLocationForOperation(appliedTo.operation);
-    case Kind.FIELD:
+    case FIELD:
       return DirectiveLocation.FIELD;
-    case Kind.FRAGMENT_SPREAD:
+    case FRAGMENT_SPREAD:
       return DirectiveLocation.FRAGMENT_SPREAD;
-    case Kind.INLINE_FRAGMENT:
+    case INLINE_FRAGMENT:
       return DirectiveLocation.INLINE_FRAGMENT;
-    case Kind.FRAGMENT_DEFINITION:
+    case FRAGMENT_DEFINITION:
       return DirectiveLocation.FRAGMENT_DEFINITION;
-    case Kind.VARIABLE_DEFINITION:
-      return DirectiveLocation.VARIABLE_DEFINITION;
-    case Kind.SCHEMA_DEFINITION:
-    case Kind.SCHEMA_EXTENSION:
-      return DirectiveLocation.SCHEMA;
-    case Kind.SCALAR_TYPE_DEFINITION:
-    case Kind.SCALAR_TYPE_EXTENSION:
-      return DirectiveLocation.SCALAR;
-    case Kind.OBJECT_TYPE_DEFINITION:
-    case Kind.OBJECT_TYPE_EXTENSION:
-      return DirectiveLocation.OBJECT;
-    case Kind.FIELD_DEFINITION:
-      return DirectiveLocation.FIELD_DEFINITION;
-    case Kind.INTERFACE_TYPE_DEFINITION:
-    case Kind.INTERFACE_TYPE_EXTENSION:
-      return DirectiveLocation.INTERFACE;
-    case Kind.UNION_TYPE_DEFINITION:
-    case Kind.UNION_TYPE_EXTENSION:
-      return DirectiveLocation.UNION;
-    case Kind.ENUM_TYPE_DEFINITION:
-    case Kind.ENUM_TYPE_EXTENSION:
-      return DirectiveLocation.ENUM;
-    case Kind.ENUM_VALUE_DEFINITION:
-      return DirectiveLocation.ENUM_VALUE;
-    case Kind.INPUT_OBJECT_TYPE_DEFINITION:
-    case Kind.INPUT_OBJECT_TYPE_EXTENSION:
-      return DirectiveLocation.INPUT_OBJECT;
-    case Kind.INPUT_VALUE_DEFINITION: {
+    case VARIABLE_DEFINITION: {
       const parentNode = ancestors[ancestors.length - 3];
-      "kind" in parentNode || invariant(false);
-      return parentNode.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION ? DirectiveLocation.INPUT_FIELD_DEFINITION : DirectiveLocation.ARGUMENT_DEFINITION;
+      if (!("kind" in parentNode))
+        invariant(false);
+      return parentNode.kind === OPERATION_DEFINITION ? DirectiveLocation.VARIABLE_DEFINITION : DirectiveLocation.FRAGMENT_VARIABLE_DEFINITION;
     }
+    case SCHEMA_DEFINITION:
+    case SCHEMA_EXTENSION:
+      return DirectiveLocation.SCHEMA;
+    case SCALAR_TYPE_DEFINITION:
+    case SCALAR_TYPE_EXTENSION:
+      return DirectiveLocation.SCALAR;
+    case OBJECT_TYPE_DEFINITION:
+    case OBJECT_TYPE_EXTENSION:
+      return DirectiveLocation.OBJECT;
+    case FIELD_DEFINITION:
+      return DirectiveLocation.FIELD_DEFINITION;
+    case INTERFACE_TYPE_DEFINITION:
+    case INTERFACE_TYPE_EXTENSION:
+      return DirectiveLocation.INTERFACE;
+    case UNION_TYPE_DEFINITION:
+    case UNION_TYPE_EXTENSION:
+      return DirectiveLocation.UNION;
+    case ENUM_TYPE_DEFINITION:
+    case ENUM_TYPE_EXTENSION:
+      return DirectiveLocation.ENUM;
+    case ENUM_VALUE_DEFINITION:
+      return DirectiveLocation.ENUM_VALUE;
+    case INPUT_OBJECT_TYPE_DEFINITION:
+    case INPUT_OBJECT_TYPE_EXTENSION:
+      return DirectiveLocation.INPUT_OBJECT;
+    case INPUT_VALUE_DEFINITION: {
+      const parentNode = ancestors.at(-3);
+      if (!(parentNode != null && ("kind" in parentNode)))
+        invariant(false);
+      return parentNode.kind === INPUT_OBJECT_TYPE_DEFINITION || parentNode.kind === INPUT_OBJECT_TYPE_EXTENSION ? DirectiveLocation.INPUT_FIELD_DEFINITION : DirectiveLocation.ARGUMENT_DEFINITION;
+    }
+    case DIRECTIVE_DEFINITION:
+    case DIRECTIVE_EXTENSION:
+      return DirectiveLocation.DIRECTIVE_DEFINITION;
     default:
       invariant(false, "Unexpected kind: " + inspect(appliedTo.kind));
   }
@@ -5247,39 +6839,47 @@ function KnownFragmentNamesRule(context) {
   };
 }
 
-// node_modules/graphql/validation/rules/KnownTypeNamesRule.mjs
-function KnownTypeNamesRule(context) {
+// node_modules/graphql/validation/rules/KnownOperationTypesRule.mjs
+function KnownOperationTypesRule(context) {
   const schema = context.getSchema();
-  const existingTypesMap = schema ? schema.getTypeMap() : Object.create(null);
-  const definedTypes = Object.create(null);
-  for (const def of context.getDocument().definitions) {
-    if (isTypeDefinitionNode(def)) {
-      definedTypes[def.name.value] = true;
-    }
-  }
-  const typeNames = [
-    ...Object.keys(existingTypesMap),
-    ...Object.keys(definedTypes)
-  ];
   return {
-    NamedType(node, _1, parent, _2, ancestors) {
-      const typeName = node.name.value;
-      if (!existingTypesMap[typeName] && !definedTypes[typeName]) {
-        var _ancestors$;
-        const definitionNode = (_ancestors$ = ancestors[2]) !== null && _ancestors$ !== undefined ? _ancestors$ : parent;
-        const isSDL = definitionNode != null && isSDLNode(definitionNode);
-        if (isSDL && standardTypeNames.includes(typeName)) {
-          return;
-        }
-        const suggestedTypes = suggestionList(typeName, isSDL ? standardTypeNames.concat(typeNames) : typeNames);
-        context.reportError(new GraphQLError(`Unknown type "${typeName}".` + didYouMean(suggestedTypes), {
-          nodes: node
-        }));
+    OperationDefinition(node) {
+      const operation = node.operation;
+      if (!schema.getRootType(operation)) {
+        context.reportError(new GraphQLError(`The ${operation} operation is not supported by the schema.`, { nodes: node }));
       }
     }
   };
 }
-var standardTypeNames = [...specifiedScalarTypes, ...introspectionTypes].map((type) => type.name);
+
+// node_modules/graphql/validation/rules/KnownTypeNamesRule.mjs
+function KnownTypeNamesRule(context) {
+  const { definitions } = context.getDocument();
+  const existingTypesMap = context.getSchema()?.getTypeMap() ?? {};
+  let definedTypeNames;
+  let typeNames;
+  return {
+    NamedType(node, _1, parent, _2, ancestors) {
+      const typeName = node.name.value;
+      if (!Object.hasOwn(existingTypesMap, typeName) && !(definedTypeNames ??= new Set(definitions.filter(isTypeDefinitionNode).map((def) => def.name.value))).has(typeName)) {
+        const definitionNode = ancestors[2] ?? parent;
+        const isSDL = definitionNode != null && isSDLNode(definitionNode);
+        if (isSDL && standardTypeNames.has(typeName)) {
+          return;
+        }
+        let suggestedTypes = [];
+        if (!context.hideSuggestions) {
+          typeNames ??= [
+            ...new Set([...Object.keys(existingTypesMap), ...definedTypeNames])
+          ];
+          suggestedTypes = suggestionList(typeName, isSDL ? [...standardTypeNames, ...typeNames] : typeNames);
+        }
+        context.reportError(new GraphQLError(`Unknown type "${typeName}".` + didYouMean(suggestedTypes), { nodes: node }));
+      }
+    }
+  };
+}
+var standardTypeNames = new Set([...specifiedScalarTypes, ...introspectionTypes].map((type) => type.name));
 function isSDLNode(value) {
   return "kind" in value && (isTypeSystemDefinitionNode(value) || isTypeSystemExtensionNode(value));
 }
@@ -5289,13 +6889,11 @@ function LoneAnonymousOperationRule(context) {
   let operationCount = 0;
   return {
     Document(node) {
-      operationCount = node.definitions.filter((definition) => definition.kind === Kind.OPERATION_DEFINITION).length;
+      operationCount = node.definitions.filter((definition) => definition.kind === OPERATION_DEFINITION).length;
     },
     OperationDefinition(node) {
       if (!node.name && operationCount > 1) {
-        context.reportError(new GraphQLError("This anonymous operation must be the only defined operation.", {
-          nodes: node
-        }));
+        context.reportError(new GraphQLError("This anonymous operation must be the only defined operation.", { nodes: node }));
       }
     }
   };
@@ -5303,16 +6901,13 @@ function LoneAnonymousOperationRule(context) {
 
 // node_modules/graphql/validation/rules/LoneSchemaDefinitionRule.mjs
 function LoneSchemaDefinitionRule(context) {
-  var _ref, _ref2, _oldSchema$astNode;
   const oldSchema = context.getSchema();
-  const alreadyDefined = (_ref = (_ref2 = (_oldSchema$astNode = oldSchema === null || oldSchema === undefined ? undefined : oldSchema.astNode) !== null && _oldSchema$astNode !== undefined ? _oldSchema$astNode : oldSchema === null || oldSchema === undefined ? undefined : oldSchema.getQueryType()) !== null && _ref2 !== undefined ? _ref2 : oldSchema === null || oldSchema === undefined ? undefined : oldSchema.getMutationType()) !== null && _ref !== undefined ? _ref : oldSchema === null || oldSchema === undefined ? undefined : oldSchema.getSubscriptionType();
+  const alreadyDefined = oldSchema?.astNode ?? oldSchema?.getQueryType() ?? oldSchema?.getMutationType() ?? oldSchema?.getSubscriptionType();
   let schemaDefinitionsCount = 0;
   return {
     SchemaDefinition(node) {
       if (alreadyDefined) {
-        context.reportError(new GraphQLError("Cannot define a new schema within a schema extension.", {
-          nodes: node
-        }));
+        context.reportError(new GraphQLError("Cannot define a new schema within a schema extension.", { nodes: node }));
         return;
       }
       if (schemaDefinitionsCount > 0) {
@@ -5328,24 +6923,33 @@ function LoneSchemaDefinitionRule(context) {
 // node_modules/graphql/validation/rules/MaxIntrospectionDepthRule.mjs
 var MAX_LISTS_DEPTH = 3;
 function MaxIntrospectionDepthRule(context) {
-  function checkDepth(node, visitedFragments = Object.create(null), depth = 0) {
-    if (node.kind === Kind.FRAGMENT_SPREAD) {
+  const checkedFragments = Object.create(null);
+  const exceededFragments = Object.create(null);
+  function checkDepth(node, visitedFragments, depth = 0) {
+    if (node.kind === FRAGMENT_SPREAD) {
       const fragmentName = node.name.value;
-      if (visitedFragments[fragmentName] === true) {
+      const exceededEntryDepth = exceededFragments[fragmentName];
+      if (exceededEntryDepth !== undefined && exceededEntryDepth <= depth) {
+        return true;
+      }
+      const visitedEntryDepth = visitedFragments[fragmentName];
+      const checkedEntryDepth = checkedFragments[fragmentName];
+      if (visitedEntryDepth !== undefined && visitedEntryDepth >= depth || checkedEntryDepth !== undefined && checkedEntryDepth >= depth) {
         return false;
       }
       const fragment = context.getFragment(fragmentName);
       if (!fragment) {
         return false;
       }
-      try {
-        visitedFragments[fragmentName] = true;
-        return checkDepth(fragment, visitedFragments, depth);
-      } finally {
-        visitedFragments[fragmentName] = undefined;
+      visitedFragments[fragmentName] = depth;
+      if (checkDepth(fragment, visitedFragments, depth)) {
+        exceededFragments[fragmentName] = depth;
+        return true;
       }
+      checkedFragments[fragmentName] = depth;
+      return false;
     }
-    if (node.kind === Kind.FIELD && (node.name.value === "fields" || node.name.value === "interfaces" || node.name.value === "possibleTypes" || node.name.value === "inputFields")) {
+    if (node.kind === FIELD && (node.name.value === "fields" || node.name.value === "interfaces" || node.name.value === "possibleTypes" || node.name.value === "inputFields")) {
       depth++;
       if (depth >= MAX_LISTS_DEPTH) {
         return true;
@@ -5363,7 +6967,8 @@ function MaxIntrospectionDepthRule(context) {
   return {
     Field(node) {
       if (node.name.value === "__schema" || node.name.value === "__type") {
-        if (checkDepth(node)) {
+        const visitedFragments = Object.create(null);
+        if (checkDepth(node, visitedFragments)) {
           context.reportError(new GraphQLError("Maximum introspection depth exceeded", {
             nodes: [node]
           }));
@@ -5376,7 +6981,7 @@ function MaxIntrospectionDepthRule(context) {
 
 // node_modules/graphql/validation/rules/NoFragmentCyclesRule.mjs
 function NoFragmentCyclesRule(context) {
-  const visitedFrags = Object.create(null);
+  const visitedFrags = new Set;
   const spreadPath = [];
   const spreadPathIndexByName = Object.create(null);
   return {
@@ -5387,11 +6992,11 @@ function NoFragmentCyclesRule(context) {
     }
   };
   function detectCycleRecursive(fragment) {
-    if (visitedFrags[fragment.name.value]) {
+    if (visitedFrags.has(fragment.name.value)) {
       return;
     }
     const fragmentName = fragment.name.value;
-    visitedFrags[fragmentName] = true;
+    visitedFrags.add(fragmentName);
     const spreadNodes = context.getFragmentSpreads(fragment.selectionSet);
     if (spreadNodes.length === 0) {
       return;
@@ -5409,9 +7014,7 @@ function NoFragmentCyclesRule(context) {
       } else {
         const cyclePath = spreadPath.slice(cycleIndex);
         const viaPath = cyclePath.slice(0, -1).map((s) => '"' + s.name.value + '"').join(", ");
-        context.reportError(new GraphQLError(`Cannot spread fragment "${spreadName}" within itself` + (viaPath !== "" ? ` via ${viaPath}.` : "."), {
-          nodes: cyclePath
-        }));
+        context.reportError(new GraphQLError(`Cannot spread fragment "${spreadName}" within itself` + (viaPath !== "" ? ` via ${viaPath}.` : "."), { nodes: cyclePath }));
       }
       spreadPath.pop();
     }
@@ -5421,37 +7024,30 @@ function NoFragmentCyclesRule(context) {
 
 // node_modules/graphql/validation/rules/NoUndefinedVariablesRule.mjs
 function NoUndefinedVariablesRule(context) {
-  let variableNameDefined = Object.create(null);
   return {
-    OperationDefinition: {
-      enter() {
-        variableNameDefined = Object.create(null);
-      },
-      leave(operation) {
-        const usages = context.getRecursiveVariableUsages(operation);
-        for (const { node } of usages) {
-          const varName = node.name.value;
-          if (variableNameDefined[varName] !== true) {
-            context.reportError(new GraphQLError(operation.name ? `Variable "$${varName}" is not defined by operation "${operation.name.value}".` : `Variable "$${varName}" is not defined.`, {
-              nodes: [node, operation]
-            }));
-          }
+    OperationDefinition(operation) {
+      const variableNameDefined = new Set(operation.variableDefinitions?.map((node) => node.variable.name.value));
+      const usages = context.getRecursiveVariableUsages(operation);
+      for (const { node, fragmentVariableDefinition } of usages) {
+        if (fragmentVariableDefinition) {
+          continue;
+        }
+        const varName = node.name.value;
+        if (!variableNameDefined.has(varName)) {
+          context.reportError(new GraphQLError(operation.name ? `Variable "$${varName}" is not defined by operation "${operation.name.value}".` : `Variable "$${varName}" is not defined.`, { nodes: [node, operation] }));
         }
       }
-    },
-    VariableDefinition(node) {
-      variableNameDefined[node.variable.name.value] = true;
     }
   };
 }
 
 // node_modules/graphql/validation/rules/NoUnusedFragmentsRule.mjs
 function NoUnusedFragmentsRule(context) {
-  const operationDefs = [];
+  const operations = [];
   const fragmentDefs = [];
   return {
-    OperationDefinition(node) {
-      operationDefs.push(node);
+    OperationDefinition(operation) {
+      operations.push(operation);
       return false;
     },
     FragmentDefinition(node) {
@@ -5460,15 +7056,10 @@ function NoUnusedFragmentsRule(context) {
     },
     Document: {
       leave() {
-        const fragmentNameUsed = Object.create(null);
-        for (const operation of operationDefs) {
-          for (const fragment of context.getRecursivelyReferencedFragments(operation)) {
-            fragmentNameUsed[fragment.name.value] = true;
-          }
-        }
+        const fragmentNameUsed = new Set(context.getRecursivelyReferencedFragmentsForOperations(operations).map((fragment) => fragment.name.value));
         for (const fragmentDef of fragmentDefs) {
           const fragName = fragmentDef.name.value;
-          if (fragmentNameUsed[fragName] !== true) {
+          if (!fragmentNameUsed.has(fragName)) {
             context.reportError(new GraphQLError(`Fragment "${fragName}" is never used.`, {
               nodes: fragmentDef
             }));
@@ -5481,160 +7072,202 @@ function NoUnusedFragmentsRule(context) {
 
 // node_modules/graphql/validation/rules/NoUnusedVariablesRule.mjs
 function NoUnusedVariablesRule(context) {
-  let variableDefs = [];
   return {
-    OperationDefinition: {
-      enter() {
-        variableDefs = [];
-      },
-      leave(operation) {
-        const variableNameUsed = Object.create(null);
-        const usages = context.getRecursiveVariableUsages(operation);
-        for (const { node } of usages) {
-          variableNameUsed[node.name.value] = true;
-        }
-        for (const variableDef of variableDefs) {
-          const variableName = variableDef.variable.name.value;
-          if (variableNameUsed[variableName] !== true) {
-            context.reportError(new GraphQLError(operation.name ? `Variable "$${variableName}" is never used in operation "${operation.name.value}".` : `Variable "$${variableName}" is never used.`, {
-              nodes: variableDef
-            }));
-          }
+    FragmentDefinition(fragment) {
+      const usages = context.getVariableUsages(fragment);
+      const argumentNameUsed = new Set(usages.map(({ node }) => node.name.value));
+      const variableDefinitions = fragment.variableDefinitions ?? [];
+      for (const varDef of variableDefinitions) {
+        const argName = varDef.variable.name.value;
+        if (!argumentNameUsed.has(argName)) {
+          context.reportError(new GraphQLError(`Variable "$${argName}" is never used in fragment "${fragment.name.value}".`, { nodes: varDef }));
         }
       }
     },
-    VariableDefinition(def) {
-      variableDefs.push(def);
-    }
-  };
-}
-
-// node_modules/graphql/utilities/sortValueNode.mjs
-function sortValueNode(valueNode) {
-  switch (valueNode.kind) {
-    case Kind.OBJECT:
-      return { ...valueNode, fields: sortFields(valueNode.fields) };
-    case Kind.LIST:
-      return { ...valueNode, values: valueNode.values.map(sortValueNode) };
-    case Kind.INT:
-    case Kind.FLOAT:
-    case Kind.STRING:
-    case Kind.BOOLEAN:
-    case Kind.NULL:
-    case Kind.ENUM:
-    case Kind.VARIABLE:
-      return valueNode;
-  }
-}
-function sortFields(fields) {
-  return fields.map((fieldNode) => ({
-    ...fieldNode,
-    value: sortValueNode(fieldNode.value)
-  })).sort((fieldA, fieldB) => naturalCompare(fieldA.name.value, fieldB.name.value));
-}
-
-// node_modules/graphql/validation/rules/OverlappingFieldsCanBeMergedRule.mjs
-function reasonMessage(reason) {
-  if (Array.isArray(reason)) {
-    return reason.map(([responseName, subReason]) => `subfields "${responseName}" conflict because ` + reasonMessage(subReason)).join(" and ");
-  }
-  return reason;
-}
-function OverlappingFieldsCanBeMergedRule(context) {
-  const comparedFieldsAndFragmentPairs = new OrderedPairSet;
-  const comparedFragmentPairs = new PairSet;
-  const cachedFieldsAndFragmentNames = new Map;
-  return {
-    SelectionSet(selectionSet) {
-      const conflicts = findConflictsWithinSelectionSet(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, context.getParentType(), selectionSet);
-      for (const [[responseName, reason], fields1, fields2] of conflicts) {
-        const reasonMsg = reasonMessage(reason);
-        context.reportError(new GraphQLError(`Fields "${responseName}" conflict because ${reasonMsg}. Use different aliases on the fields to fetch both if this was intentional.`, {
-          nodes: fields1.concat(fields2)
-        }));
+    OperationDefinition(operation) {
+      const usages = context.getRecursiveVariableUsages(operation);
+      const operationVariableNameUsed = new Set;
+      for (const { node, fragmentVariableDefinition } of usages) {
+        const varName = node.name.value;
+        if (!fragmentVariableDefinition) {
+          operationVariableNameUsed.add(varName);
+        }
+      }
+      const variableDefinitions = operation.variableDefinitions ?? [];
+      for (const variableDef of variableDefinitions) {
+        const variableName = variableDef.variable.name.value;
+        if (!operationVariableNameUsed.has(variableName)) {
+          context.reportError(new GraphQLError(operation.name ? `Variable "$${variableName}" is never used in operation "${operation.name.value}".` : `Variable "$${variableName}" is never used.`, { nodes: variableDef }));
+        }
       }
     }
   };
 }
-function findConflictsWithinSelectionSet(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, parentType, selectionSet) {
+
+// node_modules/graphql/validation/validationAbortedError.mjs
+var validationAbortedError = new GraphQLError("Validation aborted.");
+
+// node_modules/graphql/validation/rules/OverlappingFieldsCanBeMergedRule.mjs
+var MAX_CONFLICT_DETAIL_LENGTH = 1000;
+var MAX_CONFLICT_NODES = 20;
+var MAX_FRAGMENT_ARGUMENT_SIZE = 256;
+var MAX_COMPLEXITY_BUDGET = 500000;
+function OverlappingFieldsCanBeMergedRule(validationContext) {
+  const ruleContext = {
+    comparedFieldsAndFragmentPairs: new Map,
+    comparedFragmentPairs: new Map,
+    cachedCollectFieldsResults: new Map,
+    valueInfoByNode: new Map,
+    fragmentSpreadInfoByNode: new Map,
+    fragmentSpreadInfoByKey: new Map,
+    remainingComplexityBudget: MAX_COMPLEXITY_BUDGET
+  };
+  let fragmentScope;
+  return {
+    FragmentDefinition: {
+      enter(node) {
+        const fragmentName = node.name.value;
+        const fragmentSignature = validationContext.getFragmentSignatureByName()(fragmentName);
+        fragmentScope = getVariableScope(fragmentSignature);
+      },
+      leave() {
+        fragmentScope = undefined;
+      }
+    },
+    SelectionSet(selectionSet, _key, parent) {
+      if (parent && "kind" in parent && parent.kind === INLINE_FRAGMENT) {
+        return;
+      }
+      if (selectionSet.selections.length <= 1 && selectionSet.selections[0]?.kind !== INLINE_FRAGMENT) {
+        return;
+      }
+      const conflicts = findConflictsWithinSelectionSet(validationContext, ruleContext, validationContext.getParentType(), selectionSet, fragmentScope);
+      for (const { responseName, reason, fields1, fields2 } of conflicts) {
+        validationContext.reportError(new GraphQLError(`Fields "${maybeAbbreviate(responseName)}" conflict because ${reason}. Use different aliases on the fields to fetch both if this was intentional.`, { nodes: fields1.concat(fields2) }));
+      }
+    }
+  };
+}
+function findConflictsWithinSelectionSet(validationContext, ruleContext, parentType, selectionSet, scope) {
   const conflicts = [];
-  const [fieldMap, fragmentNames] = getFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, parentType, selectionSet);
-  collectConflictsWithin(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, fieldMap);
-  if (fragmentNames.length !== 0) {
-    for (let i = 0;i < fragmentNames.length; i++) {
-      collectConflictsBetweenFieldsAndFragment(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, false, fieldMap, fragmentNames[i]);
-      for (let j = i + 1;j < fragmentNames.length; j++) {
-        collectConflictsBetweenFragments(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, false, fragmentNames[i], fragmentNames[j]);
+  const collectFieldsResult = collectFields(validationContext, ruleContext, parentType, selectionSet);
+  collectConflictsWithin(validationContext, ruleContext, conflicts, collectFieldsResult, scope);
+  if (collectFieldsResult.spreads.length !== 0 && (collectFieldsResult.groupedFieldSet.size !== 0 || collectFieldsResult.spreads.length > 1)) {
+    const fragmentSpreads = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult, scope);
+    for (let i = 0;i < fragmentSpreads.length; i++) {
+      collectConflictsBetweenFieldsAndFragment(validationContext, ruleContext, conflicts, false, collectFieldsResult, scope, fragmentSpreads[i]);
+      for (let j = i + 1;j < fragmentSpreads.length; j++) {
+        collectConflictsBetweenFragments(validationContext, ruleContext, conflicts, false, fragmentSpreads[i], fragmentSpreads[j]);
       }
     }
   }
   return conflicts;
 }
-function collectConflictsBetweenFieldsAndFragment(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap, fragmentName) {
-  if (comparedFieldsAndFragmentPairs.has(fieldMap, fragmentName, areMutuallyExclusive)) {
+function collectConflictsBetweenFieldsAndFragment(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult, scope, fragmentSpread) {
+  spendComplexityBudget(ruleContext, 1);
+  if (collectFieldsResult.groupedFieldSet.size === 0) {
     return;
   }
-  comparedFieldsAndFragmentPairs.add(fieldMap, fragmentName, areMutuallyExclusive);
-  const fragment = context.getFragment(fragmentName);
+  const fragment = fragmentSpread.definition;
+  let byFragmentScope = ruleContext.comparedFieldsAndFragmentPairs.get(scope);
+  if (byFragmentScope === undefined) {
+    byFragmentScope = new Map;
+    ruleContext.comparedFieldsAndFragmentPairs.set(scope, byFragmentScope);
+  }
+  let comparedFieldsAndFragmentPairs = byFragmentScope.get(fragmentSpread.scope);
+  if (comparedFieldsAndFragmentPairs === undefined) {
+    comparedFieldsAndFragmentPairs = new OrderedPairSet;
+    byFragmentScope.set(fragmentSpread.scope, comparedFieldsAndFragmentPairs);
+  }
+  if (comparedFieldsAndFragmentPairs.has(collectFieldsResult, fragment, areMutuallyExclusive)) {
+    return;
+  }
+  comparedFieldsAndFragmentPairs.add(collectFieldsResult, fragment, areMutuallyExclusive);
   if (!fragment) {
     return;
   }
-  const [fieldMap2, referencedFragmentNames] = getReferencedFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, fragment);
-  if (fieldMap === fieldMap2) {
+  const collectFieldsResult2 = collectFragmentFields(validationContext, ruleContext, fragment);
+  const referencedFragmentSpreads = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult2, fragmentSpread.scope);
+  if (collectFieldsResult === collectFieldsResult2 && scope === fragmentSpread.scope) {
     return;
   }
-  collectConflictsBetween(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap, fieldMap2);
-  for (const referencedFragmentName of referencedFragmentNames) {
-    collectConflictsBetweenFieldsAndFragment(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap, referencedFragmentName);
+  collectConflictsBetween(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult, scope, collectFieldsResult2, fragmentSpread.scope);
+  for (const referencedFragmentSpread of referencedFragmentSpreads) {
+    collectConflictsBetweenFieldsAndFragment(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult, scope, referencedFragmentSpread);
   }
 }
-function collectConflictsBetweenFragments(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fragmentName1, fragmentName2) {
-  if (fragmentName1 === fragmentName2) {
+function collectConflictsBetweenFragments(validationContext, ruleContext, conflicts, areMutuallyExclusive, fragmentSpread1, fragmentSpread2) {
+  const fragment1 = fragmentSpread1.definition;
+  const fragment2 = fragmentSpread2.definition;
+  const scope1 = fragmentSpread1.scope;
+  const scope2 = fragmentSpread2.scope;
+  spendComplexityBudget(ruleContext, 2);
+  if (fragment1 === fragment2 && scope1 === scope2) {
     return;
   }
-  if (comparedFragmentPairs.has(fragmentName1, fragmentName2, areMutuallyExclusive)) {
+  let byScope = ruleContext.comparedFragmentPairs.get(scope1);
+  let comparedFragmentPairs = byScope?.get(scope2) ?? ruleContext.comparedFragmentPairs.get(scope2)?.get(scope1);
+  if (comparedFragmentPairs === undefined) {
+    if (byScope === undefined) {
+      byScope = new Map;
+      ruleContext.comparedFragmentPairs.set(scope1, byScope);
+    }
+    comparedFragmentPairs = new PairSet;
+    byScope.set(scope2, comparedFragmentPairs);
+  }
+  if (fragment1 === fragment2) {
+    if (comparedFragmentPairs.has(fragment1, fragment2, false)) {
+      return;
+    }
+    comparedFragmentPairs.add(fragment1, fragment2, false);
+    validationContext.reportError(new GraphQLError(`Spreads "${maybeAbbreviate(fragmentSpread1.node.name.value)}" conflict because ${getFragmentSpreadDescription(ruleContext, fragmentSpread1.node)} and ${getFragmentSpreadDescription(ruleContext, fragmentSpread2.node)} have different fragment arguments.`, { nodes: [fragmentSpread1.node, fragmentSpread2.node] }));
     return;
   }
-  comparedFragmentPairs.add(fragmentName1, fragmentName2, areMutuallyExclusive);
-  const fragment1 = context.getFragment(fragmentName1);
-  const fragment2 = context.getFragment(fragmentName2);
+  if (comparedFragmentPairs.has(fragment1, fragment2, areMutuallyExclusive)) {
+    return;
+  }
+  comparedFragmentPairs.add(fragment1, fragment2, areMutuallyExclusive);
   if (!fragment1 || !fragment2) {
     return;
   }
-  const [fieldMap1, referencedFragmentNames1] = getReferencedFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, fragment1);
-  const [fieldMap2, referencedFragmentNames2] = getReferencedFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, fragment2);
-  collectConflictsBetween(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap1, fieldMap2);
-  for (const referencedFragmentName2 of referencedFragmentNames2) {
-    collectConflictsBetweenFragments(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fragmentName1, referencedFragmentName2);
+  const collectFieldsResult1 = collectFragmentFields(validationContext, ruleContext, fragment1);
+  const referencedFragmentSpreads1 = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult1, fragmentSpread1.scope);
+  const collectFieldsResult2 = collectFragmentFields(validationContext, ruleContext, fragment2);
+  const referencedFragmentSpreads2 = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult2, fragmentSpread2.scope);
+  collectConflictsBetween(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult1, fragmentSpread1.scope, collectFieldsResult2, fragmentSpread2.scope);
+  for (const referencedFragmentSpread2 of referencedFragmentSpreads2) {
+    collectConflictsBetweenFragments(validationContext, ruleContext, conflicts, areMutuallyExclusive, fragmentSpread1, referencedFragmentSpread2);
   }
-  for (const referencedFragmentName1 of referencedFragmentNames1) {
-    collectConflictsBetweenFragments(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, referencedFragmentName1, fragmentName2);
+  for (const referencedFragmentSpread1 of referencedFragmentSpreads1) {
+    collectConflictsBetweenFragments(validationContext, ruleContext, conflicts, areMutuallyExclusive, referencedFragmentSpread1, fragmentSpread2);
   }
 }
-function findConflictsBetweenSubSelectionSets(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, parentType1, selectionSet1, parentType2, selectionSet2) {
+function findConflictsBetweenSubSelectionSets(validationContext, ruleContext, areMutuallyExclusive, parentType1, selectionSet1, scope1, parentType2, selectionSet2, scope2) {
   const conflicts = [];
-  const [fieldMap1, fragmentNames1] = getFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, parentType1, selectionSet1);
-  const [fieldMap2, fragmentNames2] = getFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, parentType2, selectionSet2);
-  collectConflictsBetween(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap1, fieldMap2);
-  for (const fragmentName2 of fragmentNames2) {
-    collectConflictsBetweenFieldsAndFragment(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap1, fragmentName2);
+  const collectFieldsResult1 = collectFields(validationContext, ruleContext, parentType1, selectionSet1);
+  const fragmentSpreads1 = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult1, scope1);
+  const collectFieldsResult2 = collectFields(validationContext, ruleContext, parentType2, selectionSet2);
+  const fragmentSpreads2 = getFragmentSpreads(validationContext, ruleContext, collectFieldsResult2, scope2);
+  collectConflictsBetween(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult1, scope1, collectFieldsResult2, scope2);
+  for (const fragmentSpread2 of fragmentSpreads2) {
+    collectConflictsBetweenFieldsAndFragment(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult1, scope1, fragmentSpread2);
   }
-  for (const fragmentName1 of fragmentNames1) {
-    collectConflictsBetweenFieldsAndFragment(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fieldMap2, fragmentName1);
+  for (const fragmentSpread1 of fragmentSpreads1) {
+    collectConflictsBetweenFieldsAndFragment(validationContext, ruleContext, conflicts, areMutuallyExclusive, collectFieldsResult2, scope2, fragmentSpread1);
   }
-  for (const fragmentName1 of fragmentNames1) {
-    for (const fragmentName2 of fragmentNames2) {
-      collectConflictsBetweenFragments(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, fragmentName1, fragmentName2);
+  for (const fragmentSpread1 of fragmentSpreads1) {
+    for (const fragmentSpread2 of fragmentSpreads2) {
+      collectConflictsBetweenFragments(validationContext, ruleContext, conflicts, areMutuallyExclusive, fragmentSpread1, fragmentSpread2);
     }
   }
   return conflicts;
 }
-function collectConflictsWithin(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, fieldMap) {
-  for (const [responseName, fields] of Object.entries(fieldMap)) {
-    if (fields.length > 1) {
-      for (let i = 0;i < fields.length; i++) {
-        for (let j = i + 1;j < fields.length; j++) {
-          const conflict = findConflict(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, false, responseName, fields[i], fields[j]);
+function collectConflictsWithin(validationContext, ruleContext, conflicts, collectFieldsResult, scope) {
+  for (const [responseName, fieldDetailsList] of collectFieldsResult.groupedFieldSet.entries()) {
+    if (fieldDetailsList.length > 1) {
+      for (let i = 0;i < fieldDetailsList.length; i++) {
+        for (let j = i + 1;j < fieldDetailsList.length; j++) {
+          const conflict = findConflict(validationContext, ruleContext, false, responseName, fieldDetailsList[i], scope, fieldDetailsList[j], scope);
           if (conflict) {
             conflicts.push(conflict);
           }
@@ -5643,96 +7276,227 @@ function collectConflictsWithin(context, conflicts, cachedFieldsAndFragmentNames
     }
   }
 }
-function collectConflictsBetween(context, conflicts, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, parentFieldsAreMutuallyExclusive, fieldMap1, fieldMap2) {
-  for (const [responseName, fields1] of Object.entries(fieldMap1)) {
-    const fields2 = fieldMap2[responseName];
-    if (fields2) {
-      for (const field1 of fields1) {
-        for (const field2 of fields2) {
-          const conflict = findConflict(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, parentFieldsAreMutuallyExclusive, responseName, field1, field2);
-          if (conflict) {
-            conflicts.push(conflict);
-          }
+function collectConflictsBetween(validationContext, ruleContext, conflicts, parentFieldsAreMutuallyExclusive, collectFieldsResult1, scope1, collectFieldsResult2, scope2) {
+  if (collectFieldsResult1.groupedFieldSet.size === 0 || collectFieldsResult2.groupedFieldSet.size === 0) {
+    return;
+  }
+  for (const { responseName, fieldDetailsList1, fieldDetailsList2 } of getOverlappingFields(ruleContext, collectFieldsResult1, collectFieldsResult2)) {
+    for (const fieldDetails1 of fieldDetailsList1) {
+      for (const fieldDetails2 of fieldDetailsList2) {
+        const conflict = findConflict(validationContext, ruleContext, parentFieldsAreMutuallyExclusive, responseName, fieldDetails1, scope1, fieldDetails2, scope2);
+        if (conflict) {
+          conflicts.push(conflict);
         }
       }
     }
   }
 }
-function findConflict(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, parentFieldsAreMutuallyExclusive, responseName, field1, field2) {
-  const [parentType1, node1, def1] = field1;
-  const [parentType2, node2, def2] = field2;
+function getOverlappingFields(ruleContext, collectFieldsResult1, collectFieldsResult2) {
+  const byCollectFieldsResult = collectFieldsResult1.overlappingFields ??= new Map;
+  const cached = byCollectFieldsResult.get(collectFieldsResult2);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const overlappingFields = [];
+  for (const [responseName, fieldDetailsList1] of collectFieldsResult1.groupedFieldSet.entries()) {
+    spendComplexityBudget(ruleContext, 1);
+    const fieldDetailsList2 = collectFieldsResult2.groupedFieldSet.get(responseName);
+    if (fieldDetailsList2 != null) {
+      overlappingFields.push({
+        responseName,
+        fieldDetailsList1,
+        fieldDetailsList2
+      });
+    }
+  }
+  byCollectFieldsResult.set(collectFieldsResult2, overlappingFields);
+  return overlappingFields;
+}
+function findConflict(validationContext, ruleContext, parentFieldsAreMutuallyExclusive, responseName, fieldDetails1, scope1, fieldDetails2, scope2) {
+  const { parentType: parentType1, node: node1, definition: def1, streamDirective: streamDirective1 } = fieldDetails1;
+  const { parentType: parentType2, node: node2, definition: def2, streamDirective: streamDirective2 } = fieldDetails2;
   const areMutuallyExclusive = parentFieldsAreMutuallyExclusive || parentType1 !== parentType2 && isObjectType(parentType1) && isObjectType(parentType2);
+  spendComplexityBudget(ruleContext, 2);
+  if (fieldDetails1.isSimpleLeaf && fieldDetails2.isSimpleLeaf && def1?.type === def2?.type && node1.name.value === node2.name.value) {
+    return;
+  }
+  const fieldInfo1 = getFieldInfo(fieldDetails1);
+  const fieldInfo2 = getFieldInfo(fieldDetails2);
+  let comparison = fieldInfo1.comparisons.get(fieldInfo2);
+  if (comparison === undefined) {
+    comparison = {};
+    fieldInfo1.comparisons.set(fieldInfo2, comparison);
+  }
   if (!areMutuallyExclusive) {
     const name1 = node1.name.value;
     const name2 = node2.name.value;
-    if (name1 !== name2) {
-      return [
-        [responseName, `"${name1}" and "${name2}" are different fields`],
-        [node1],
-        [node2]
-      ];
+    const sameName = comparison.sameName ??= name1 === name2;
+    if (!sameName) {
+      return {
+        responseName,
+        reason: `"${maybeAbbreviate(name1)}" and "${maybeAbbreviate(name2)}" are different fields`,
+        fields1: [node1],
+        fields2: [node2]
+      };
     }
-    if (!sameArguments(node1, node2)) {
-      return [
-        [responseName, "they have differing arguments"],
-        [node1],
-        [node2]
-      ];
+    const comparedArguments = comparison.arguments ??= compareArguments(ruleContext, fieldInfo1.arguments, fieldInfo2.arguments);
+    if (!sameArguments(ruleContext, comparedArguments, scope1, scope2)) {
+      return {
+        responseName,
+        reason: "they have differing arguments",
+        fields1: [node1],
+        fields2: [node2]
+      };
     }
   }
-  const type1 = def1 === null || def1 === undefined ? undefined : def1.type;
-  const type2 = def2 === null || def2 === undefined ? undefined : def2.type;
-  if (type1 && type2 && doTypesConflict(type1, type2)) {
-    return [
-      [
-        responseName,
-        `they return conflicting types "${inspect(type1)}" and "${inspect(type2)}"`
-      ],
-      [node1],
-      [node2]
-    ];
+  if (streamDirective1 || streamDirective2) {
+    let reason = "they have overlapping stream directives";
+    if (streamDirective1 && streamDirective2) {
+      const comparedArguments = comparison.streamArguments ??= compareArguments(ruleContext, fieldInfo1.streamArguments, fieldInfo2.streamArguments);
+      if (sameArguments(ruleContext, comparedArguments, scope1, scope2)) {
+        reason += ". See https://github.com/graphql/defer-stream-wg/discussions/100";
+      }
+    }
+    return { responseName, reason, fields1: [node1], fields2: [node2] };
+  }
+  const type1 = def1?.type;
+  const type2 = def2?.type;
+  if (type1 && type2 && doTypesConflict(ruleContext, type1, type2)) {
+    const type1String = fieldInfo1.typeString ??= inspect(type1);
+    const type2String = fieldInfo2.typeString ??= inspect(type2);
+    return {
+      responseName,
+      reason: `they return conflicting types "${type1String}" and "${type2String}"`,
+      fields1: [node1],
+      fields2: [node2]
+    };
   }
   const selectionSet1 = node1.selectionSet;
   const selectionSet2 = node2.selectionSet;
   if (selectionSet1 && selectionSet2) {
-    const conflicts = findConflictsBetweenSubSelectionSets(context, cachedFieldsAndFragmentNames, comparedFieldsAndFragmentPairs, comparedFragmentPairs, areMutuallyExclusive, getNamedType(type1), selectionSet1, getNamedType(type2), selectionSet2);
+    const conflicts = findConflictsBetweenSubSelectionSets(validationContext, ruleContext, areMutuallyExclusive, fieldInfo1.namedType, selectionSet1, scope1, fieldInfo2.namedType, selectionSet2, scope2);
     return subfieldConflicts(conflicts, responseName, node1, node2);
   }
 }
-function sameArguments(node1, node2) {
-  const args1 = node1.arguments;
-  const args2 = node2.arguments;
-  if (args1 === undefined || args1.length === 0) {
-    return args2 === undefined || args2.length === 0;
+function getFieldInfo(fieldDetails) {
+  return fieldDetails.info ??= {
+    comparisons: new Map,
+    namedType: getNamedType(fieldDetails.definition?.type),
+    arguments: getArgumentInfo(fieldDetails.node.arguments),
+    streamArguments: getArgumentInfo(fieldDetails.streamDirective?.arguments)
+  };
+}
+function getArgumentInfo(args) {
+  if (args === undefined || args.length === 0) {
+    return;
   }
-  if (args2 === undefined || args2.length === 0) {
-    return false;
+  const values = new Map;
+  for (const { name, value } of args) {
+    values.set(name.value, value);
   }
-  if (args1.length !== args2.length) {
-    return false;
+  return {
+    nodes: args,
+    values
+  };
+}
+function compareArguments(ruleContext, argumentInfo1, argumentInfo2) {
+  const valuesWithVariables = [];
+  if (argumentInfo1 === undefined) {
+    return {
+      sameStructure: argumentInfo2 === undefined,
+      valuesWithVariables
+    };
   }
-  const values2 = new Map(args2.map(({ name, value }) => [name.value, value]));
-  return args1.every((arg1) => {
-    const value1 = arg1.value;
-    const value2 = values2.get(arg1.name.value);
+  if (argumentInfo1.nodes.length !== argumentInfo2?.nodes.length) {
+    return { sameStructure: false, valuesWithVariables };
+  }
+  for (const arg1 of argumentInfo1.nodes) {
+    spendComplexityBudget(ruleContext, 1);
+    const value2 = argumentInfo2.values.get(arg1.name.value);
     if (value2 === undefined) {
-      return false;
+      return { sameStructure: false, valuesWithVariables };
     }
-    return stringifyValue(value1) === stringifyValue(value2);
+    const valueInfo1 = getValueInfo(ruleContext, arg1.value);
+    if (valueInfo1.comparisonKey !== getValueInfo(ruleContext, value2).comparisonKey) {
+      return { sameStructure: false, valuesWithVariables };
+    }
+    if (valueInfo1.variables.length !== 0) {
+      valuesWithVariables.push(valueInfo1);
+    }
+  }
+  return { sameStructure: true, valuesWithVariables };
+}
+function sameArguments(ruleContext, comparison, scope1, scope2) {
+  if (!comparison.sameStructure) {
+    return false;
+  }
+  return scope1 === scope2 || comparison.valuesWithVariables.every((value) => {
+    spendComplexityBudget(ruleContext, 1);
+    return !usesLocalVariables(ruleContext, value, scope1) && !usesLocalVariables(ruleContext, value, scope2);
   });
 }
-function stringifyValue(value) {
-  return print(sortValueNode(value));
+function usesLocalVariables(ruleContext, value, scope) {
+  if (scope === undefined) {
+    return false;
+  }
+  const dependencies = value.scopeDependencies ??= new Map;
+  const cached = dependencies.get(scope.signature);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const dependsOnScope = value.variables.some((variable) => {
+    spendComplexityBudget(ruleContext, 1);
+    return scope.signature.variableDefinitions.has(variable);
+  });
+  dependencies.set(scope.signature, dependsOnScope);
+  return dependsOnScope;
 }
-function doTypesConflict(type1, type2) {
+function getValueInfo(ruleContext, value) {
+  const cached = ruleContext.valueInfoByNode.get(value);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const variables = [];
+  const comparisonKey = JSON.stringify(value, (_key, node) => {
+    if (!isNode(node)) {
+      return node;
+    }
+    switch (node.kind) {
+      case VARIABLE:
+        variables.push(node.name.value);
+        return [node.kind, node.name.value];
+      case OBJECT:
+        return [
+          node.kind,
+          node.fields.slice().sort((first, second) => first.name.value < second.name.value ? -1 : first.name.value > second.name.value ? 1 : 0)
+        ];
+      case OBJECT_FIELD:
+        return [node.name.value, node.value];
+      case LIST:
+        return [node.kind, node.values];
+      case STRING:
+        return [node.kind, node.value, node.block === true];
+      default:
+        return [node.kind, "value" in node ? node.value : null];
+    }
+  });
+  const valueInfo = { comparisonKey, variables };
+  ruleContext.valueInfoByNode.set(value, valueInfo);
+  return valueInfo;
+}
+function doTypesConflict(ruleContext, type1, type2) {
+  if (type1 === type2) {
+    return false;
+  }
+  spendComplexityBudget(ruleContext, 1);
   if (isListType(type1)) {
-    return isListType(type2) ? doTypesConflict(type1.ofType, type2.ofType) : true;
+    return isListType(type2) ? doTypesConflict(ruleContext, type1.ofType, type2.ofType) : true;
   }
   if (isListType(type2)) {
     return true;
   }
   if (isNonNullType(type1)) {
-    return isNonNullType(type2) ? doTypesConflict(type1.ofType, type2.ofType) : true;
+    return isNonNullType(type2) ? doTypesConflict(ruleContext, type1.ofType, type2.ofType) : true;
   }
   if (isNonNullType(type2)) {
     return true;
@@ -5742,61 +7506,202 @@ function doTypesConflict(type1, type2) {
   }
   return false;
 }
-function getFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, parentType, selectionSet) {
-  const cached = cachedFieldsAndFragmentNames.get(selectionSet);
-  if (cached) {
-    return cached;
+function collectFields(validationContext, ruleContext, parentType, selectionSet) {
+  const { cachedCollectFieldsResults } = ruleContext;
+  let bySelectionSet = cachedCollectFieldsResults.get(parentType);
+  if (!bySelectionSet) {
+    bySelectionSet = new Map;
+    cachedCollectFieldsResults.set(parentType, bySelectionSet);
   }
-  const nodeAndDefs = Object.create(null);
-  const fragmentNames = Object.create(null);
-  _collectFieldsAndFragmentNames(context, parentType, selectionSet, nodeAndDefs, fragmentNames);
-  const result = [nodeAndDefs, Object.keys(fragmentNames)];
-  cachedFieldsAndFragmentNames.set(selectionSet, result);
-  return result;
-}
-function getReferencedFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, fragment) {
-  const cached = cachedFieldsAndFragmentNames.get(fragment.selectionSet);
-  if (cached) {
-    return cached;
+  let collectFieldsResult = bySelectionSet.get(selectionSet);
+  if (!collectFieldsResult) {
+    const groupedFieldSet = new Map;
+    const spreads = [];
+    collectFieldsImpl(validationContext, parentType, selectionSet, groupedFieldSet, spreads);
+    collectFieldsResult = { groupedFieldSet, spreads };
+    bySelectionSet.set(selectionSet, collectFieldsResult);
   }
-  const fragmentType = typeFromAST(context.getSchema(), fragment.typeCondition);
-  return getFieldsAndFragmentNames(context, cachedFieldsAndFragmentNames, fragmentType, fragment.selectionSet);
+  return collectFieldsResult;
 }
-function _collectFieldsAndFragmentNames(context, parentType, selectionSet, nodeAndDefs, fragmentNames) {
+function collectFragmentFields(validationContext, ruleContext, fragment) {
+  const fragmentType = typeFromAST(validationContext.getSchema(), fragment.typeCondition);
+  return collectFields(validationContext, ruleContext, fragmentType, fragment.selectionSet);
+}
+function collectFieldsImpl(validationContext, parentType, selectionSet, groupedFieldSet, fragmentSpreads) {
   for (const selection of selectionSet.selections) {
     switch (selection.kind) {
-      case Kind.FIELD: {
+      case FIELD: {
         const fieldName = selection.name.value;
         let fieldDef;
         if (isObjectType(parentType) || isInterfaceType(parentType)) {
           fieldDef = parentType.getFields()[fieldName];
         }
         const responseName = selection.alias ? selection.alias.value : fieldName;
-        if (!nodeAndDefs[responseName]) {
-          nodeAndDefs[responseName] = [];
+        let fieldDetailsList = groupedFieldSet.get(responseName);
+        if (fieldDetailsList == null) {
+          fieldDetailsList = [];
+          groupedFieldSet.set(responseName, fieldDetailsList);
         }
-        nodeAndDefs[responseName].push([parentType, selection, fieldDef]);
+        const streamDirective = selection.directives?.find((directive) => directive.name.value === "stream");
+        fieldDetailsList.push({
+          parentType,
+          node: selection,
+          definition: fieldDef,
+          isSimpleLeaf: (selection.arguments?.length ?? 0) === 0 && !selection.selectionSet && streamDirective === undefined,
+          streamDirective
+        });
         break;
       }
-      case Kind.FRAGMENT_SPREAD:
-        fragmentNames[selection.name.value] = true;
+      case FRAGMENT_SPREAD: {
+        fragmentSpreads.push(selection);
         break;
-      case Kind.INLINE_FRAGMENT: {
+      }
+      case INLINE_FRAGMENT: {
         const typeCondition = selection.typeCondition;
-        const inlineFragmentType = typeCondition ? typeFromAST(context.getSchema(), typeCondition) : parentType;
-        _collectFieldsAndFragmentNames(context, inlineFragmentType, selection.selectionSet, nodeAndDefs, fragmentNames);
+        const inlineFragmentType = typeCondition ? typeFromAST(validationContext.getSchema(), typeCondition) : parentType;
+        collectFieldsImpl(validationContext, inlineFragmentType, selection.selectionSet, groupedFieldSet, fragmentSpreads);
         break;
       }
     }
   }
 }
+function getFragmentSpreads(validationContext, ruleContext, collectFieldsResult, scope) {
+  const byScope = collectFieldsResult.byScope ??= new Map;
+  const cached = byScope.get(scope);
+  if (cached) {
+    return cached;
+  }
+  const spreadsByScope = new Map;
+  const result = [];
+  for (const spreadNode of collectFieldsResult.spreads) {
+    const spread = getFragmentSpread(validationContext, ruleContext, spreadNode, scope);
+    let byDefinition = spreadsByScope.get(spread.scope);
+    if (byDefinition === undefined) {
+      byDefinition = new Map;
+      spreadsByScope.set(spread.scope, byDefinition);
+    }
+    const previous = byDefinition.get(spread.definition);
+    if (previous === undefined) {
+      byDefinition.set(spread.definition, spread);
+      result.push(spread);
+    } else {
+      previous.node = spread.node;
+    }
+  }
+  byScope.set(scope, result);
+  return result;
+}
+function getFragmentSpread(validationContext, ruleContext, fragmentSpreadNode, scope) {
+  spendComplexityBudget(ruleContext, 1);
+  let fragmentSpreadInfo = ruleContext.fragmentSpreadInfoByNode.get(fragmentSpreadNode);
+  if (fragmentSpreadInfo === undefined) {
+    const signature = validationContext.getFragmentSignatureByName()(fragmentSpreadNode.name.value);
+    const argumentInfo = getArgumentInfo(fragmentSpreadNode.arguments);
+    const parts = [];
+    const values = [];
+    if (signature && argumentInfo !== undefined) {
+      const argMap = argumentInfo.values;
+      const names = [];
+      for (const name of argMap.keys()) {
+        if (signature.variableDefinitions.has(name)) {
+          names.push(name);
+        }
+      }
+      for (const name of names.sort()) {
+        const argument = getValueInfo(ruleContext, argMap.get(name));
+        parts.push(name, argument.comparisonKey);
+        if (argument.variables.length !== 0) {
+          values.push(argument);
+        }
+      }
+    }
+    const fragmentSpreadInfoKey = JSON.stringify([
+      signature?.definition.name.value,
+      parts
+    ]);
+    fragmentSpreadInfo = ruleContext.fragmentSpreadInfoByKey.get(fragmentSpreadInfoKey);
+    if (fragmentSpreadInfo === undefined) {
+      fragmentSpreadInfo = {
+        signature,
+        values,
+        byScope: new Map
+      };
+      ruleContext.fragmentSpreadInfoByKey.set(fragmentSpreadInfoKey, fragmentSpreadInfo);
+    }
+    ruleContext.fragmentSpreadInfoByNode.set(fragmentSpreadNode, fragmentSpreadInfo);
+  }
+  const variableScope = fragmentSpreadInfo.values.some((value) => {
+    spendComplexityBudget(ruleContext, 1);
+    return usesLocalVariables(ruleContext, value, scope);
+  }) ? scope : undefined;
+  let fragmentScope = fragmentSpreadInfo.byScope.get(variableScope);
+  if (!fragmentSpreadInfo.byScope.has(variableScope)) {
+    fragmentScope = getVariableScope(fragmentSpreadInfo.signature);
+    fragmentSpreadInfo.byScope.set(variableScope, fragmentScope);
+  }
+  return {
+    node: fragmentSpreadNode,
+    scope: fragmentScope,
+    definition: fragmentSpreadInfo.signature?.definition
+  };
+}
+function getVariableScope(fragmentSignature) {
+  if (!fragmentSignature || fragmentSignature.variableDefinitions.size === 0) {
+    return;
+  }
+  return { signature: fragmentSignature };
+}
+function getFragmentSpreadDescription(ruleContext, node) {
+  const description = {
+    ...node,
+    name: { ...node.name, value: maybeAbbreviate(node.name.value) },
+    directives: []
+  };
+  let size = 1;
+  for (const argument of node.arguments ?? []) {
+    size += 2 + argument.name.value.length + getValueInfo(ruleContext, argument.value).comparisonKey.length;
+    if (size > MAX_FRAGMENT_ARGUMENT_SIZE) {
+      return description.name.value + "(...)";
+    }
+  }
+  return print(description).slice(3);
+}
 function subfieldConflicts(conflicts, responseName, node1, node2) {
   if (conflicts.length > 0) {
-    return [
-      [responseName, conflicts.map(([reason]) => reason)],
-      [node1, ...conflicts.map(([, fields1]) => fields1).flat()],
-      [node2, ...conflicts.map(([, , fields2]) => fields2).flat()]
-    ];
+    let message = "";
+    for (const { responseName: name, reason } of conflicts) {
+      message += (message === "" ? "" : " and ") + `subfields "${maybeAbbreviate(name)}" conflict because ${reason}`;
+      if (message.length > MAX_CONFLICT_DETAIL_LENGTH) {
+        break;
+      }
+    }
+    return {
+      responseName,
+      reason: maybeAbbreviate(message),
+      fields1: collectConflictNodes(node1, conflicts, "fields1"),
+      fields2: collectConflictNodes(node2, conflicts, "fields2")
+    };
+  }
+}
+function collectConflictNodes(node, conflicts, side) {
+  const nodes = [node];
+  for (const conflict of conflicts) {
+    const remaining = MAX_CONFLICT_NODES - nodes.length;
+    const retainedNodes = conflict[side].slice(-remaining);
+    nodes.push(...retainedNodes);
+    if (nodes.length === MAX_CONFLICT_NODES) {
+      break;
+    }
+  }
+  return nodes;
+}
+function maybeAbbreviate(text) {
+  return text.length > MAX_CONFLICT_DETAIL_LENGTH ? text.slice(0, MAX_CONFLICT_DETAIL_LENGTH) + "..." : text;
+}
+function spendComplexityBudget(ruleContext, cost) {
+  ruleContext.remainingComplexityBudget -= cost;
+  if (ruleContext.remainingComplexityBudget < 0) {
+    throw validationAbortedError;
   }
 }
 
@@ -5805,8 +7710,7 @@ class OrderedPairSet {
     this._data = new Map;
   }
   has(a, b, weaklyPresent) {
-    var _this$_data$get;
-    const result = (_this$_data$get = this._data.get(a)) === null || _this$_data$get === undefined ? undefined : _this$_data$get.get(b);
+    const result = this._data.get(a)?.get(b);
     if (result === undefined) {
       return false;
     }
@@ -5827,14 +7731,10 @@ class PairSet {
     this._orderedPairSet = new OrderedPairSet;
   }
   has(a, b, weaklyPresent) {
-    return a < b ? this._orderedPairSet.has(a, b, weaklyPresent) : this._orderedPairSet.has(b, a, weaklyPresent);
+    return this._orderedPairSet.has(a, b, weaklyPresent) || this._orderedPairSet.has(b, a, weaklyPresent);
   }
   add(a, b, weaklyPresent) {
-    if (a < b) {
-      this._orderedPairSet.add(a, b, weaklyPresent);
-    } else {
-      this._orderedPairSet.add(b, a, weaklyPresent);
-    }
+    this._orderedPairSet.add(a, b, weaklyPresent);
   }
 }
 
@@ -5847,9 +7747,7 @@ function PossibleFragmentSpreadsRule(context) {
       if (isCompositeType(fragType) && isCompositeType(parentType) && !doTypesOverlap(context.getSchema(), fragType, parentType)) {
         const parentTypeStr = inspect(parentType);
         const fragTypeStr = inspect(fragType);
-        context.reportError(new GraphQLError(`Fragment cannot be spread here as objects of type "${parentTypeStr}" can never be of type "${fragTypeStr}".`, {
-          nodes: node
-        }));
+        context.reportError(new GraphQLError(`Fragment cannot be spread here as objects of type "${parentTypeStr}" can never be of type "${fragTypeStr}".`, { nodes: node }));
       }
     },
     FragmentSpread(node) {
@@ -5859,9 +7757,7 @@ function PossibleFragmentSpreadsRule(context) {
       if (fragType && parentType && !doTypesOverlap(context.getSchema(), fragType, parentType)) {
         const parentTypeStr = inspect(parentType);
         const fragTypeStr = inspect(fragType);
-        context.reportError(new GraphQLError(`Fragment "${fragName}" cannot be spread here as objects of type "${parentTypeStr}" can never be of type "${fragTypeStr}".`, {
-          nodes: node
-        }));
+        context.reportError(new GraphQLError(`Fragment "${fragName}" cannot be spread here as objects of type "${parentTypeStr}" can never be of type "${fragTypeStr}".`, { nodes: node }));
       }
     }
   };
@@ -5879,10 +7775,10 @@ function getFragmentType(context, name) {
 // node_modules/graphql/validation/rules/PossibleTypeExtensionsRule.mjs
 function PossibleTypeExtensionsRule(context) {
   const schema = context.getSchema();
-  const definedTypes = Object.create(null);
+  const definedTypes = new Map;
   for (const def of context.getDocument().definitions) {
     if (isTypeDefinitionNode(def)) {
-      definedTypes[def.name.value] = def;
+      definedTypes.set(def.name.value, def);
     }
   }
   return {
@@ -5895,15 +7791,15 @@ function PossibleTypeExtensionsRule(context) {
   };
   function checkExtension(node) {
     const typeName = node.name.value;
-    const defNode = definedTypes[typeName];
-    const existingType = schema === null || schema === undefined ? undefined : schema.getType(typeName);
+    const defNode = definedTypes.get(typeName);
+    const existingType = schema?.getType(typeName);
     let expectedKind;
-    if (defNode) {
+    if (defNode != null) {
       expectedKind = defKindToExtKind[defNode.kind];
     } else if (existingType) {
       expectedKind = typeToExtKind(existingType);
     }
-    if (expectedKind) {
+    if (expectedKind != null) {
       if (expectedKind !== node.kind) {
         const kindStr = extensionKindToTypeName(node.kind);
         context.reportError(new GraphQLError(`Cannot extend non-${kindStr} type "${typeName}".`, {
@@ -5911,59 +7807,56 @@ function PossibleTypeExtensionsRule(context) {
         }));
       }
     } else {
-      const allTypeNames = Object.keys({
-        ...definedTypes,
-        ...schema === null || schema === undefined ? undefined : schema.getTypeMap()
-      });
-      const suggestedTypes = suggestionList(typeName, allTypeNames);
-      context.reportError(new GraphQLError(`Cannot extend type "${typeName}" because it is not defined.` + didYouMean(suggestedTypes), {
-        nodes: node.name
-      }));
+      const allTypeNames = [
+        ...definedTypes.keys(),
+        ...Object.keys(schema?.getTypeMap() ?? {})
+      ];
+      context.reportError(new GraphQLError(`Cannot extend type "${typeName}" because it is not defined.` + didYouMean(suggestionList(typeName, allTypeNames)), { nodes: node.name }));
     }
   }
 }
 var defKindToExtKind = {
-  [Kind.SCALAR_TYPE_DEFINITION]: Kind.SCALAR_TYPE_EXTENSION,
-  [Kind.OBJECT_TYPE_DEFINITION]: Kind.OBJECT_TYPE_EXTENSION,
-  [Kind.INTERFACE_TYPE_DEFINITION]: Kind.INTERFACE_TYPE_EXTENSION,
-  [Kind.UNION_TYPE_DEFINITION]: Kind.UNION_TYPE_EXTENSION,
-  [Kind.ENUM_TYPE_DEFINITION]: Kind.ENUM_TYPE_EXTENSION,
-  [Kind.INPUT_OBJECT_TYPE_DEFINITION]: Kind.INPUT_OBJECT_TYPE_EXTENSION
+  [SCALAR_TYPE_DEFINITION]: SCALAR_TYPE_EXTENSION,
+  [OBJECT_TYPE_DEFINITION]: OBJECT_TYPE_EXTENSION,
+  [INTERFACE_TYPE_DEFINITION]: INTERFACE_TYPE_EXTENSION,
+  [UNION_TYPE_DEFINITION]: UNION_TYPE_EXTENSION,
+  [ENUM_TYPE_DEFINITION]: ENUM_TYPE_EXTENSION,
+  [INPUT_OBJECT_TYPE_DEFINITION]: INPUT_OBJECT_TYPE_EXTENSION
 };
 function typeToExtKind(type) {
   if (isScalarType(type)) {
-    return Kind.SCALAR_TYPE_EXTENSION;
+    return SCALAR_TYPE_EXTENSION;
   }
   if (isObjectType(type)) {
-    return Kind.OBJECT_TYPE_EXTENSION;
+    return OBJECT_TYPE_EXTENSION;
   }
   if (isInterfaceType(type)) {
-    return Kind.INTERFACE_TYPE_EXTENSION;
+    return INTERFACE_TYPE_EXTENSION;
   }
   if (isUnionType(type)) {
-    return Kind.UNION_TYPE_EXTENSION;
+    return UNION_TYPE_EXTENSION;
   }
   if (isEnumType(type)) {
-    return Kind.ENUM_TYPE_EXTENSION;
+    return ENUM_TYPE_EXTENSION;
   }
   if (isInputObjectType(type)) {
-    return Kind.INPUT_OBJECT_TYPE_EXTENSION;
+    return INPUT_OBJECT_TYPE_EXTENSION;
   }
   invariant(false, "Unexpected type: " + inspect(type));
 }
 function extensionKindToTypeName(kind) {
   switch (kind) {
-    case Kind.SCALAR_TYPE_EXTENSION:
+    case SCALAR_TYPE_EXTENSION:
       return "scalar";
-    case Kind.OBJECT_TYPE_EXTENSION:
+    case OBJECT_TYPE_EXTENSION:
       return "object";
-    case Kind.INTERFACE_TYPE_EXTENSION:
+    case INTERFACE_TYPE_EXTENSION:
       return "interface";
-    case Kind.UNION_TYPE_EXTENSION:
+    case UNION_TYPE_EXTENSION:
       return "union";
-    case Kind.ENUM_TYPE_EXTENSION:
+    case ENUM_TYPE_EXTENSION:
       return "enum";
-    case Kind.INPUT_OBJECT_TYPE_EXTENSION:
+    case INPUT_OBJECT_TYPE_EXTENSION:
       return "input object";
     default:
       invariant(false, "Unexpected kind: " + inspect(kind));
@@ -5972,22 +7865,40 @@ function extensionKindToTypeName(kind) {
 
 // node_modules/graphql/validation/rules/ProvidedRequiredArgumentsRule.mjs
 function ProvidedRequiredArgumentsRule(context) {
+  const requiredArgsByFragment = new Map;
   return {
     ...ProvidedRequiredArgumentsOnDirectivesRule(context),
     Field: {
       leave(fieldNode) {
-        var _fieldNode$arguments;
         const fieldDef = context.getFieldDef();
-        if (!fieldDef) {
+        if (!fieldDef || fieldDef.args.length === 0) {
           return false;
         }
-        const providedArgs = new Set((_fieldNode$arguments = fieldNode.arguments) === null || _fieldNode$arguments === undefined ? undefined : _fieldNode$arguments.map((arg) => arg.name.value));
+        const providedArgs = new Set(fieldNode.arguments?.map((arg) => arg.name.value));
         for (const argDef of fieldDef.args) {
           if (!providedArgs.has(argDef.name) && isRequiredArgument(argDef)) {
-            const argTypeStr = inspect(argDef.type);
-            context.reportError(new GraphQLError(`Field "${fieldDef.name}" argument "${argDef.name}" of type "${argTypeStr}" is required, but it was not provided.`, {
-              nodes: fieldNode
-            }));
+            context.reportError(new GraphQLError(`Argument "${argDef}" of type "${argDef.type}" is required, but it was not provided.`, { nodes: fieldNode }));
+          }
+        }
+      }
+    },
+    FragmentSpread: {
+      leave(spreadNode) {
+        const fragmentSignature = context.getFragmentSignature();
+        if (!fragmentSignature) {
+          return false;
+        }
+        let requiredArgs = requiredArgsByFragment.get(fragmentSignature);
+        if (!requiredArgs) {
+          requiredArgs = [...fragmentSignature.variableDefinitions].filter(([, definition]) => isRequiredArgumentNode(definition));
+          requiredArgsByFragment.set(fragmentSignature, requiredArgs);
+        }
+        const providedArgs = new Set(spreadNode.arguments?.map((arg) => arg.name.value));
+        for (const [varName, variableDefinition] of requiredArgs) {
+          if (!providedArgs.has(varName)) {
+            const type = typeFromAST(context.getSchema(), variableDefinition.type);
+            const argTypeStr = inspect(type);
+            context.reportError(new GraphQLError(`Fragment "${spreadNode.name.value}" argument "${varName}" of type "${argTypeStr}" is required, but it was not provided.`, { nodes: spreadNode }));
           }
         }
       }
@@ -5995,36 +7906,31 @@ function ProvidedRequiredArgumentsRule(context) {
   };
 }
 function ProvidedRequiredArgumentsOnDirectivesRule(context) {
-  var _schema$getDirectives;
-  const requiredArgsMap = Object.create(null);
+  const requiredArgsMap = new Map;
   const schema = context.getSchema();
-  const definedDirectives = (_schema$getDirectives = schema === null || schema === undefined ? undefined : schema.getDirectives()) !== null && _schema$getDirectives !== undefined ? _schema$getDirectives : specifiedDirectives;
+  const definedDirectives = schema?.getDirectives() ?? specifiedDirectives;
   for (const directive of definedDirectives) {
-    requiredArgsMap[directive.name] = keyMap(directive.args.filter(isRequiredArgument), (arg) => arg.name);
+    requiredArgsMap.set(directive.name, new Map(directive.args.filter(isRequiredArgument).map((arg) => [arg.name, arg])));
   }
   const astDefinitions = context.getDocument().definitions;
   for (const def of astDefinitions) {
-    if (def.kind === Kind.DIRECTIVE_DEFINITION) {
-      var _def$arguments;
-      const argNodes = (_def$arguments = def.arguments) !== null && _def$arguments !== undefined ? _def$arguments : [];
-      requiredArgsMap[def.name.value] = keyMap(argNodes.filter(isRequiredArgumentNode), (arg) => arg.name.value);
+    if (def.kind === DIRECTIVE_DEFINITION) {
+      const argNodes = def.arguments ?? [];
+      requiredArgsMap.set(def.name.value, new Map(argNodes.filter(isRequiredArgumentNode).map((arg) => [arg.name.value, arg])));
     }
   }
   return {
     Directive: {
       leave(directiveNode) {
         const directiveName = directiveNode.name.value;
-        const requiredArgs = requiredArgsMap[directiveName];
-        if (requiredArgs) {
-          var _directiveNode$argume;
-          const argNodes = (_directiveNode$argume = directiveNode.arguments) !== null && _directiveNode$argume !== undefined ? _directiveNode$argume : [];
+        const requiredArgs = requiredArgsMap.get(directiveName);
+        if (requiredArgs != null) {
+          const argNodes = directiveNode.arguments ?? [];
           const argNodeMap = new Set(argNodes.map((arg) => arg.name.value));
-          for (const [argName, argDef] of Object.entries(requiredArgs)) {
+          for (const [argName, argDef] of requiredArgs.entries()) {
             if (!argNodeMap.has(argName)) {
               const argType = isType(argDef.type) ? inspect(argDef.type) : print(argDef.type);
-              context.reportError(new GraphQLError(`Directive "@${directiveName}" argument "${argName}" of type "${argType}" is required, but it was not provided.`, {
-                nodes: directiveNode
-              }));
+              context.reportError(new GraphQLError(`Argument "@${directiveName}(${argName}:)" of type "${argType}" is required, but it was not provided.`, { nodes: directiveNode }));
             }
           }
         }
@@ -6033,7 +7939,7 @@ function ProvidedRequiredArgumentsOnDirectivesRule(context) {
   };
 }
 function isRequiredArgumentNode(arg) {
-  return arg.type.kind === Kind.NON_NULL_TYPE && arg.defaultValue == null;
+  return arg.type.kind === NON_NULL_TYPE && arg.defaultValue == null;
 }
 
 // node_modules/graphql/validation/rules/ScalarLeafsRule.mjs
@@ -6047,244 +7953,434 @@ function ScalarLeafsRule(context) {
           if (selectionSet) {
             const fieldName = node.name.value;
             const typeStr = inspect(type);
-            context.reportError(new GraphQLError(`Field "${fieldName}" must not have a selection since type "${typeStr}" has no subfields.`, {
-              nodes: selectionSet
-            }));
+            context.reportError(new GraphQLError(`Field "${fieldName}" must not have a selection since type "${typeStr}" has no subfields.`, { nodes: selectionSet }));
           }
         } else if (!selectionSet) {
           const fieldName = node.name.value;
           const typeStr = inspect(type);
-          context.reportError(new GraphQLError(`Field "${fieldName}" of type "${typeStr}" must have a selection of subfields. Did you mean "${fieldName} { ... }"?`, {
-            nodes: node
-          }));
-        } else if (selectionSet.selections.length === 0) {
+          context.reportError(new GraphQLError(`Field "${fieldName}" of type "${typeStr}" must have a selection of subfields. Did you mean "${fieldName} { ... }"?`, { nodes: node }));
+        } else if (selectionSet.selections.length === 0 && !context.allowEmptySelectionSets) {
           const fieldName = node.name.value;
           const typeStr = inspect(type);
-          context.reportError(new GraphQLError(`Field "${fieldName}" of type "${typeStr}" must have at least one field selected.`, {
-            nodes: node
-          }));
+          context.reportError(new GraphQLError(`Field "${fieldName}" of type "${typeStr}" must have at least one field selected.`, { nodes: node }));
         }
       }
     }
   };
 }
 
-// node_modules/graphql/utilities/valueFromAST.mjs
-function valueFromAST(valueNode, type, variables) {
-  if (!valueNode) {
-    return;
-  }
-  if (valueNode.kind === Kind.VARIABLE) {
-    const variableName = valueNode.name.value;
-    if (variables == null || variables[variableName] === undefined) {
-      return;
-    }
-    const variableValue = variables[variableName];
-    if (variableValue === null && isNonNullType(type)) {
-      return;
-    }
-    return variableValue;
-  }
+// node_modules/graphql/utilities/coerceInputValue.mjs
+function coerceInputValue(inputValue, type) {
   if (isNonNullType(type)) {
-    if (valueNode.kind === Kind.NULL) {
+    if (inputValue == null) {
       return;
     }
-    return valueFromAST(valueNode, type.ofType, variables);
+    return coerceInputValue(inputValue, type.ofType);
   }
-  if (valueNode.kind === Kind.NULL) {
+  if (inputValue == null) {
     return null;
   }
   if (isListType(type)) {
-    const itemType = type.ofType;
-    if (valueNode.kind === Kind.LIST) {
-      const coercedValues = [];
-      for (const itemNode of valueNode.values) {
-        if (isMissingVariable(itemNode, variables)) {
-          if (isNonNullType(itemType)) {
-            return;
-          }
-          coercedValues.push(null);
-        } else {
-          const itemValue = valueFromAST(itemNode, itemType, variables);
-          if (itemValue === undefined) {
-            return;
-          }
-          coercedValues.push(itemValue);
-        }
+    if (!isIterableObject(inputValue)) {
+      const coercedItem = coerceInputValue(inputValue, type.ofType);
+      if (coercedItem === undefined) {
+        return;
       }
-      return coercedValues;
+      return [coercedItem];
     }
-    const coercedValue = valueFromAST(valueNode, itemType, variables);
-    if (coercedValue === undefined) {
-      return;
+    const coercedValue = [];
+    for (const itemValue of inputValue) {
+      const coercedItem = coerceInputValue(itemValue, type.ofType);
+      if (coercedItem === undefined) {
+        return;
+      }
+      coercedValue.push(coercedItem);
     }
-    return [coercedValue];
+    return coercedValue;
   }
   if (isInputObjectType(type)) {
-    if (valueNode.kind !== Kind.OBJECT) {
+    if (!isObjectLike(inputValue) || Array.isArray(inputValue)) {
       return;
     }
-    const coercedObj = Object.create(null);
-    const fieldNodes = keyMap(valueNode.fields, (field) => field.name.value);
-    for (const field of Object.values(type.getFields())) {
-      const fieldNode = fieldNodes[field.name];
-      if (!fieldNode || isMissingVariable(fieldNode.value, variables)) {
-        if (field.defaultValue !== undefined) {
-          coercedObj[field.name] = field.defaultValue;
-        } else if (isNonNullType(field.type)) {
-          return;
-        }
+    const coercedValue = Object.create(null);
+    const fieldDefs = type.getFields();
+    let definedFieldCount = 0;
+    for (const fieldName of Object.keys(inputValue)) {
+      if (inputValue[fieldName] === undefined) {
         continue;
       }
-      const fieldValue = valueFromAST(fieldNode.value, field.type, variables);
-      if (fieldValue === undefined) {
+      definedFieldCount++;
+      if (!Object.hasOwn(fieldDefs, fieldName)) {
         return;
       }
-      coercedObj[field.name] = fieldValue;
+    }
+    for (const field of Object.values(fieldDefs)) {
+      const fieldValue = inputValue[field.name];
+      if (fieldValue === undefined) {
+        if (isRequiredInputField(field)) {
+          return;
+        }
+        const coercedDefaultValue = coerceDefaultValue(field);
+        if (coercedDefaultValue !== undefined) {
+          coercedValue[field.name] = coercedDefaultValue;
+        }
+      } else {
+        const coercedField = coerceInputValue(fieldValue, field.type);
+        if (coercedField === undefined) {
+          return;
+        }
+        coercedValue[field.name] = coercedField;
+      }
     }
     if (type.isOneOf) {
-      const keys = Object.keys(coercedObj);
-      if (keys.length !== 1) {
+      const keys = Object.keys(coercedValue);
+      if (definedFieldCount !== 1 || keys.length !== 1) {
         return;
       }
-      if (coercedObj[keys[0]] === null) {
+      const key = keys[0];
+      const value = coercedValue[key];
+      if (value === null) {
         return;
       }
     }
-    return coercedObj;
+    return coercedValue;
   }
-  if (isLeafType(type)) {
-    let result;
-    try {
-      result = type.parseLiteral(valueNode, variables);
-    } catch (_error) {
-      return;
-    }
-    if (result === undefined) {
-      return;
-    }
-    return result;
-  }
-  invariant(false, "Unexpected input type: " + inspect(type));
+  const leafType = assertLeafType(type);
+  try {
+    return leafType.coerceInputValue(inputValue);
+  } catch (_error) {}
 }
-function isMissingVariable(valueNode, variables) {
-  return valueNode.kind === Kind.VARIABLE && (variables == null || variables[valueNode.name.value] === undefined);
+function coerceInputLiteral(valueNode, type, variableValues, fragmentVariableValues) {
+  if (valueNode.kind === VARIABLE) {
+    const coercedVariableValue = getCoercedVariableValue(valueNode, variableValues, fragmentVariableValues);
+    if (coercedVariableValue == null && isNonNullType(type)) {
+      return;
+    }
+    return coercedVariableValue;
+  }
+  if (isNonNullType(type)) {
+    if (valueNode.kind === NULL) {
+      return;
+    }
+    return coerceInputLiteral(valueNode, type.ofType, variableValues, fragmentVariableValues);
+  }
+  if (valueNode.kind === NULL) {
+    return null;
+  }
+  if (isListType(type)) {
+    if (valueNode.kind !== LIST) {
+      const itemValue = coerceInputLiteral(valueNode, type.ofType, variableValues, fragmentVariableValues);
+      if (itemValue === undefined) {
+        return;
+      }
+      return [itemValue];
+    }
+    const coercedValue = [];
+    for (const itemNode of valueNode.values) {
+      let itemValue = coerceInputLiteral(itemNode, type.ofType, variableValues, fragmentVariableValues);
+      if (itemValue === undefined) {
+        if (itemNode.kind === VARIABLE && getCoercedVariableValue(itemNode, variableValues, fragmentVariableValues) == null && !isNonNullType(type.ofType)) {
+          itemValue = null;
+        } else {
+          return;
+        }
+      }
+      coercedValue.push(itemValue);
+    }
+    return coercedValue;
+  }
+  if (isInputObjectType(type)) {
+    if (valueNode.kind !== OBJECT) {
+      return;
+    }
+    const coercedValue = Object.create(null);
+    const fieldDefs = type.getFields();
+    const hasUndefinedField = valueNode.fields.some((field) => !Object.hasOwn(fieldDefs, field.name.value));
+    if (hasUndefinedField) {
+      return;
+    }
+    const fieldNodes = new Map(valueNode.fields.map((field) => [field.name.value, field]));
+    for (const field of Object.values(fieldDefs)) {
+      const fieldNode = fieldNodes.get(field.name);
+      if (!fieldNode || fieldNode.value.kind === VARIABLE && isMissingVariable(fieldNode.value, variableValues, fragmentVariableValues)) {
+        if (isRequiredInputField(field)) {
+          return;
+        }
+        const coercedDefaultValue = coerceDefaultValue(field);
+        if (coercedDefaultValue !== undefined) {
+          coercedValue[field.name] = coercedDefaultValue;
+        }
+      } else {
+        const fieldValue = coerceInputLiteral(fieldNode.value, field.type, variableValues, fragmentVariableValues);
+        if (fieldValue === undefined) {
+          return;
+        }
+        coercedValue[field.name] = fieldValue;
+      }
+    }
+    if (type.isOneOf) {
+      const coercedKeys = Object.keys(coercedValue);
+      if (fieldNodes.size !== 1 || coercedKeys.length !== 1) {
+        return;
+      }
+      for (const [fieldName, fieldNode] of fieldNodes) {
+        if (fieldNode.value.kind === NULL || coercedValue[fieldName] === null) {
+          return;
+        }
+      }
+    }
+    return coercedValue;
+  }
+  const leafType = assertLeafType(type);
+  try {
+    return leafType.coerceInputLiteral ? leafType.coerceInputLiteral(replaceVariables(valueNode, variableValues, fragmentVariableValues)) : leafType.parseLiteral(valueNode, variableValues?.coerced);
+  } catch (_error) {}
+}
+function getCoercedVariableValue(variableNode, variableValues, fragmentVariableValues) {
+  const varName = variableNode.name.value;
+  if (fragmentVariableValues?.sources[varName] !== undefined) {
+    return fragmentVariableValues.coerced[varName];
+  }
+  return variableValues?.coerced[varName];
+}
+function isMissingVariable(variableNode, variableValues, fragmentVariableValues) {
+  const varName = variableNode.name.value;
+  const scopedValues = fragmentVariableValues?.sources[varName] !== undefined ? fragmentVariableValues.coerced : variableValues?.coerced;
+  return scopedValues?.[varName] === undefined;
+}
+function coerceDefaultValue(inputValue) {
+  let coercedDefaultValue = inputValue._memoizedCoercedDefaultValue;
+  if (coercedDefaultValue !== undefined) {
+    return coercedDefaultValue;
+  }
+  const defaultInput = inputValue.default;
+  if (defaultInput !== undefined) {
+    coercedDefaultValue = defaultInput.literal ? coerceInputLiteral(defaultInput.literal, inputValue.type) : coerceInputValue(defaultInput.value, inputValue.type);
+    if (!(coercedDefaultValue !== undefined))
+      invariant(false, `Expected value of type "${inputValue.type}" to be valid, found: ${inspect(defaultInput.literal ?? defaultInput.value)}.`);
+    inputValue._memoizedCoercedDefaultValue = coercedDefaultValue;
+    return coercedDefaultValue;
+  }
+  const defaultValue = inputValue.defaultValue;
+  if (defaultValue !== undefined) {
+    inputValue._memoizedCoercedDefaultValue = defaultValue;
+  }
+  return defaultValue;
 }
 
 // node_modules/graphql/execution/values.mjs
-function getArgumentValues(def, node, variableValues) {
-  var _node$arguments;
-  const coercedValues = {};
-  const argumentNodes = (_node$arguments = node.arguments) !== null && _node$arguments !== undefined ? _node$arguments : [];
-  const argNodeMap = keyMap(argumentNodes, (arg) => arg.name.value);
+function maybeUseDefaultValue(coercedValues, name, inputValue, onError, hideSuggestions) {
+  try {
+    const coercedDefaultValue = coerceDefaultValue(inputValue);
+    if (coercedDefaultValue !== undefined) {
+      coercedValues[name] = coercedDefaultValue;
+    }
+  } catch (error) {
+    const defaultInput = inputValue.default;
+    if (defaultInput === undefined) {
+      throw error;
+    }
+    let reportedValidationError = false;
+    validateDefaultInput(defaultInput, inputValue.type, (defaultError, path) => {
+      reportedValidationError = true;
+      onError(defaultError, path);
+    }, hideSuggestions);
+    if (!reportedValidationError) {
+      onError(ensureGraphQLError(error), []);
+    }
+  }
+}
+function getFragmentVariableValues(fragmentSpreadNode, fragmentSignatures, variableValues, fragmentVariableValues, hideSuggestions) {
+  const argumentNodes = fragmentSpreadNode.arguments ?? [];
+  const argNodeMap = new Map(argumentNodes.map((arg) => [arg.name.value, arg]));
+  const sources = Object.create(null);
+  const coerced = Object.create(null);
+  for (const [varName, varSignature] of Object.entries(fragmentSignatures)) {
+    const argumentNode = argNodeMap.get(varName);
+    if (argumentNode !== undefined) {
+      sources[varName] = fragmentVariableValues == null ? { signature: varSignature, value: argumentNode.value } : {
+        signature: varSignature,
+        value: argumentNode.value,
+        fragmentVariableValues
+      };
+    } else {
+      sources[varName] = {
+        signature: varSignature
+      };
+    }
+    coerceArgument(coerced, fragmentSpreadNode, varName, varSignature, argumentNode, variableValues, fragmentVariableValues, hideSuggestions);
+  }
+  return { sources, coerced };
+}
+function getArgumentValues(def, node, variableValues, fragmentVariableValues, hideSuggestions) {
+  const coercedValues = Object.create(null);
+  if (def.args.length === 0) {
+    return coercedValues;
+  }
+  const argumentNodes = node.arguments ?? [];
+  const argNodeMap = new Map(argumentNodes.map((arg) => [arg.name.value, arg]));
   for (const argDef of def.args) {
     const name = argDef.name;
-    const argType = argDef.type;
-    const argumentNode = argNodeMap[name];
-    if (!argumentNode) {
-      if (argDef.defaultValue !== undefined) {
-        coercedValues[name] = argDef.defaultValue;
-      } else if (isNonNullType(argType)) {
-        throw new GraphQLError(`Argument "${name}" of required type "${inspect(argType)}" ` + "was not provided.", {
-          nodes: node
-        });
-      }
-      continue;
-    }
-    const valueNode = argumentNode.value;
-    let isNull = valueNode.kind === Kind.NULL;
-    if (valueNode.kind === Kind.VARIABLE) {
-      const variableName = valueNode.name.value;
-      if (variableValues == null || !hasOwnProperty(variableValues, variableName)) {
-        if (argDef.defaultValue !== undefined) {
-          coercedValues[name] = argDef.defaultValue;
-        } else if (isNonNullType(argType)) {
-          throw new GraphQLError(`Argument "${name}" of required type "${inspect(argType)}" ` + `was provided the variable "$${variableName}" which was not provided a runtime value.`, {
-            nodes: valueNode
-          });
-        }
-        continue;
-      }
-      isNull = variableValues[variableName] == null;
-    }
-    if (isNull && isNonNullType(argType)) {
-      throw new GraphQLError(`Argument "${name}" of non-null type "${inspect(argType)}" ` + "must not be null.", {
-        nodes: valueNode
-      });
-    }
-    const coercedValue = valueFromAST(valueNode, argType, variableValues);
-    if (coercedValue === undefined) {
-      throw new GraphQLError(`Argument "${name}" has invalid value ${print(valueNode)}.`, {
-        nodes: valueNode
-      });
-    }
-    coercedValues[name] = coercedValue;
+    coerceArgument(coercedValues, node, name, argDef, argNodeMap.get(argDef.name), variableValues, fragmentVariableValues, hideSuggestions);
   }
   return coercedValues;
 }
-function getDirectiveValues(directiveDef, node, variableValues) {
-  var _node$directives;
-  const directiveNode = (_node$directives = node.directives) === null || _node$directives === undefined ? undefined : _node$directives.find((directive) => directive.name.value === directiveDef.name);
-  if (directiveNode) {
-    return getArgumentValues(directiveDef, directiveNode, variableValues);
+function coerceArgument(coercedValues, node, argName, argDef, argumentNode, variableValues, fragmentVariableValues, hideSuggestions) {
+  const argType = argDef.type;
+  const onArgDefaultValueError = (error, path) => {
+    throw new GraphQLError(`${printArgumentOrFragmentVariable(argDef, node)} has invalid default value${printPathArray(path)}: ${error.message}`, { nodes: node });
+  };
+  if (!argumentNode) {
+    if (isRequiredArgument(argDef)) {
+      throw new GraphQLError(`${printArgumentOrFragmentVariable(argDef, node)} of required type "${argType}" was not provided.`, { nodes: node });
+    }
+    maybeUseDefaultValue(coercedValues, argName, argDef, onArgDefaultValueError, hideSuggestions);
+    return;
   }
+  const valueNode = argumentNode.value;
+  if (valueNode.kind === VARIABLE) {
+    const variableName = valueNode.name.value;
+    const scopedVariableValues = fragmentVariableValues?.sources[variableName] ? fragmentVariableValues : variableValues;
+    if ((scopedVariableValues == null || !Object.hasOwn(scopedVariableValues.coerced, variableName)) && !isRequiredArgument(argDef)) {
+      maybeUseDefaultValue(coercedValues, argName, argDef, onArgDefaultValueError, hideSuggestions);
+      return;
+    }
+  }
+  const coercedValue = coerceInputLiteral(valueNode, argType, variableValues, fragmentVariableValues);
+  if (coercedValue === undefined) {
+    validateInputLiteral(valueNode, argType, (error, path) => {
+      error.message = `${printArgumentOrFragmentVariable(argDef, node)} has invalid value${printPathArray(path)}: ${error.message}`;
+      throw error;
+    }, variableValues, fragmentVariableValues, hideSuggestions);
+    invariant(false, "Invalid argument");
+  }
+  coercedValues[argName] = coercedValue;
 }
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
+function printArgumentOrFragmentVariable(argDef, node) {
+  return isArgument(argDef) ? `Argument "${argDef}"` : `Variable "$${argDef.name}" defined by fragment "${node.name.value}"`;
+}
+function getDirectiveValues(directiveDef, node, variableValues, fragmentVariableValues, hideSuggestions) {
+  const directiveNode = node.directives?.find((directive) => directive.name.value === directiveDef.name);
+  if (directiveNode) {
+    return getArgumentValues(directiveDef, directiveNode, variableValues, fragmentVariableValues, hideSuggestions);
+  }
 }
 
 // node_modules/graphql/execution/collectFields.mjs
-function collectFields(schema, fragments, variableValues, runtimeType, selectionSet) {
-  const fields = new Map;
-  collectFieldsImpl(schema, fragments, variableValues, runtimeType, selectionSet, fields, new Set);
-  return fields;
+function collectFields2(schema, fragments, variableValues, runtimeType, selectionSet, hideSuggestions, forbidSkipAndInclude = false, visit = visitSelectionSets) {
+  const groupedFieldSet = new AccumulatorMap;
+  const newDeferUsages = [];
+  const context = {
+    schema,
+    fragments,
+    variableValues,
+    runtimeType,
+    visitedFragmentNames: new Map,
+    hideSuggestions,
+    forbiddenDirectiveInstances: [],
+    forbidSkipAndInclude
+  };
+  visit(context, selectionSet, groupedFieldSet, newDeferUsages);
+  return {
+    groupedFieldSet,
+    newDeferUsages,
+    forbiddenDirectiveInstances: context.forbiddenDirectiveInstances
+  };
 }
-function collectFieldsImpl(schema, fragments, variableValues, runtimeType, selectionSet, fields, visitedFragmentNames) {
+function visitSelectionSets(context, selectionSet, groupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues, recurse = visitSelectionSets) {
+  const { schema, fragments, variableValues, runtimeType, visitedFragmentNames, hideSuggestions } = context;
   for (const selection of selectionSet.selections) {
     switch (selection.kind) {
-      case Kind.FIELD: {
-        if (!shouldIncludeNode(variableValues, selection)) {
+      case FIELD: {
+        if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues)) {
           continue;
         }
-        const name = getFieldEntryKey(selection);
-        const fieldList = fields.get(name);
-        if (fieldList !== undefined) {
-          fieldList.push(selection);
+        groupedFieldSet.add(getFieldEntryKey(selection), {
+          node: selection,
+          deferUsage,
+          fragmentVariableValues
+        });
+        break;
+      }
+      case INLINE_FRAGMENT: {
+        if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues) || !doesFragmentConditionMatch(schema, selection, runtimeType)) {
+          continue;
+        }
+        const newDeferUsage = getDeferUsage(variableValues, fragmentVariableValues, selection, deferUsage);
+        if (!newDeferUsage) {
+          recurse(context, selection.selectionSet, groupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues, recurse);
         } else {
-          fields.set(name, [selection]);
+          newDeferUsages.push(newDeferUsage);
+          recurse(context, selection.selectionSet, groupedFieldSet, newDeferUsages, newDeferUsage, fragmentVariableValues, recurse);
         }
         break;
       }
-      case Kind.INLINE_FRAGMENT: {
-        if (!shouldIncludeNode(variableValues, selection) || !doesFragmentConditionMatch(schema, selection, runtimeType)) {
-          continue;
-        }
-        collectFieldsImpl(schema, fragments, variableValues, runtimeType, selection.selectionSet, fields, visitedFragmentNames);
-        break;
-      }
-      case Kind.FRAGMENT_SPREAD: {
+      case FRAGMENT_SPREAD: {
         const fragName = selection.name.value;
-        if (visitedFragmentNames.has(fragName) || !shouldIncludeNode(variableValues, selection)) {
+        if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues)) {
           continue;
         }
-        visitedFragmentNames.add(fragName);
         const fragment = fragments[fragName];
-        if (!fragment || !doesFragmentConditionMatch(schema, fragment, runtimeType)) {
+        if (fragment == null || !doesFragmentConditionMatch(schema, fragment.definition, runtimeType)) {
           continue;
         }
-        collectFieldsImpl(schema, fragments, variableValues, runtimeType, fragment.selectionSet, fields, visitedFragmentNames);
+        const newDeferUsage = getDeferUsage(variableValues, fragmentVariableValues, selection, deferUsage);
+        const maybeNewDeferUsage = newDeferUsage ?? deferUsage;
+        let visitedDeferSet = visitedFragmentNames.get(fragName);
+        if (!visitedDeferSet) {
+          visitedDeferSet = new Set;
+          visitedFragmentNames.set(fragName, visitedDeferSet);
+        }
+        if (visitedDeferSet.has(null) || maybeNewDeferUsage && visitedDeferSet.has(maybeNewDeferUsage.directiveNode)) {
+          continue;
+        }
+        if (newDeferUsage) {
+          newDeferUsages.push(newDeferUsage);
+        }
+        visitedDeferSet.add(maybeNewDeferUsage?.directiveNode ?? null);
+        const fragmentVariableSignatures = fragment.variableSignatures;
+        let newFragmentVariableValues;
+        if (fragmentVariableSignatures) {
+          newFragmentVariableValues = getFragmentVariableValues(selection, fragmentVariableSignatures, variableValues, fragmentVariableValues, hideSuggestions);
+        }
+        recurse(context, fragment.definition.selectionSet, groupedFieldSet, newDeferUsages, maybeNewDeferUsage, newFragmentVariableValues, recurse);
         break;
       }
     }
   }
 }
-function shouldIncludeNode(variableValues, node) {
-  const skip = getDirectiveValues(GraphQLSkipDirective, node, variableValues);
-  if ((skip === null || skip === undefined ? undefined : skip.if) === true) {
+function getDeferUsage(variableValues, fragmentVariableValues, node, parentDeferUsage) {
+  const directiveNode = node.directives?.find((directive) => directive.name.value === GraphQLDeferDirective.name);
+  if (!directiveNode) {
+    return;
+  }
+  const defer = getArgumentValues(GraphQLDeferDirective, directiveNode, variableValues, fragmentVariableValues);
+  if (defer.if === false) {
+    return;
+  }
+  return {
+    label: typeof defer.label === "string" ? defer.label : undefined,
+    directiveNode,
+    parentDeferUsage
+  };
+}
+function shouldIncludeNode(context, node, variableValues, fragmentVariableValues) {
+  const skipDirectiveNode = node.directives?.find((directive) => directive.name.value === GraphQLSkipDirective.name);
+  if (skipDirectiveNode && context.forbidSkipAndInclude) {
+    context.forbiddenDirectiveInstances.push(skipDirectiveNode);
     return false;
   }
-  const include = getDirectiveValues(GraphQLIncludeDirective, node, variableValues);
-  if ((include === null || include === undefined ? undefined : include.if) === false) {
+  const skip = skipDirectiveNode ? getArgumentValues(GraphQLSkipDirective, skipDirectiveNode, variableValues, fragmentVariableValues, context.hideSuggestions) : undefined;
+  if (skip?.if === true) {
+    return false;
+  }
+  const includeDirectiveNode = node.directives?.find((directive) => directive.name.value === GraphQLIncludeDirective.name);
+  if (includeDirectiveNode && context.forbidSkipAndInclude) {
+    context.forbiddenDirectiveInstances.push(includeDirectiveNode);
+    return false;
+  }
+  const include = includeDirectiveNode ? getArgumentValues(GraphQLIncludeDirective, includeDirectiveNode, variableValues, fragmentVariableValues, context.hideSuggestions) : undefined;
+  if (include?.if === false) {
     return false;
   }
   return true;
@@ -6308,7 +8404,23 @@ function getFieldEntryKey(node) {
 }
 
 // node_modules/graphql/validation/rules/SingleFieldSubscriptionsRule.mjs
+function toNodes(fieldDetailsList) {
+  return fieldDetailsList.map((fieldDetails) => fieldDetails.node);
+}
 function SingleFieldSubscriptionsRule(context) {
+  let fragments;
+  const visitSelectionSets2 = (visitContext, selectionSet, groupedFieldSet, newDeferUsages, ...[deferUsage, fragmentVariableValues]) => {
+    context.spendFragmentWork(selectionSet.selections.length);
+    for (const selection of selectionSet.selections) {
+      const directives = selection.directives;
+      if (directives !== undefined) {
+        context.spendFragmentWork(directives.length);
+        const defer = directives.find((directive) => directive.name.value === GraphQLDeferDirective.name);
+        context.spendFragmentWork(defer?.arguments?.length ?? 0);
+      }
+    }
+    visitSelectionSets(visitContext, selectionSet, groupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues, visitSelectionSets2);
+  };
   return {
     OperationDefinition(node) {
       if (node.operation === "subscription") {
@@ -6316,30 +8428,35 @@ function SingleFieldSubscriptionsRule(context) {
         const subscriptionType = schema.getSubscriptionType();
         if (subscriptionType) {
           const operationName = node.name ? node.name.value : null;
-          const variableValues = Object.create(null);
-          const document = context.getDocument();
-          const fragments = Object.create(null);
-          for (const definition of document.definitions) {
-            if (definition.kind === Kind.FRAGMENT_DEFINITION) {
-              fragments[definition.name.value] = definition;
+          const variableValues = {
+            sources: Object.create(null),
+            coerced: Object.create(null)
+          };
+          if (!fragments) {
+            fragments = Object.create(null);
+            for (const definition of context.getDocument().definitions) {
+              if (definition.kind === FRAGMENT_DEFINITION) {
+                fragments[definition.name.value] = { definition };
+              }
             }
           }
-          const fields = collectFields(schema, fragments, variableValues, subscriptionType, node.selectionSet);
-          if (fields.size > 1) {
-            const fieldSelectionLists = [...fields.values()];
-            const extraFieldSelectionLists = fieldSelectionLists.slice(1);
-            const extraFieldSelections = extraFieldSelectionLists.flat();
-            context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must select only one top level field.` : "Anonymous Subscription must select only one top level field.", {
-              nodes: extraFieldSelections
-            }));
+          const { groupedFieldSet, forbiddenDirectiveInstances } = collectFields2(schema, fragments, variableValues, subscriptionType, node.selectionSet, context.hideSuggestions, true, visitSelectionSets2);
+          if (forbiddenDirectiveInstances.length > 0) {
+            context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must not use \`@skip\` or \`@include\` directives in the top level selection.` : "Anonymous Subscription must not use `@skip` or `@include` directives in the top level selection.", { nodes: forbiddenDirectiveInstances }));
+            return;
           }
-          for (const fieldNodes of fields.values()) {
-            const field = fieldNodes[0];
-            const fieldName = field.name.value;
+          if (groupedFieldSet.size === 0) {
+            context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must select one top level field.` : "Anonymous Subscription must select one top level field.", { nodes: node.selectionSet }));
+          } else if (groupedFieldSet.size > 1) {
+            const fieldDetailsLists = [...groupedFieldSet.values()];
+            const extraFieldDetailsLists = fieldDetailsLists.slice(1);
+            const extraFieldSelections = extraFieldDetailsLists.flatMap((fieldDetailsList) => toNodes(fieldDetailsList));
+            context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must select only one top level field.` : "Anonymous Subscription must select only one top level field.", { nodes: extraFieldSelections }));
+          }
+          for (const fieldDetailsList of groupedFieldSet.values()) {
+            const fieldName = toNodes(fieldDetailsList)[0].name.value;
             if (fieldName.startsWith("__")) {
-              context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must not select an introspection top level field.` : "Anonymous Subscription must not select an introspection top level field.", {
-                nodes: fieldNodes
-              }));
+              context.reportError(new GraphQLError(operationName != null ? `Subscription "${operationName}" must not select an introspection top level field.` : "Anonymous Subscription must not select an introspection top level field.", { nodes: toNodes(fieldDetailsList) }));
             }
           }
         }
@@ -6348,17 +8465,24 @@ function SingleFieldSubscriptionsRule(context) {
   };
 }
 
+// node_modules/graphql/validation/rules/StreamDirectiveOnListFieldRule.mjs
+function StreamDirectiveOnListFieldRule(context) {
+  return {
+    Directive(node) {
+      const fieldDef = context.getFieldDef();
+      const parentType = context.getParentType();
+      if (fieldDef && parentType && node.name.value === GraphQLStreamDirective.name && !(isListType(fieldDef.type) || isWrappingType(fieldDef.type) && isListType(fieldDef.type.ofType))) {
+        context.reportError(new GraphQLError(`Directive "@stream" cannot be used on non-list field "${parentType}.${fieldDef.name}".`, { nodes: node }));
+      }
+    }
+  };
+}
+
 // node_modules/graphql/jsutils/groupBy.mjs
 function groupBy(list, keyFn) {
-  const result = new Map;
+  const result = new AccumulatorMap;
   for (const item of list) {
-    const key = keyFn(item);
-    const group = result.get(key);
-    if (group === undefined) {
-      result.set(key, [item]);
-    } else {
-      group.push(item);
-    }
+    result.add(keyFn(item), item);
   }
   return result;
 }
@@ -6367,8 +8491,7 @@ function groupBy(list, keyFn) {
 function UniqueArgumentDefinitionNamesRule(context) {
   return {
     DirectiveDefinition(directiveNode) {
-      var _directiveNode$argume;
-      const argumentNodes = (_directiveNode$argume = directiveNode.arguments) !== null && _directiveNode$argume !== undefined ? _directiveNode$argume : [];
+      const argumentNodes = directiveNode.arguments ?? [];
       return checkArgUniqueness(`@${directiveNode.name.value}`, argumentNodes);
     },
     InterfaceTypeDefinition: checkArgUniquenessPerField,
@@ -6377,13 +8500,11 @@ function UniqueArgumentDefinitionNamesRule(context) {
     ObjectTypeExtension: checkArgUniquenessPerField
   };
   function checkArgUniquenessPerField(typeNode) {
-    var _typeNode$fields;
     const typeName = typeNode.name.value;
-    const fieldNodes = (_typeNode$fields = typeNode.fields) !== null && _typeNode$fields !== undefined ? _typeNode$fields : [];
+    const fieldNodes = typeNode.fields ?? [];
     for (const fieldDef of fieldNodes) {
-      var _fieldDef$arguments;
       const fieldName = fieldDef.name.value;
-      const argumentNodes = (_fieldDef$arguments = fieldDef.arguments) !== null && _fieldDef$arguments !== undefined ? _fieldDef$arguments : [];
+      const argumentNodes = fieldDef.arguments ?? [];
       checkArgUniqueness(`${typeName}.${fieldName}`, argumentNodes);
     }
     return false;
@@ -6392,9 +8513,7 @@ function UniqueArgumentDefinitionNamesRule(context) {
     const seenArgs = groupBy(argumentNodes, (arg) => arg.name.value);
     for (const [argName, argNodes] of seenArgs) {
       if (argNodes.length > 1) {
-        context.reportError(new GraphQLError(`Argument "${parentName}(${argName}:)" can only be defined once.`, {
-          nodes: argNodes.map((node) => node.name)
-        }));
+        context.reportError(new GraphQLError(`Argument "${parentName}(${argName}:)" can only be defined once.`, { nodes: argNodes.map((node) => node.name) }));
       }
     }
     return false;
@@ -6408,14 +8527,11 @@ function UniqueArgumentNamesRule(context) {
     Directive: checkArgUniqueness
   };
   function checkArgUniqueness(parentNode) {
-    var _parentNode$arguments;
-    const argumentNodes = (_parentNode$arguments = parentNode.arguments) !== null && _parentNode$arguments !== undefined ? _parentNode$arguments : [];
+    const argumentNodes = parentNode.arguments ?? [];
     const seenArgs = groupBy(argumentNodes, (arg) => arg.name.value);
     for (const [argName, argNodes] of seenArgs) {
       if (argNodes.length > 1) {
-        context.reportError(new GraphQLError(`There can be only one argument named "${argName}".`, {
-          nodes: argNodes.map((node) => node.name)
-        }));
+        context.reportError(new GraphQLError(`There can be only one argument named "${argName}".`, { nodes: argNodes.map((node) => node.name) }));
       }
     }
   }
@@ -6423,23 +8539,20 @@ function UniqueArgumentNamesRule(context) {
 
 // node_modules/graphql/validation/rules/UniqueDirectiveNamesRule.mjs
 function UniqueDirectiveNamesRule(context) {
-  const knownDirectiveNames = Object.create(null);
+  const knownDirectiveNames = new Map;
   const schema = context.getSchema();
   return {
     DirectiveDefinition(node) {
       const directiveName = node.name.value;
-      if (schema !== null && schema !== undefined && schema.getDirective(directiveName)) {
-        context.reportError(new GraphQLError(`Directive "@${directiveName}" already exists in the schema. It cannot be redefined.`, {
-          nodes: node.name
-        }));
+      if (schema?.getDirective(directiveName)) {
+        context.reportError(new GraphQLError(`Directive "@${directiveName}" already exists in the schema. It cannot be redefined.`, { nodes: node.name }));
         return;
       }
-      if (knownDirectiveNames[directiveName]) {
-        context.reportError(new GraphQLError(`There can be only one directive named "@${directiveName}".`, {
-          nodes: [knownDirectiveNames[directiveName], node.name]
-        }));
+      const knownName = knownDirectiveNames.get(directiveName);
+      if (knownName) {
+        context.reportError(new GraphQLError(`There can be only one directive named "@${directiveName}".`, { nodes: [knownName, node.name] }));
       } else {
-        knownDirectiveNames[directiveName] = node.name;
+        knownDirectiveNames.set(directiveName, node.name);
       }
       return false;
     }
@@ -6448,46 +8561,54 @@ function UniqueDirectiveNamesRule(context) {
 
 // node_modules/graphql/validation/rules/UniqueDirectivesPerLocationRule.mjs
 function UniqueDirectivesPerLocationRule(context) {
-  const uniqueDirectiveMap = Object.create(null);
+  const uniqueDirectiveMap = new Map;
   const schema = context.getSchema();
   const definedDirectives = schema ? schema.getDirectives() : specifiedDirectives;
   for (const directive of definedDirectives) {
-    uniqueDirectiveMap[directive.name] = !directive.isRepeatable;
+    uniqueDirectiveMap.set(directive.name, !directive.isRepeatable);
   }
   const astDefinitions = context.getDocument().definitions;
   for (const def of astDefinitions) {
-    if (def.kind === Kind.DIRECTIVE_DEFINITION) {
-      uniqueDirectiveMap[def.name.value] = !def.repeatable;
+    if (def.kind === DIRECTIVE_DEFINITION) {
+      uniqueDirectiveMap.set(def.name.value, !def.repeatable);
     }
   }
-  const schemaDirectives = Object.create(null);
-  const typeDirectivesMap = Object.create(null);
+  const schemaDirectives = new Map;
+  const typeDirectivesMap = new Map;
+  const directiveDirectivesMap = new Map;
   return {
     enter(node) {
       if (!("directives" in node) || !node.directives) {
         return;
       }
       let seenDirectives;
-      if (node.kind === Kind.SCHEMA_DEFINITION || node.kind === Kind.SCHEMA_EXTENSION) {
+      if (node.kind === SCHEMA_DEFINITION || node.kind === SCHEMA_EXTENSION) {
         seenDirectives = schemaDirectives;
       } else if (isTypeDefinitionNode(node) || isTypeExtensionNode(node)) {
         const typeName = node.name.value;
-        seenDirectives = typeDirectivesMap[typeName];
+        seenDirectives = typeDirectivesMap.get(typeName);
         if (seenDirectives === undefined) {
-          typeDirectivesMap[typeName] = seenDirectives = Object.create(null);
+          seenDirectives = new Map;
+          typeDirectivesMap.set(typeName, seenDirectives);
+        }
+      } else if (node.kind === DIRECTIVE_DEFINITION || node.kind === DIRECTIVE_EXTENSION) {
+        const directiveName = node.name.value;
+        seenDirectives = directiveDirectivesMap.get(directiveName);
+        if (seenDirectives === undefined) {
+          seenDirectives = new Map;
+          directiveDirectivesMap.set(directiveName, seenDirectives);
         }
       } else {
-        seenDirectives = Object.create(null);
+        seenDirectives = new Map;
       }
       for (const directive of node.directives) {
         const directiveName = directive.name.value;
-        if (uniqueDirectiveMap[directiveName]) {
-          if (seenDirectives[directiveName]) {
-            context.reportError(new GraphQLError(`The directive "@${directiveName}" can only be used once at this location.`, {
-              nodes: [seenDirectives[directiveName], directive]
-            }));
+        if (uniqueDirectiveMap.get(directiveName) === true) {
+          const seenDirective = seenDirectives.get(directiveName);
+          if (seenDirective != null) {
+            context.reportError(new GraphQLError(`The directive "@${directiveName}" can only be used once at this location.`, { nodes: [seenDirective, directive] }));
           } else {
-            seenDirectives[directiveName] = directive;
+            seenDirectives.set(directiveName, directive);
           }
         }
       }
@@ -6499,32 +8620,31 @@ function UniqueDirectivesPerLocationRule(context) {
 function UniqueEnumValueNamesRule(context) {
   const schema = context.getSchema();
   const existingTypeMap = schema ? schema.getTypeMap() : Object.create(null);
-  const knownValueNames = Object.create(null);
+  const knownValueNames = new Map;
   return {
     EnumTypeDefinition: checkValueUniqueness,
     EnumTypeExtension: checkValueUniqueness
   };
   function checkValueUniqueness(node) {
-    var _node$values;
     const typeName = node.name.value;
-    if (!knownValueNames[typeName]) {
-      knownValueNames[typeName] = Object.create(null);
+    let valueNames = knownValueNames.get(typeName);
+    if (valueNames == null) {
+      valueNames = new Map;
+      knownValueNames.set(typeName, valueNames);
     }
-    const valueNodes = (_node$values = node.values) !== null && _node$values !== undefined ? _node$values : [];
-    const valueNames = knownValueNames[typeName];
+    const valueNodes = node.values ?? [];
     for (const valueDef of valueNodes) {
       const valueName = valueDef.name.value;
       const existingType = existingTypeMap[typeName];
       if (isEnumType(existingType) && existingType.getValue(valueName)) {
-        context.reportError(new GraphQLError(`Enum value "${typeName}.${valueName}" already exists in the schema. It cannot also be defined in this type extension.`, {
-          nodes: valueDef.name
-        }));
-      } else if (valueNames[valueName]) {
-        context.reportError(new GraphQLError(`Enum value "${typeName}.${valueName}" can only be defined once.`, {
-          nodes: [valueNames[valueName], valueDef.name]
-        }));
+        context.reportError(new GraphQLError(`Enum value "${typeName}.${valueName}" already exists in the schema. It cannot also be defined in this type extension.`, { nodes: valueDef.name }));
+        continue;
+      }
+      const knownValueName = valueNames.get(valueName);
+      if (knownValueName != null) {
+        context.reportError(new GraphQLError(`Enum value "${typeName}.${valueName}" can only be defined once.`, { nodes: [knownValueName, valueDef.name] }));
       } else {
-        valueNames[valueName] = valueDef.name;
+        valueNames.set(valueName, valueDef.name);
       }
     }
     return false;
@@ -6535,7 +8655,7 @@ function UniqueEnumValueNamesRule(context) {
 function UniqueFieldDefinitionNamesRule(context) {
   const schema = context.getSchema();
   const existingTypeMap = schema ? schema.getTypeMap() : Object.create(null);
-  const knownFieldNames = Object.create(null);
+  const knownFieldNames = new Map;
   return {
     InputObjectTypeDefinition: checkFieldUniqueness,
     InputObjectTypeExtension: checkFieldUniqueness,
@@ -6545,25 +8665,24 @@ function UniqueFieldDefinitionNamesRule(context) {
     ObjectTypeExtension: checkFieldUniqueness
   };
   function checkFieldUniqueness(node) {
-    var _node$fields;
     const typeName = node.name.value;
-    if (!knownFieldNames[typeName]) {
-      knownFieldNames[typeName] = Object.create(null);
+    let fieldNames = knownFieldNames.get(typeName);
+    if (fieldNames == null) {
+      fieldNames = new Map;
+      knownFieldNames.set(typeName, fieldNames);
     }
-    const fieldNodes = (_node$fields = node.fields) !== null && _node$fields !== undefined ? _node$fields : [];
-    const fieldNames = knownFieldNames[typeName];
+    const fieldNodes = node.fields ?? [];
     for (const fieldDef of fieldNodes) {
       const fieldName = fieldDef.name.value;
       if (hasField(existingTypeMap[typeName], fieldName)) {
-        context.reportError(new GraphQLError(`Field "${typeName}.${fieldName}" already exists in the schema. It cannot also be defined in this type extension.`, {
-          nodes: fieldDef.name
-        }));
-      } else if (fieldNames[fieldName]) {
-        context.reportError(new GraphQLError(`Field "${typeName}.${fieldName}" can only be defined once.`, {
-          nodes: [fieldNames[fieldName], fieldDef.name]
-        }));
+        context.reportError(new GraphQLError(`Field "${typeName}.${fieldName}" already exists in the schema. It cannot also be defined in this type extension.`, { nodes: fieldDef.name }));
+        continue;
+      }
+      const knownFieldName = fieldNames.get(fieldName);
+      if (knownFieldName != null) {
+        context.reportError(new GraphQLError(`Field "${typeName}.${fieldName}" can only be defined once.`, { nodes: [knownFieldName, fieldDef.name] }));
       } else {
-        fieldNames[fieldName] = fieldDef.name;
+        fieldNames.set(fieldName, fieldDef.name);
       }
     }
     return false;
@@ -6578,17 +8697,16 @@ function hasField(type, fieldName) {
 
 // node_modules/graphql/validation/rules/UniqueFragmentNamesRule.mjs
 function UniqueFragmentNamesRule(context) {
-  const knownFragmentNames = Object.create(null);
+  const knownFragmentNames = new Map;
   return {
     OperationDefinition: () => false,
     FragmentDefinition(node) {
       const fragmentName = node.name.value;
-      if (knownFragmentNames[fragmentName]) {
-        context.reportError(new GraphQLError(`There can be only one fragment named "${fragmentName}".`, {
-          nodes: [knownFragmentNames[fragmentName], node.name]
-        }));
+      const knownFragmentName = knownFragmentNames.get(fragmentName);
+      if (knownFragmentName != null) {
+        context.reportError(new GraphQLError(`There can be only one fragment named "${fragmentName}".`, { nodes: [knownFragmentName, node.name] }));
       } else {
-        knownFragmentNames[fragmentName] = node.name;
+        knownFragmentNames.set(fragmentName, node.name);
       }
       return false;
     }
@@ -6598,27 +8716,27 @@ function UniqueFragmentNamesRule(context) {
 // node_modules/graphql/validation/rules/UniqueInputFieldNamesRule.mjs
 function UniqueInputFieldNamesRule(context) {
   const knownNameStack = [];
-  let knownNames = Object.create(null);
+  let knownNames = new Map;
   return {
     ObjectValue: {
       enter() {
         knownNameStack.push(knownNames);
-        knownNames = Object.create(null);
+        knownNames = new Map;
       },
       leave() {
         const prevKnownNames = knownNameStack.pop();
-        prevKnownNames || invariant(false);
+        if (!(prevKnownNames != null))
+          invariant(false);
         knownNames = prevKnownNames;
       }
     },
     ObjectField(node) {
       const fieldName = node.name.value;
-      if (knownNames[fieldName]) {
-        context.reportError(new GraphQLError(`There can be only one input field named "${fieldName}".`, {
-          nodes: [knownNames[fieldName], node.name]
-        }));
+      const knownName = knownNames.get(fieldName);
+      if (knownName != null) {
+        context.reportError(new GraphQLError(`There can be only one input field named "${fieldName}".`, { nodes: [knownName, node.name] }));
       } else {
-        knownNames[fieldName] = node.name;
+        knownNames.set(fieldName, node.name);
       }
     }
   };
@@ -6626,20 +8744,16 @@ function UniqueInputFieldNamesRule(context) {
 
 // node_modules/graphql/validation/rules/UniqueOperationNamesRule.mjs
 function UniqueOperationNamesRule(context) {
-  const knownOperationNames = Object.create(null);
+  const knownOperationNames = new Map;
   return {
     OperationDefinition(node) {
       const operationName = node.name;
-      if (operationName) {
-        if (knownOperationNames[operationName.value]) {
-          context.reportError(new GraphQLError(`There can be only one operation named "${operationName.value}".`, {
-            nodes: [
-              knownOperationNames[operationName.value],
-              operationName
-            ]
-          }));
+      if (operationName != null) {
+        const knownOperationName = knownOperationNames.get(operationName.value);
+        if (knownOperationName != null) {
+          context.reportError(new GraphQLError(`There can be only one operation named "${operationName.value}".`, { nodes: [knownOperationName, operationName] }));
         } else {
-          knownOperationNames[operationName.value] = operationName;
+          knownOperationNames.set(operationName.value, operationName);
         }
       }
       return false;
@@ -6651,7 +8765,7 @@ function UniqueOperationNamesRule(context) {
 // node_modules/graphql/validation/rules/UniqueOperationTypesRule.mjs
 function UniqueOperationTypesRule(context) {
   const schema = context.getSchema();
-  const definedOperationTypes = Object.create(null);
+  const definedOperationTypes = new Map;
   const existingOperationTypes = schema ? {
     query: schema.getQueryType(),
     mutation: schema.getMutationType(),
@@ -6662,21 +8776,16 @@ function UniqueOperationTypesRule(context) {
     SchemaExtension: checkOperationTypes
   };
   function checkOperationTypes(node) {
-    var _node$operationTypes;
-    const operationTypesNodes = (_node$operationTypes = node.operationTypes) !== null && _node$operationTypes !== undefined ? _node$operationTypes : [];
+    const operationTypesNodes = node.operationTypes ?? [];
     for (const operationType of operationTypesNodes) {
       const operation = operationType.operation;
-      const alreadyDefinedOperationType = definedOperationTypes[operation];
+      const alreadyDefinedOperationType = definedOperationTypes.get(operation);
       if (existingOperationTypes[operation]) {
-        context.reportError(new GraphQLError(`Type for ${operation} already defined in the schema. It cannot be redefined.`, {
-          nodes: operationType
-        }));
+        context.reportError(new GraphQLError(`Type for ${operation} already defined in the schema. It cannot be redefined.`, { nodes: operationType }));
       } else if (alreadyDefinedOperationType) {
-        context.reportError(new GraphQLError(`There can be only one ${operation} type in schema.`, {
-          nodes: [alreadyDefinedOperationType, operationType]
-        }));
+        context.reportError(new GraphQLError(`There can be only one ${operation} type in schema.`, { nodes: [alreadyDefinedOperationType, operationType] }));
       } else {
-        definedOperationTypes[operation] = operationType;
+        definedOperationTypes.set(operation, operationType);
       }
     }
     return false;
@@ -6685,7 +8794,7 @@ function UniqueOperationTypesRule(context) {
 
 // node_modules/graphql/validation/rules/UniqueTypeNamesRule.mjs
 function UniqueTypeNamesRule(context) {
-  const knownTypeNames = Object.create(null);
+  const knownTypeNames = new Map;
   const schema = context.getSchema();
   return {
     ScalarTypeDefinition: checkTypeName,
@@ -6697,18 +8806,17 @@ function UniqueTypeNamesRule(context) {
   };
   function checkTypeName(node) {
     const typeName = node.name.value;
-    if (schema !== null && schema !== undefined && schema.getType(typeName)) {
-      context.reportError(new GraphQLError(`Type "${typeName}" already exists in the schema. It cannot also be defined in this type definition.`, {
-        nodes: node.name
-      }));
+    if (schema?.getType(typeName)) {
+      context.reportError(new GraphQLError(`Type "${typeName}" already exists in the schema. It cannot also be defined in this type definition.`, { nodes: node.name }));
       return;
     }
-    if (knownTypeNames[typeName]) {
+    const knownNameNode = knownTypeNames.get(typeName);
+    if (knownNameNode != null) {
       context.reportError(new GraphQLError(`There can be only one type named "${typeName}".`, {
-        nodes: [knownTypeNames[typeName], node.name]
+        nodes: [knownNameNode, node.name]
       }));
     } else {
-      knownTypeNames[typeName] = node.name;
+      knownTypeNames.set(typeName, node.name);
     }
     return false;
   }
@@ -6718,14 +8826,11 @@ function UniqueTypeNamesRule(context) {
 function UniqueVariableNamesRule(context) {
   return {
     OperationDefinition(operationNode) {
-      var _operationNode$variab;
-      const variableDefinitions = (_operationNode$variab = operationNode.variableDefinitions) !== null && _operationNode$variab !== undefined ? _operationNode$variab : [];
+      const variableDefinitions = operationNode.variableDefinitions ?? [];
       const seenVariableDefinitions = groupBy(variableDefinitions, (node) => node.variable.name.value);
       for (const [variableName, variableNodes] of seenVariableDefinitions) {
         if (variableNodes.length > 1) {
-          context.reportError(new GraphQLError(`There can be only one variable named "$${variableName}".`, {
-            nodes: variableNodes.map((node) => node.variable.name)
-          }));
+          context.reportError(new GraphQLError(`There can be only one variable named "$${variableName}".`, { nodes: variableNodes.map((node) => node.variable.name) }));
         }
       }
     }
@@ -6734,130 +8839,24 @@ function UniqueVariableNamesRule(context) {
 
 // node_modules/graphql/validation/rules/ValuesOfCorrectTypeRule.mjs
 function ValuesOfCorrectTypeRule(context) {
-  let variableDefinitions = {};
   return {
-    OperationDefinition: {
-      enter() {
-        variableDefinitions = {};
-      }
-    },
-    VariableDefinition(definition) {
-      variableDefinitions[definition.variable.name.value] = definition;
-    },
-    ListValue(node) {
-      const type = getNullableType(context.getParentInputType());
-      if (!isListType(type)) {
-        isValidValueNode(context, node);
-        return false;
-      }
-    },
-    ObjectValue(node) {
-      const type = getNamedType(context.getInputType());
-      if (!isInputObjectType(type)) {
-        isValidValueNode(context, node);
-        return false;
-      }
-      const fieldNodeMap = keyMap(node.fields, (field) => field.name.value);
-      for (const fieldDef of Object.values(type.getFields())) {
-        const fieldNode = fieldNodeMap[fieldDef.name];
-        if (!fieldNode && isRequiredInputField(fieldDef)) {
-          const typeStr = inspect(fieldDef.type);
-          context.reportError(new GraphQLError(`Field "${type.name}.${fieldDef.name}" of required type "${typeStr}" was not provided.`, {
-            nodes: node
-          }));
-        }
-      }
-      if (type.isOneOf) {
-        validateOneOfInputObject(context, node, type, fieldNodeMap, variableDefinitions);
-      }
-    },
-    ObjectField(node) {
-      const parentType = getNamedType(context.getParentInputType());
-      const fieldType = context.getInputType();
-      if (!fieldType && isInputObjectType(parentType)) {
-        const suggestions = suggestionList(node.name.value, Object.keys(parentType.getFields()));
-        context.reportError(new GraphQLError(`Field "${node.name.value}" is not defined by type "${parentType.name}".` + didYouMean(suggestions), {
-          nodes: node
-        }));
-      }
-    },
-    NullValue(node) {
-      const type = context.getInputType();
-      if (isNonNullType(type)) {
-        context.reportError(new GraphQLError(`Expected value of type "${inspect(type)}", found ${print(node)}.`, {
-          nodes: node
-        }));
-      }
-    },
-    EnumValue: (node) => isValidValueNode(context, node),
-    IntValue: (node) => isValidValueNode(context, node),
-    FloatValue: (node) => isValidValueNode(context, node),
-    StringValue: (node) => isValidValueNode(context, node),
-    BooleanValue: (node) => isValidValueNode(context, node)
+    NullValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    ListValue: (node) => isValidValueNode(context, node, context.getParentInputType()),
+    ObjectValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    EnumValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    IntValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    FloatValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    StringValue: (node) => isValidValueNode(context, node, context.getInputType()),
+    BooleanValue: (node) => isValidValueNode(context, node, context.getInputType())
   };
 }
-function isValidValueNode(context, node) {
-  const locationType = context.getInputType();
-  if (!locationType) {
-    return;
-  }
-  const type = getNamedType(locationType);
-  if (!isLeafType(type)) {
-    const typeStr = inspect(locationType);
-    context.reportError(new GraphQLError(`Expected value of type "${typeStr}", found ${print(node)}.`, {
-      nodes: node
-    }));
-    return;
-  }
-  try {
-    const parseResult = type.parseLiteral(node, undefined);
-    if (parseResult === undefined) {
-      const typeStr = inspect(locationType);
-      context.reportError(new GraphQLError(`Expected value of type "${typeStr}", found ${print(node)}.`, {
-        nodes: node
-      }));
-    }
-  } catch (error) {
-    const typeStr = inspect(locationType);
-    if (error instanceof GraphQLError) {
+function isValidValueNode(context, node, inputType) {
+  if (inputType) {
+    validateInputLiteral(node, inputType, (error) => {
       context.reportError(error);
-    } else {
-      context.reportError(new GraphQLError(`Expected value of type "${typeStr}", found ${print(node)}; ` + error.message, {
-        nodes: node,
-        originalError: error
-      }));
-    }
+    }, undefined, undefined, context.hideSuggestions);
   }
-}
-function validateOneOfInputObject(context, node, type, fieldNodeMap, variableDefinitions) {
-  var _fieldNodeMap$keys$;
-  const keys = Object.keys(fieldNodeMap);
-  const isNotExactlyOneField = keys.length !== 1;
-  if (isNotExactlyOneField) {
-    context.reportError(new GraphQLError(`OneOf Input Object "${type.name}" must specify exactly one key.`, {
-      nodes: [node]
-    }));
-    return;
-  }
-  const value = (_fieldNodeMap$keys$ = fieldNodeMap[keys[0]]) === null || _fieldNodeMap$keys$ === undefined ? undefined : _fieldNodeMap$keys$.value;
-  const isNullLiteral = !value || value.kind === Kind.NULL;
-  const isVariable = (value === null || value === undefined ? undefined : value.kind) === Kind.VARIABLE;
-  if (isNullLiteral) {
-    context.reportError(new GraphQLError(`Field "${type.name}.${keys[0]}" must be non-null.`, {
-      nodes: [node]
-    }));
-    return;
-  }
-  if (isVariable) {
-    const variableName = value.name.value;
-    const definition = variableDefinitions[variableName];
-    const isNullableVariable = definition.type.kind !== Kind.NON_NULL_TYPE;
-    if (isNullableVariable) {
-      context.reportError(new GraphQLError(`Variable "${variableName}" must be non-nullable to be used for OneOf Input Object "${type.name}".`, {
-        nodes: [node]
-      }));
-    }
-  }
+  return false;
 }
 
 // node_modules/graphql/validation/rules/VariablesAreInputTypesRule.mjs
@@ -6868,9 +8867,7 @@ function VariablesAreInputTypesRule(context) {
       if (type !== undefined && !isInputType(type)) {
         const variableName = node.variable.name.value;
         const typeName = print(node.type);
-        context.reportError(new GraphQLError(`Variable "$${variableName}" cannot be non-input type "${typeName}".`, {
-          nodes: node.type
-        }));
+        context.reportError(new GraphQLError(`Variable "$${variableName}" cannot be non-input type "${typeName}".`, { nodes: node.type }));
       }
     }
   };
@@ -6878,44 +8875,41 @@ function VariablesAreInputTypesRule(context) {
 
 // node_modules/graphql/validation/rules/VariablesInAllowedPositionRule.mjs
 function VariablesInAllowedPositionRule(context) {
-  let varDefMap = Object.create(null);
+  let varDefMap;
   return {
     OperationDefinition: {
-      enter() {
-        varDefMap = Object.create(null);
+      enter(operation) {
+        varDefMap = new Map;
+        if (operation.variableDefinitions) {
+          for (const varDef of operation.variableDefinitions) {
+            varDefMap.set(varDef.variable.name.value, varDef);
+          }
+        }
       },
       leave(operation) {
         const usages = context.getRecursiveVariableUsages(operation);
-        for (const { node, type, defaultValue, parentType } of usages) {
+        for (const { node, type, parentType, defaultValue, fragmentVariableDefinition } of usages) {
           const varName = node.name.value;
-          const varDef = varDefMap[varName];
+          let varDef = fragmentVariableDefinition;
+          varDef ??= varDefMap.get(varName);
           if (varDef && type) {
             const schema = context.getSchema();
             const varType = typeFromAST(schema, varDef.type);
             if (varType && !allowedVariableUsage(schema, varType, varDef.defaultValue, type, defaultValue)) {
-              const varTypeStr = inspect(varType);
-              const typeStr = inspect(type);
-              context.reportError(new GraphQLError(`Variable "$${varName}" of type "${varTypeStr}" used in position expecting type "${typeStr}".`, {
-                nodes: [varDef, node]
-              }));
+              context.reportError(new GraphQLError(`Variable "$${varName}" of type "${varType}" used in position expecting type "${type}".`, { nodes: [varDef, node] }));
             }
             if (isInputObjectType(parentType) && parentType.isOneOf && isNullableType(varType)) {
-              context.reportError(new GraphQLError(`Variable "$${varName}" is of type "${varType}" but must be non-nullable to be used for OneOf Input Object "${parentType}".`, {
-                nodes: [varDef, node]
-              }));
+              context.reportError(new GraphQLError(`Variable "$${varName}" is of type "${varType}" but must be non-nullable to be used for OneOf Input Object "${parentType}".`, { nodes: [varDef, node] }));
             }
           }
         }
       }
-    },
-    VariableDefinition(node) {
-      varDefMap[node.variable.name.value] = node;
     }
   };
 }
 function allowedVariableUsage(schema, varType, varDefaultValue, locationType, locationDefaultValue) {
   if (isNonNullType(locationType) && !isNonNullType(varType)) {
-    const hasNonNullVariableDefaultValue = varDefaultValue != null && varDefaultValue.kind !== Kind.NULL;
+    const hasNonNullVariableDefaultValue = varDefaultValue != null && varDefaultValue.kind !== NULL;
     const hasLocationDefaultValue = locationDefaultValue !== undefined;
     if (!hasNonNullVariableDefaultValue && !hasLocationDefaultValue) {
       return false;
@@ -6927,9 +8921,12 @@ function allowedVariableUsage(schema, varType, varDefaultValue, locationType, lo
 }
 
 // node_modules/graphql/validation/specifiedRules.mjs
-var recommendedRules = Object.freeze([MaxIntrospectionDepthRule]);
+var recommendedRules = Object.freeze([
+  MaxIntrospectionDepthRule
+]);
 var specifiedRules = Object.freeze([
   ExecutableDefinitionsRule,
+  KnownOperationTypesRule,
   UniqueOperationNamesRule,
   LoneAnonymousOperationRule,
   SingleFieldSubscriptionsRule,
@@ -6948,6 +8945,10 @@ var specifiedRules = Object.freeze([
   NoUnusedVariablesRule,
   KnownDirectivesRule,
   UniqueDirectivesPerLocationRule,
+  DeferStreamDirectiveOnRootFieldRule,
+  DeferStreamDirectiveOnValidOperationsRule,
+  DeferStreamDirectiveLabelRule,
+  StreamDirectiveOnListFieldRule,
   KnownArgumentNamesRule,
   UniqueArgumentNamesRule,
   ValuesOfCorrectTypeRule,
@@ -6975,13 +8976,91 @@ var specifiedSDLRules = Object.freeze([
   ProvidedRequiredArgumentsOnDirectivesRule
 ]);
 
+// node_modules/graphql/jsutils/SetMap.mjs
+class SetMap {
+  constructor() {
+    this._entries = new Map;
+    this._memberIds = new Map;
+    this._nextMemberId = 0;
+  }
+  get size() {
+    return this._entries.size;
+  }
+  get(members) {
+    return this._entries.get(this._key(members))?.value;
+  }
+  getOrInsert(members, value) {
+    const key = this._key(members);
+    const entry = this._entries.get(key);
+    if (entry !== undefined) {
+      return entry.value;
+    }
+    this._entries.set(key, { members, value });
+    return value;
+  }
+  getOrInsertComputed(members, computeValue) {
+    const entry = this._entries.get(this._key(members));
+    if (entry !== undefined) {
+      return entry.value;
+    }
+    const value = computeValue(members);
+    this.set(members, value);
+    return value;
+  }
+  has(members) {
+    return this._entries.has(this._key(members));
+  }
+  set(members, value) {
+    const key = this._key(members);
+    const entry = this._entries.get(key);
+    if (entry !== undefined) {
+      entry.value = value;
+      return this;
+    }
+    this._entries.set(key, { members, value });
+    return this;
+  }
+  *keys() {
+    for (const entry of this._entries.values()) {
+      yield entry.members;
+    }
+  }
+  *values() {
+    for (const entry of this._entries.values()) {
+      yield entry.value;
+    }
+  }
+  *entries() {
+    for (const entry of this._entries.values()) {
+      yield [entry.members, entry.value];
+    }
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+  _key(members) {
+    const ids = [];
+    for (const member of members) {
+      let id = this._memberIds.get(member);
+      if (id === undefined) {
+        id = this._nextMemberId++;
+        this._memberIds.set(member, id);
+      }
+      ids.push(id);
+    }
+    ids.sort((id1, id2) => id1 - id2);
+    return ids.join(",");
+  }
+}
+
 // node_modules/graphql/validation/ValidationContext.mjs
 class ASTValidationContext {
   constructor(ast, onError) {
+    this._remainingFragmentWork = 50000;
     this._ast = ast;
     this._fragments = undefined;
     this._fragmentSpreads = new Map;
-    this._recursivelyReferencedFragments = new Map;
+    this._recursivelyReferencedFragments = new SetMap;
     this._onError = onError;
   }
   get [Symbol.toStringTag]() {
@@ -7000,7 +9079,7 @@ class ASTValidationContext {
     } else {
       fragments = Object.create(null);
       for (const defNode of this.getDocument().definitions) {
-        if (defNode.kind === Kind.FRAGMENT_DEFINITION) {
+        if (defNode.kind === FRAGMENT_DEFINITION) {
           fragments[defNode.name.value] = defNode;
         }
       }
@@ -7016,7 +9095,7 @@ class ASTValidationContext {
       let set;
       while (set = setsToVisit.pop()) {
         for (const selection of set.selections) {
-          if (selection.kind === Kind.FRAGMENT_SPREAD) {
+          if (selection.kind === FRAGMENT_SPREAD) {
             spreads.push(selection);
           } else if (selection.selectionSet) {
             setsToVisit.push(selection.selectionSet);
@@ -7028,28 +9107,35 @@ class ASTValidationContext {
     return spreads;
   }
   getRecursivelyReferencedFragments(operation) {
-    let fragments = this._recursivelyReferencedFragments.get(operation);
+    return this.getRecursivelyReferencedFragmentsForOperations([operation]);
+  }
+  getRecursivelyReferencedFragmentsForOperations(operations) {
+    const fragmentNames = new Set(operations.flatMap(({ selectionSet }) => this.getFragmentSpreads(selectionSet).map(({ name }) => name.value)));
+    let fragments = this._recursivelyReferencedFragments.get(fragmentNames);
     if (!fragments) {
       fragments = [];
-      const collectedNames = Object.create(null);
-      const nodesToVisit = [operation.selectionSet];
-      let node;
-      while (node = nodesToVisit.pop()) {
-        for (const spread of this.getFragmentSpreads(node)) {
-          const fragName = spread.name.value;
-          if (collectedNames[fragName] !== true) {
-            collectedNames[fragName] = true;
-            const fragment = this.getFragment(fragName);
-            if (fragment) {
-              fragments.push(fragment);
-              nodesToVisit.push(fragment.selectionSet);
-            }
+      this.spendFragmentWork(fragmentNames.size);
+      const collectedNames = new Set(fragmentNames);
+      for (const fragName of collectedNames) {
+        const fragment = this.getFragment(fragName);
+        if (fragment) {
+          fragments.push(fragment);
+          const spreads = this.getFragmentSpreads(fragment.selectionSet);
+          this.spendFragmentWork(spreads.length);
+          for (const spread of spreads) {
+            collectedNames.add(spread.name.value);
           }
         }
       }
-      this._recursivelyReferencedFragments.set(operation, fragments);
+      this._recursivelyReferencedFragments.set(fragmentNames, fragments);
     }
     return fragments;
+  }
+  spendFragmentWork(cost) {
+    this._remainingFragmentWork -= cost;
+    if (this._remainingFragmentWork < 0) {
+      throw validationAbortedError;
+    }
   }
 }
 
@@ -7057,6 +9143,9 @@ class SDLValidationContext extends ASTValidationContext {
   constructor(ast, schema, onError) {
     super(ast, onError);
     this._schema = schema;
+  }
+  get hideSuggestions() {
+    return false;
   }
   get [Symbol.toStringTag]() {
     return "SDLValidationContext";
@@ -7067,15 +9156,25 @@ class SDLValidationContext extends ASTValidationContext {
 }
 
 class ValidationContext extends ASTValidationContext {
-  constructor(schema, ast, typeInfo, onError) {
+  constructor(schema, ast, typeInfo, onError, hideSuggestionsOrOptions) {
+    const options = typeof hideSuggestionsOrOptions === "boolean" ? { hideSuggestions: hideSuggestionsOrOptions } : hideSuggestionsOrOptions ?? {};
+    const { hideSuggestions, allowEmptySelectionSets } = options;
     super(ast, onError);
     this._schema = schema;
     this._typeInfo = typeInfo;
     this._variableUsages = new Map;
     this._recursiveVariableUsages = new Map;
+    this._hideSuggestions = hideSuggestions ?? false;
+    this._allowEmptySelectionSets = allowEmptySelectionSets ?? true;
   }
   get [Symbol.toStringTag]() {
     return "ValidationContext";
+  }
+  get hideSuggestions() {
+    return this._hideSuggestions;
+  }
+  get allowEmptySelectionSets() {
+    return this._allowEmptySelectionSets;
   }
   getSchema() {
     return this._schema;
@@ -7084,15 +9183,22 @@ class ValidationContext extends ASTValidationContext {
     let usages = this._variableUsages.get(node);
     if (!usages) {
       const newUsages = [];
-      const typeInfo = new TypeInfo(this._schema);
+      const typeInfo = new TypeInfo(this._schema, undefined, this._typeInfo.getFragmentSignatureByName());
+      const fragmentDefinition = node.kind === FRAGMENT_DEFINITION ? node : undefined;
       visit(node, visitWithTypeInfo(typeInfo, {
         VariableDefinition: () => false,
         Variable(variable) {
+          let fragmentVariableDefinition;
+          if (fragmentDefinition) {
+            const fragmentSignature = typeInfo.getFragmentSignatureByName()(fragmentDefinition.name.value);
+            fragmentVariableDefinition = fragmentSignature?.variableDefinitions.get(variable.name.value);
+          }
           newUsages.push({
             node: variable,
             type: typeInfo.getInputType(),
+            parentType: typeInfo.getParentInputType(),
             defaultValue: typeInfo.getDefaultValue(),
-            parentType: typeInfo.getParentInputType()
+            fragmentVariableDefinition
           });
         }
       }));
@@ -7104,10 +9210,19 @@ class ValidationContext extends ASTValidationContext {
   getRecursiveVariableUsages(operation) {
     let usages = this._recursiveVariableUsages.get(operation);
     if (!usages) {
-      usages = this.getVariableUsages(operation);
-      for (const frag of this.getRecursivelyReferencedFragments(operation)) {
-        usages = usages.concat(this.getVariableUsages(frag));
+      const fragments = this.getRecursivelyReferencedFragments(operation);
+      let fragmentUsages = this._recursiveVariableUsages.get(fragments);
+      if (!fragmentUsages) {
+        this.spendFragmentWork(fragments.length);
+        fragmentUsages = fragments.flatMap((frag) => {
+          const localUsages = this.getVariableUsages(frag);
+          this.spendFragmentWork(localUsages.length);
+          return localUsages;
+        });
+        this._recursiveVariableUsages.set(fragments, fragmentUsages);
       }
+      this.spendFragmentWork(fragmentUsages.length);
+      usages = this.getVariableUsages(operation).concat(fragmentUsages);
       this._recursiveVariableUsages.set(operation, usages);
     }
     return usages;
@@ -7133,31 +9248,43 @@ class ValidationContext extends ASTValidationContext {
   getArgument() {
     return this._typeInfo.getArgument();
   }
+  getFragmentSignature() {
+    return this._typeInfo.getFragmentSignature();
+  }
+  getFragmentSignatureByName() {
+    return this._typeInfo.getFragmentSignatureByName();
+  }
   getEnumValue() {
     return this._typeInfo.getEnumValue();
   }
 }
 
 // node_modules/graphql/validation/validate.mjs
-function validate(schema, documentAST, rules = specifiedRules, options, typeInfo = new TypeInfo(schema)) {
-  var _options$maxErrors;
-  const maxErrors = (_options$maxErrors = options === null || options === undefined ? undefined : options.maxErrors) !== null && _options$maxErrors !== undefined ? _options$maxErrors : 100;
-  documentAST || devAssert(false, "Must provide document.");
+var QueryDocumentKeysToValidate = mapValue(QueryDocumentKeys, (keys) => keys.filter((key) => key !== "description"));
+var tooManyValidationErrorsError = new GraphQLError("Too many validation errors, error limit reached. Validation aborted.");
+function validate(schema, documentAST, rules = specifiedRules, options) {
+  return shouldTrace(validateChannel) ? validateChannel.traceSync(() => validateImpl(schema, documentAST, rules, options), { schema, document: documentAST }) : validateImpl(schema, documentAST, rules, options);
+}
+function validateImpl(schema, documentAST, rules, options) {
+  const maxErrors = options?.maxErrors ?? 100;
+  const hideSuggestions = options?.hideSuggestions ?? false;
+  const allowEmptySelectionSets = options?.allowEmptySelectionSets ?? true;
   assertValidSchema(schema);
-  const abortObj = Object.freeze({});
   const errors = [];
+  const typeInfo = new TypeInfo(schema);
   const context = new ValidationContext(schema, documentAST, typeInfo, (error) => {
     if (errors.length >= maxErrors) {
-      errors.push(new GraphQLError("Too many validation errors, error limit reached. Validation aborted."));
-      throw abortObj;
+      throw tooManyValidationErrorsError;
     }
     errors.push(error);
-  });
+  }, { hideSuggestions, allowEmptySelectionSets });
   const visitor = visitInParallel(rules.map((rule) => rule(context)));
   try {
-    visit(documentAST, visitWithTypeInfo(typeInfo, visitor));
+    visit(documentAST, visitWithTypeInfo(typeInfo, visitor), QueryDocumentKeysToValidate);
   } catch (e) {
-    if (e !== abortObj) {
+    if (e === tooManyValidationErrorsError || e === validationAbortedError) {
+      errors.push(e);
+    } else {
       throw e;
     }
   }
@@ -7180,407 +9307,605 @@ function assertValidSDL(documentAST) {
 `));
   }
 }
-// node_modules/graphql/utilities/extendSchema.mjs
-function extendSchemaImpl(schemaConfig, documentAST, options) {
-  var _schemaDef, _schemaDef$descriptio, _schemaDef2, _options$assumeValid;
-  const typeDefs = [];
-  const typeExtensionsMap = Object.create(null);
-  const directiveDefs = [];
-  let schemaDef;
-  const schemaExtensions = [];
-  for (const def of documentAST.definitions) {
-    if (def.kind === Kind.SCHEMA_DEFINITION) {
-      schemaDef = def;
-    } else if (def.kind === Kind.SCHEMA_EXTENSION) {
-      schemaExtensions.push(def);
-    } else if (isTypeDefinitionNode(def)) {
-      typeDefs.push(def);
-    } else if (isTypeExtensionNode(def)) {
-      const extendedTypeName = def.name.value;
-      const existingTypeExtensions = typeExtensionsMap[extendedTypeName];
-      typeExtensionsMap[extendedTypeName] = existingTypeExtensions ? existingTypeExtensions.concat([def]) : [def];
-    } else if (def.kind === Kind.DIRECTIVE_DEFINITION) {
-      directiveDefs.push(def);
+// node_modules/graphql/utilities/mapSchemaConfig.mjs
+var SchemaElementKind = {
+  SCHEMA: "SCHEMA",
+  SCALAR: "SCALAR",
+  OBJECT: "OBJECT",
+  FIELD: "FIELD",
+  ARGUMENT: "ARGUMENT",
+  INTERFACE: "INTERFACE",
+  UNION: "UNION",
+  ENUM: "ENUM",
+  ENUM_VALUE: "ENUM_VALUE",
+  INPUT_OBJECT: "INPUT_OBJECT",
+  INPUT_FIELD: "INPUT_FIELD",
+  DIRECTIVE: "DIRECTIVE"
+};
+function mapSchemaConfig(schemaConfig, configMapperMapFn) {
+  const configMapperMap = configMapperMapFn({
+    getNamedType,
+    setNamedType,
+    getNamedTypes
+  });
+  const mappedTypeMap = new Map;
+  for (const type of schemaConfig.types) {
+    const typeName = type.name;
+    const mappedNamedType = mapNamedType(type);
+    if (mappedNamedType) {
+      mappedTypeMap.set(typeName, mappedNamedType);
     }
   }
-  if (Object.keys(typeExtensionsMap).length === 0 && typeDefs.length === 0 && directiveDefs.length === 0 && schemaExtensions.length === 0 && schemaDef == null) {
-    return schemaConfig;
+  const mappedDirectives = [];
+  for (const directive of schemaConfig.directives) {
+    if (isSpecifiedDirective(directive)) {
+      mappedDirectives.push(directive);
+      continue;
+    }
+    const mappedDirectiveConfig = mapDirective(directive.toConfig());
+    if (mappedDirectiveConfig) {
+      mappedDirectives.push(new GraphQLDirective(mappedDirectiveConfig));
+    }
   }
-  const typeMap = Object.create(null);
-  for (const existingType of schemaConfig.types) {
-    typeMap[existingType.name] = extendNamedType(existingType);
-  }
-  for (const typeNode of typeDefs) {
-    var _stdTypeMap$name;
-    const name = typeNode.name.value;
-    typeMap[name] = (_stdTypeMap$name = stdTypeMap[name]) !== null && _stdTypeMap$name !== undefined ? _stdTypeMap$name : buildType(typeNode);
-  }
-  const operationTypes = {
-    query: schemaConfig.query && replaceNamedType(schemaConfig.query),
-    mutation: schemaConfig.mutation && replaceNamedType(schemaConfig.mutation),
-    subscription: schemaConfig.subscription && replaceNamedType(schemaConfig.subscription),
-    ...schemaDef && getOperationTypes([schemaDef]),
-    ...getOperationTypes(schemaExtensions)
+  const mappedSchemaConfig = {
+    ...schemaConfig,
+    query: schemaConfig.query && getNamedType(schemaConfig.query.name),
+    mutation: schemaConfig.mutation && getNamedType(schemaConfig.mutation.name),
+    subscription: schemaConfig.subscription && getNamedType(schemaConfig.subscription.name),
+    types: Array.from(mappedTypeMap.values()),
+    directives: mappedDirectives
   };
-  return {
-    description: (_schemaDef = schemaDef) === null || _schemaDef === undefined ? undefined : (_schemaDef$descriptio = _schemaDef.description) === null || _schemaDef$descriptio === undefined ? undefined : _schemaDef$descriptio.value,
-    ...operationTypes,
-    types: Object.values(typeMap),
-    directives: [
-      ...schemaConfig.directives.map(replaceDirective),
-      ...directiveDefs.map(buildDirective)
-    ],
-    extensions: Object.create(null),
-    astNode: (_schemaDef2 = schemaDef) !== null && _schemaDef2 !== undefined ? _schemaDef2 : schemaConfig.astNode,
-    extensionASTNodes: schemaConfig.extensionASTNodes.concat(schemaExtensions),
-    assumeValid: (_options$assumeValid = options === null || options === undefined ? undefined : options.assumeValid) !== null && _options$assumeValid !== undefined ? _options$assumeValid : false
-  };
-  function replaceType(type) {
+  const schemaMapper = configMapperMap[SchemaElementKind.SCHEMA];
+  return schemaMapper == null ? mappedSchemaConfig : schemaMapper(mappedSchemaConfig);
+  function getType(type) {
     if (isListType(type)) {
-      return new GraphQLList(replaceType(type.ofType));
+      return new GraphQLList(getType(type.ofType));
     }
     if (isNonNullType(type)) {
-      return new GraphQLNonNull(replaceType(type.ofType));
+      return new GraphQLNonNull(getType(type.ofType));
     }
-    return replaceNamedType(type);
+    return getNamedType(type.name);
   }
-  function replaceNamedType(type) {
-    return typeMap[type.name];
+  function getNamedType(typeName) {
+    const type = stdTypeMap.get(typeName) ?? mappedTypeMap.get(typeName);
+    if (!(type !== undefined))
+      invariant(false, `Unknown type: "${typeName}".`);
+    return type;
   }
-  function replaceDirective(directive) {
-    const config = directive.toConfig();
-    return new GraphQLDirective({
-      ...config,
-      args: mapValue(config.args, extendArg)
-    });
+  function setNamedType(type) {
+    mappedTypeMap.set(type.name, type);
   }
-  function extendNamedType(type) {
+  function getNamedTypes() {
+    return Array.from(mappedTypeMap.values());
+  }
+  function mapNamedType(type) {
     if (isIntrospectionType(type) || isSpecifiedScalarType(type)) {
       return type;
     }
     if (isScalarType(type)) {
-      return extendScalarType(type);
+      return mapScalarType(type);
     }
     if (isObjectType(type)) {
-      return extendObjectType(type);
+      return mapObjectType(type);
     }
     if (isInterfaceType(type)) {
-      return extendInterfaceType(type);
+      return mapInterfaceType(type);
     }
     if (isUnionType(type)) {
-      return extendUnionType(type);
+      return mapUnionType(type);
     }
     if (isEnumType(type)) {
-      return extendEnumType(type);
+      return mapEnumType(type);
     }
     if (isInputObjectType(type)) {
-      return extendInputObjectType(type);
+      return mapInputObjectType(type);
     }
     invariant(false, "Unexpected type: " + inspect(type));
   }
-  function extendInputObjectType(type) {
-    var _typeExtensionsMap$co;
-    const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$co = typeExtensionsMap[config.name]) !== null && _typeExtensionsMap$co !== undefined ? _typeExtensionsMap$co : [];
-    return new GraphQLInputObjectType({
-      ...config,
-      fields: () => ({
-        ...mapValue(config.fields, (field) => ({
-          ...field,
-          type: replaceType(field.type)
-        })),
-        ...buildInputFieldMap(extensions)
-      }),
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
+  function mapScalarType(type) {
+    let mappedConfig = type.toConfig();
+    const mapper = configMapperMap[SchemaElementKind.SCALAR];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLScalarType(mappedConfig);
   }
-  function extendEnumType(type) {
-    var _typeExtensionsMap$ty;
+  function mapObjectType(type) {
     const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$ty = typeExtensionsMap[type.name]) !== null && _typeExtensionsMap$ty !== undefined ? _typeExtensionsMap$ty : [];
-    return new GraphQLEnumType({
+    let mappedConfig = {
       ...config,
-      values: { ...config.values, ...buildEnumValueMap(extensions) },
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
-  }
-  function extendScalarType(type) {
-    var _typeExtensionsMap$co2;
-    const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$co2 = typeExtensionsMap[config.name]) !== null && _typeExtensionsMap$co2 !== undefined ? _typeExtensionsMap$co2 : [];
-    let specifiedByURL = config.specifiedByURL;
-    for (const extensionNode of extensions) {
-      var _getSpecifiedByURL;
-      specifiedByURL = (_getSpecifiedByURL = getSpecifiedByURL(extensionNode)) !== null && _getSpecifiedByURL !== undefined ? _getSpecifiedByURL : specifiedByURL;
-    }
-    return new GraphQLScalarType({
-      ...config,
-      specifiedByURL,
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
-  }
-  function extendObjectType(type) {
-    var _typeExtensionsMap$co3;
-    const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$co3 = typeExtensionsMap[config.name]) !== null && _typeExtensionsMap$co3 !== undefined ? _typeExtensionsMap$co3 : [];
-    return new GraphQLObjectType({
-      ...config,
-      interfaces: () => [
-        ...type.getInterfaces().map(replaceNamedType),
-        ...buildInterfaces(extensions)
-      ],
-      fields: () => ({
-        ...mapValue(config.fields, extendField),
-        ...buildFieldMap(extensions)
-      }),
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
-  }
-  function extendInterfaceType(type) {
-    var _typeExtensionsMap$co4;
-    const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$co4 = typeExtensionsMap[config.name]) !== null && _typeExtensionsMap$co4 !== undefined ? _typeExtensionsMap$co4 : [];
-    return new GraphQLInterfaceType({
-      ...config,
-      interfaces: () => [
-        ...type.getInterfaces().map(replaceNamedType),
-        ...buildInterfaces(extensions)
-      ],
-      fields: () => ({
-        ...mapValue(config.fields, extendField),
-        ...buildFieldMap(extensions)
-      }),
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
-  }
-  function extendUnionType(type) {
-    var _typeExtensionsMap$co5;
-    const config = type.toConfig();
-    const extensions = (_typeExtensionsMap$co5 = typeExtensionsMap[config.name]) !== null && _typeExtensionsMap$co5 !== undefined ? _typeExtensionsMap$co5 : [];
-    return new GraphQLUnionType({
-      ...config,
-      types: () => [
-        ...type.getTypes().map(replaceNamedType),
-        ...buildUnionTypes(extensions)
-      ],
-      extensionASTNodes: config.extensionASTNodes.concat(extensions)
-    });
-  }
-  function extendField(field) {
-    return {
-      ...field,
-      type: replaceType(field.type),
-      args: field.args && mapValue(field.args, extendArg)
+      interfaces: () => config.interfaces.map((iface) => getNamedType(iface.name)),
+      fields: () => mapFields(config.fields, type.name)
     };
+    const mapper = configMapperMap[SchemaElementKind.OBJECT];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLObjectType(mappedConfig);
   }
-  function extendArg(arg) {
-    return { ...arg, type: replaceType(arg.type) };
-  }
-  function getOperationTypes(nodes) {
-    const opTypes = {};
-    for (const node of nodes) {
-      var _node$operationTypes;
-      const operationTypesNodes = (_node$operationTypes = node.operationTypes) !== null && _node$operationTypes !== undefined ? _node$operationTypes : [];
-      for (const operationType of operationTypesNodes) {
-        opTypes[operationType.operation] = getNamedType(operationType.type);
-      }
-    }
-    return opTypes;
-  }
-  function getNamedType(node) {
-    var _stdTypeMap$name2;
-    const name = node.name.value;
-    const type = (_stdTypeMap$name2 = stdTypeMap[name]) !== null && _stdTypeMap$name2 !== undefined ? _stdTypeMap$name2 : typeMap[name];
-    if (type === undefined) {
-      throw new Error(`Unknown type: "${name}".`);
-    }
-    return type;
-  }
-  function getWrappedType(node) {
-    if (node.kind === Kind.LIST_TYPE) {
-      return new GraphQLList(getWrappedType(node.type));
-    }
-    if (node.kind === Kind.NON_NULL_TYPE) {
-      return new GraphQLNonNull(getWrappedType(node.type));
-    }
-    return getNamedType(node);
-  }
-  function buildDirective(node) {
-    var _node$description;
-    return new GraphQLDirective({
-      name: node.name.value,
-      description: (_node$description = node.description) === null || _node$description === undefined ? undefined : _node$description.value,
-      locations: node.locations.map(({ value }) => value),
-      isRepeatable: node.repeatable,
-      args: buildArgumentMap(node.arguments),
-      astNode: node
-    });
-  }
-  function buildFieldMap(nodes) {
-    const fieldConfigMap = Object.create(null);
-    for (const node of nodes) {
-      var _node$fields;
-      const nodeFields = (_node$fields = node.fields) !== null && _node$fields !== undefined ? _node$fields : [];
-      for (const field of nodeFields) {
-        var _field$description;
-        fieldConfigMap[field.name.value] = {
-          type: getWrappedType(field.type),
-          description: (_field$description = field.description) === null || _field$description === undefined ? undefined : _field$description.value,
-          args: buildArgumentMap(field.arguments),
-          deprecationReason: getDeprecationReason(field),
-          astNode: field
-        };
-      }
-    }
-    return fieldConfigMap;
-  }
-  function buildArgumentMap(args) {
-    const argsNodes = args !== null && args !== undefined ? args : [];
-    const argConfigMap = Object.create(null);
-    for (const arg of argsNodes) {
-      var _arg$description;
-      const type = getWrappedType(arg.type);
-      argConfigMap[arg.name.value] = {
-        type,
-        description: (_arg$description = arg.description) === null || _arg$description === undefined ? undefined : _arg$description.value,
-        defaultValue: valueFromAST(arg.defaultValue, type),
-        deprecationReason: getDeprecationReason(arg),
-        astNode: arg
+  function mapFields(fieldMap, parentTypeName) {
+    const newFieldMap = Object.create(null);
+    for (const [fieldName, field] of Object.entries(fieldMap)) {
+      let mappedField = {
+        ...field,
+        type: getType(field.type),
+        args: mapArgs(field.args, fieldName, parentTypeName)
       };
+      const mapper = configMapperMap[SchemaElementKind.FIELD];
+      if (mapper) {
+        mappedField = mapper(mappedField, parentTypeName);
+      }
+      newFieldMap[fieldName] = mappedField;
     }
-    return argConfigMap;
+    return newFieldMap;
   }
-  function buildInputFieldMap(nodes) {
-    const inputFieldMap = Object.create(null);
-    for (const node of nodes) {
-      var _node$fields2;
-      const fieldsNodes = (_node$fields2 = node.fields) !== null && _node$fields2 !== undefined ? _node$fields2 : [];
-      for (const field of fieldsNodes) {
-        var _field$description2;
-        const type = getWrappedType(field.type);
-        inputFieldMap[field.name.value] = {
-          type,
-          description: (_field$description2 = field.description) === null || _field$description2 === undefined ? undefined : _field$description2.value,
-          defaultValue: valueFromAST(field.defaultValue, type),
-          deprecationReason: getDeprecationReason(field),
-          astNode: field
-        };
+  function mapArgs(argumentMap, fieldOrDirectiveName, parentTypeName) {
+    const newArgumentMap = Object.create(null);
+    for (const [argName, arg] of Object.entries(argumentMap)) {
+      let mappedArg = {
+        ...arg,
+        type: getType(arg.type)
+      };
+      const mapper = configMapperMap[SchemaElementKind.ARGUMENT];
+      if (mapper) {
+        mappedArg = mapper(mappedArg, fieldOrDirectiveName, parentTypeName);
       }
+      newArgumentMap[argName] = mappedArg;
     }
-    return inputFieldMap;
+    return newArgumentMap;
   }
-  function buildEnumValueMap(nodes) {
-    const enumValueMap = Object.create(null);
-    for (const node of nodes) {
-      var _node$values;
-      const valuesNodes = (_node$values = node.values) !== null && _node$values !== undefined ? _node$values : [];
-      for (const value of valuesNodes) {
-        var _value$description;
-        enumValueMap[value.name.value] = {
-          description: (_value$description = value.description) === null || _value$description === undefined ? undefined : _value$description.value,
-          deprecationReason: getDeprecationReason(value),
-          astNode: value
-        };
-      }
-    }
-    return enumValueMap;
+  function mapInterfaceType(type) {
+    const config = type.toConfig();
+    let mappedConfig = {
+      ...config,
+      interfaces: () => config.interfaces.map((iface) => getNamedType(iface.name)),
+      fields: () => mapFields(config.fields, type.name)
+    };
+    const mapper = configMapperMap[SchemaElementKind.INTERFACE];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLInterfaceType(mappedConfig);
   }
-  function buildInterfaces(nodes) {
-    return nodes.flatMap((node) => {
-      var _node$interfaces$map, _node$interfaces;
-      return (_node$interfaces$map = (_node$interfaces = node.interfaces) === null || _node$interfaces === undefined ? undefined : _node$interfaces.map(getNamedType)) !== null && _node$interfaces$map !== undefined ? _node$interfaces$map : [];
-    });
+  function mapUnionType(type) {
+    const config = type.toConfig();
+    let mappedConfig = {
+      ...config,
+      types: () => config.types.map((memberType) => getNamedType(memberType.name))
+    };
+    const mapper = configMapperMap[SchemaElementKind.UNION];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLUnionType(mappedConfig);
   }
-  function buildUnionTypes(nodes) {
-    return nodes.flatMap((node) => {
-      var _node$types$map, _node$types;
-      return (_node$types$map = (_node$types = node.types) === null || _node$types === undefined ? undefined : _node$types.map(getNamedType)) !== null && _node$types$map !== undefined ? _node$types$map : [];
-    });
+  function mapEnumType(type) {
+    const config = type.toConfig();
+    let mappedConfig = {
+      ...config,
+      values: () => {
+        const newEnumValues = Object.create(null);
+        for (const [valueName, value] of Object.entries(config.values)) {
+          const mappedValue = mapEnumValue(value, valueName, type.name);
+          newEnumValues[valueName] = mappedValue;
+        }
+        return newEnumValues;
+      }
+    };
+    const mapper = configMapperMap[SchemaElementKind.ENUM];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLEnumType(mappedConfig);
   }
-  function buildType(astNode) {
-    var _typeExtensionsMap$na;
-    const name = astNode.name.value;
-    const extensionASTNodes = (_typeExtensionsMap$na = typeExtensionsMap[name]) !== null && _typeExtensionsMap$na !== undefined ? _typeExtensionsMap$na : [];
-    switch (astNode.kind) {
-      case Kind.OBJECT_TYPE_DEFINITION: {
-        var _astNode$description;
-        const allNodes = [astNode, ...extensionASTNodes];
-        return new GraphQLObjectType({
-          name,
-          description: (_astNode$description = astNode.description) === null || _astNode$description === undefined ? undefined : _astNode$description.value,
-          interfaces: () => buildInterfaces(allNodes),
-          fields: () => buildFieldMap(allNodes),
-          astNode,
-          extensionASTNodes
-        });
+  function mapEnumValue(valueConfig, valueName, enumName) {
+    const mappedConfig = { ...valueConfig };
+    const mapper = configMapperMap[SchemaElementKind.ENUM_VALUE];
+    return mapper == null ? mappedConfig : mapper(mappedConfig, valueName, enumName);
+  }
+  function mapInputObjectType(type) {
+    const config = type.toConfig();
+    let mappedConfig = {
+      ...config,
+      fields: () => {
+        const newInputFieldMap = Object.create(null);
+        for (const [fieldName, field] of Object.entries(config.fields)) {
+          const mappedField = mapInputField(field, fieldName, type.name);
+          newInputFieldMap[fieldName] = mappedField;
+        }
+        return newInputFieldMap;
       }
-      case Kind.INTERFACE_TYPE_DEFINITION: {
-        var _astNode$description2;
-        const allNodes = [astNode, ...extensionASTNodes];
-        return new GraphQLInterfaceType({
-          name,
-          description: (_astNode$description2 = astNode.description) === null || _astNode$description2 === undefined ? undefined : _astNode$description2.value,
-          interfaces: () => buildInterfaces(allNodes),
-          fields: () => buildFieldMap(allNodes),
-          astNode,
-          extensionASTNodes
-        });
-      }
-      case Kind.ENUM_TYPE_DEFINITION: {
-        var _astNode$description3;
-        const allNodes = [astNode, ...extensionASTNodes];
-        return new GraphQLEnumType({
-          name,
-          description: (_astNode$description3 = astNode.description) === null || _astNode$description3 === undefined ? undefined : _astNode$description3.value,
-          values: buildEnumValueMap(allNodes),
-          astNode,
-          extensionASTNodes
-        });
-      }
-      case Kind.UNION_TYPE_DEFINITION: {
-        var _astNode$description4;
-        const allNodes = [astNode, ...extensionASTNodes];
-        return new GraphQLUnionType({
-          name,
-          description: (_astNode$description4 = astNode.description) === null || _astNode$description4 === undefined ? undefined : _astNode$description4.value,
-          types: () => buildUnionTypes(allNodes),
-          astNode,
-          extensionASTNodes
-        });
-      }
-      case Kind.SCALAR_TYPE_DEFINITION: {
-        var _astNode$description5;
-        return new GraphQLScalarType({
-          name,
-          description: (_astNode$description5 = astNode.description) === null || _astNode$description5 === undefined ? undefined : _astNode$description5.value,
-          specifiedByURL: getSpecifiedByURL(astNode),
-          astNode,
-          extensionASTNodes
-        });
-      }
-      case Kind.INPUT_OBJECT_TYPE_DEFINITION: {
-        var _astNode$description6;
-        const allNodes = [astNode, ...extensionASTNodes];
-        return new GraphQLInputObjectType({
-          name,
-          description: (_astNode$description6 = astNode.description) === null || _astNode$description6 === undefined ? undefined : _astNode$description6.value,
-          fields: () => buildInputFieldMap(allNodes),
-          astNode,
-          extensionASTNodes,
-          isOneOf: isOneOf(astNode)
-        });
-      }
-    }
+    };
+    const mapper = configMapperMap[SchemaElementKind.INPUT_OBJECT];
+    mappedConfig = mapper == null ? mappedConfig : mapper(mappedConfig);
+    return new GraphQLInputObjectType(mappedConfig);
+  }
+  function mapInputField(inputFieldConfig, inputFieldName, inputObjectTypeName) {
+    const mappedConfig = {
+      ...inputFieldConfig,
+      type: getType(inputFieldConfig.type)
+    };
+    const mapper = configMapperMap[SchemaElementKind.INPUT_FIELD];
+    return mapper == null ? mappedConfig : mapper(mappedConfig, inputFieldName, inputObjectTypeName);
+  }
+  function mapDirective(config) {
+    const mappedConfig = {
+      ...config,
+      args: mapArgs(config.args, config.name, undefined)
+    };
+    const mapper = configMapperMap[SchemaElementKind.DIRECTIVE];
+    return mapper == null ? mappedConfig : mapper(mappedConfig);
   }
 }
-var stdTypeMap = keyMap([...specifiedScalarTypes, ...introspectionTypes], (type) => type.name);
+var stdTypeMap = new Map([...specifiedScalarTypes, ...introspectionTypes].map((type) => [
+  type.name,
+  type
+]));
+
+// node_modules/graphql/utilities/extendSchema.mjs
+function extendSchemaImpl(schemaConfig, documentAST, options) {
+  const typeDefs = [];
+  const scalarExtensions = new AccumulatorMap;
+  const objectExtensions = new AccumulatorMap;
+  const interfaceExtensions = new AccumulatorMap;
+  const unionExtensions = new AccumulatorMap;
+  const enumExtensions = new AccumulatorMap;
+  const inputObjectExtensions = new AccumulatorMap;
+  const directiveExtensions = new AccumulatorMap;
+  const directiveDefs = [];
+  let schemaDef;
+  const schemaExtensions = [];
+  let isSchemaChanged = false;
+  for (const def of documentAST.definitions) {
+    switch (def.kind) {
+      case SCHEMA_DEFINITION:
+        schemaDef = def;
+        break;
+      case SCHEMA_EXTENSION:
+        schemaExtensions.push(def);
+        break;
+      case DIRECTIVE_DEFINITION:
+        directiveDefs.push(def);
+        break;
+      case DIRECTIVE_EXTENSION:
+        directiveExtensions.add(def.name.value, def);
+        break;
+      case SCALAR_TYPE_DEFINITION:
+      case OBJECT_TYPE_DEFINITION:
+      case INTERFACE_TYPE_DEFINITION:
+      case UNION_TYPE_DEFINITION:
+      case ENUM_TYPE_DEFINITION:
+      case INPUT_OBJECT_TYPE_DEFINITION:
+        typeDefs.push(def);
+        break;
+      case SCALAR_TYPE_EXTENSION:
+        scalarExtensions.add(def.name.value, def);
+        break;
+      case OBJECT_TYPE_EXTENSION:
+        objectExtensions.add(def.name.value, def);
+        break;
+      case INTERFACE_TYPE_EXTENSION:
+        interfaceExtensions.add(def.name.value, def);
+        break;
+      case UNION_TYPE_EXTENSION:
+        unionExtensions.add(def.name.value, def);
+        break;
+      case ENUM_TYPE_EXTENSION:
+        enumExtensions.add(def.name.value, def);
+        break;
+      case INPUT_OBJECT_TYPE_EXTENSION:
+        inputObjectExtensions.add(def.name.value, def);
+        break;
+      default:
+        continue;
+    }
+    isSchemaChanged = true;
+  }
+  if (!isSchemaChanged) {
+    return schemaConfig;
+  }
+  return mapSchemaConfig(schemaConfig, (context) => {
+    const { getNamedType, setNamedType, getNamedTypes } = context;
+    return {
+      [SchemaElementKind.SCHEMA]: (config) => {
+        for (const typeNode of typeDefs) {
+          const type = stdTypeMap2.get(typeNode.name.value) ?? buildNamedType(typeNode);
+          setNamedType(type);
+        }
+        const operationTypes = {
+          query: config.query && getNamedType(config.query.name),
+          mutation: config.mutation && getNamedType(config.mutation.name),
+          subscription: config.subscription && getNamedType(config.subscription.name),
+          ...schemaDef && getOperationTypes([schemaDef]),
+          ...getOperationTypes(schemaExtensions)
+        };
+        return {
+          description: schemaDef?.description?.value ?? config.description,
+          ...operationTypes,
+          types: getNamedTypes(),
+          directives: [
+            ...config.directives.map(extendDirective),
+            ...directiveDefs.map(buildDirective)
+          ],
+          extensions: config.extensions,
+          astNode: schemaDef ?? config.astNode,
+          extensionASTNodes: config.extensionASTNodes.concat(schemaExtensions),
+          assumeValid: options?.assumeValid ?? false
+        };
+      },
+      [SchemaElementKind.INPUT_OBJECT]: (config) => {
+        const extensions = inputObjectExtensions.get(config.name) ?? [];
+        return {
+          ...config,
+          fields: () => ({
+            ...config.fields(),
+            ...buildInputFieldMap(extensions)
+          }),
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      },
+      [SchemaElementKind.ENUM]: (config) => {
+        const extensions = enumExtensions.get(config.name) ?? [];
+        return {
+          ...config,
+          values: () => ({
+            ...config.values(),
+            ...buildEnumValueMap(extensions)
+          }),
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      },
+      [SchemaElementKind.SCALAR]: (config) => {
+        const extensions = scalarExtensions.get(config.name) ?? [];
+        let specifiedByURL = config.specifiedByURL;
+        for (const extensionNode of extensions) {
+          specifiedByURL = getSpecifiedByURL(extensionNode) ?? specifiedByURL;
+        }
+        return {
+          ...config,
+          specifiedByURL,
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      },
+      [SchemaElementKind.OBJECT]: (config) => {
+        const extensions = objectExtensions.get(config.name) ?? [];
+        return {
+          ...config,
+          interfaces: () => [
+            ...config.interfaces(),
+            ...buildInterfaces(extensions)
+          ],
+          fields: () => ({
+            ...config.fields(),
+            ...buildFieldMap(extensions)
+          }),
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      },
+      [SchemaElementKind.INTERFACE]: (config) => {
+        const extensions = interfaceExtensions.get(config.name) ?? [];
+        return {
+          ...config,
+          interfaces: () => [
+            ...config.interfaces(),
+            ...buildInterfaces(extensions)
+          ],
+          fields: () => ({
+            ...config.fields(),
+            ...buildFieldMap(extensions)
+          }),
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      },
+      [SchemaElementKind.UNION]: (config) => {
+        const extensions = unionExtensions.get(config.name) ?? [];
+        return {
+          ...config,
+          types: () => [...config.types(), ...buildUnionTypes(extensions)],
+          extensionASTNodes: config.extensionASTNodes.concat(extensions)
+        };
+      }
+    };
+    function getOperationTypes(nodes) {
+      const opTypes = {};
+      for (const node of nodes) {
+        const operationTypesNodes = node.operationTypes ?? [];
+        for (const operationType of operationTypesNodes) {
+          opTypes[operationType.operation] = namedTypeFromAST(operationType.type);
+        }
+      }
+      return opTypes;
+    }
+    function namedTypeFromAST(node) {
+      const name = node.name.value;
+      const type = getNamedType(name);
+      if (!(type !== undefined))
+        invariant(false, `Unknown type: "${name}".`);
+      return type;
+    }
+    function typeFromAST(node) {
+      if (node.kind === LIST_TYPE) {
+        return new GraphQLList(typeFromAST(node.type));
+      }
+      if (node.kind === NON_NULL_TYPE) {
+        return new GraphQLNonNull(typeFromAST(node.type));
+      }
+      return namedTypeFromAST(node);
+    }
+    function buildDirective(node) {
+      const extensionASTNodes = directiveExtensions.get(node.name.value) ?? [];
+      const deprecationReason = getDeprecationReason(node) ?? extensionASTNodes.map((extensionNode) => getDeprecationReason(extensionNode)).find((reason) => reason != null);
+      return new GraphQLDirective({
+        name: node.name.value,
+        description: node.description?.value,
+        locations: node.locations.map(({ value }) => value),
+        isRepeatable: node.repeatable,
+        args: buildArgumentMap(node.arguments),
+        deprecationReason,
+        astNode: node,
+        extensionASTNodes
+      });
+    }
+    function extendDirective(directive) {
+      const extensionASTNodes = directiveExtensions.get(directive.name) ?? [];
+      if (extensionASTNodes.length === 0) {
+        return directive;
+      }
+      const deprecationReason = directive.deprecationReason ?? extensionASTNodes.map((extensionNode) => getDeprecationReason(extensionNode)).find((reason) => reason != null);
+      return new GraphQLDirective({
+        ...directive.toConfig(),
+        deprecationReason,
+        extensionASTNodes: directive.extensionASTNodes.concat(extensionASTNodes)
+      });
+    }
+    function buildFieldMap(nodes) {
+      const fieldConfigMap = Object.create(null);
+      for (const node of nodes) {
+        const nodeFields = node.fields ?? [];
+        for (const field of nodeFields) {
+          fieldConfigMap[field.name.value] = {
+            type: typeFromAST(field.type),
+            description: field.description?.value,
+            args: buildArgumentMap(field.arguments),
+            deprecationReason: getDeprecationReason(field),
+            astNode: field
+          };
+        }
+      }
+      return fieldConfigMap;
+    }
+    function buildArgumentMap(args) {
+      const argsNodes = args ?? [];
+      const argConfigMap = Object.create(null);
+      for (const arg of argsNodes) {
+        const type = typeFromAST(arg.type);
+        argConfigMap[arg.name.value] = {
+          type,
+          description: arg.description?.value,
+          default: arg.defaultValue && { literal: arg.defaultValue },
+          deprecationReason: getDeprecationReason(arg),
+          astNode: arg
+        };
+      }
+      return argConfigMap;
+    }
+    function buildInputFieldMap(nodes) {
+      const inputFieldMap = Object.create(null);
+      for (const node of nodes) {
+        const fieldsNodes = node.fields ?? [];
+        for (const field of fieldsNodes) {
+          const type = typeFromAST(field.type);
+          inputFieldMap[field.name.value] = {
+            type,
+            description: field.description?.value,
+            default: field.defaultValue && { literal: field.defaultValue },
+            deprecationReason: getDeprecationReason(field),
+            astNode: field
+          };
+        }
+      }
+      return inputFieldMap;
+    }
+    function buildEnumValueMap(nodes) {
+      const enumValueMap = Object.create(null);
+      for (const node of nodes) {
+        const valuesNodes = node.values ?? [];
+        for (const value of valuesNodes) {
+          enumValueMap[value.name.value] = {
+            description: value.description?.value,
+            deprecationReason: getDeprecationReason(value),
+            astNode: value
+          };
+        }
+      }
+      return enumValueMap;
+    }
+    function buildInterfaces(nodes) {
+      return nodes.flatMap((node) => node.interfaces?.map(namedTypeFromAST) ?? []);
+    }
+    function buildUnionTypes(nodes) {
+      return nodes.flatMap((node) => node.types?.map(namedTypeFromAST) ?? []);
+    }
+    function buildNamedType(astNode) {
+      const name = astNode.name.value;
+      switch (astNode.kind) {
+        case OBJECT_TYPE_DEFINITION: {
+          const extensionASTNodes = objectExtensions.get(name) ?? [];
+          const allNodes = [astNode, ...extensionASTNodes];
+          return new GraphQLObjectType({
+            name,
+            description: astNode.description?.value,
+            interfaces: () => buildInterfaces(allNodes),
+            fields: () => buildFieldMap(allNodes),
+            astNode,
+            extensionASTNodes
+          });
+        }
+        case INTERFACE_TYPE_DEFINITION: {
+          const extensionASTNodes = interfaceExtensions.get(name) ?? [];
+          const allNodes = [astNode, ...extensionASTNodes];
+          return new GraphQLInterfaceType({
+            name,
+            description: astNode.description?.value,
+            interfaces: () => buildInterfaces(allNodes),
+            fields: () => buildFieldMap(allNodes),
+            astNode,
+            extensionASTNodes
+          });
+        }
+        case ENUM_TYPE_DEFINITION: {
+          const extensionASTNodes = enumExtensions.get(name) ?? [];
+          const allNodes = [astNode, ...extensionASTNodes];
+          return new GraphQLEnumType({
+            name,
+            description: astNode.description?.value,
+            values: () => buildEnumValueMap(allNodes),
+            astNode,
+            extensionASTNodes
+          });
+        }
+        case UNION_TYPE_DEFINITION: {
+          const extensionASTNodes = unionExtensions.get(name) ?? [];
+          const allNodes = [astNode, ...extensionASTNodes];
+          return new GraphQLUnionType({
+            name,
+            description: astNode.description?.value,
+            types: () => buildUnionTypes(allNodes),
+            astNode,
+            extensionASTNodes
+          });
+        }
+        case SCALAR_TYPE_DEFINITION: {
+          const extensionASTNodes = scalarExtensions.get(name) ?? [];
+          let specifiedByURL = getSpecifiedByURL(astNode);
+          for (const extensionNode of extensionASTNodes) {
+            specifiedByURL = getSpecifiedByURL(extensionNode) ?? specifiedByURL;
+          }
+          return new GraphQLScalarType({
+            name,
+            description: astNode.description?.value,
+            specifiedByURL,
+            astNode,
+            extensionASTNodes
+          });
+        }
+        case INPUT_OBJECT_TYPE_DEFINITION: {
+          const extensionASTNodes = inputObjectExtensions.get(name) ?? [];
+          const allNodes = [astNode, ...extensionASTNodes];
+          return new GraphQLInputObjectType({
+            name,
+            description: astNode.description?.value,
+            fields: () => buildInputFieldMap(allNodes),
+            astNode,
+            extensionASTNodes,
+            isOneOf: isOneOf(astNode)
+          });
+        }
+      }
+    }
+  });
+}
+var stdTypeMap2 = new Map([...specifiedScalarTypes, ...introspectionTypes].map((type) => [
+  type.name,
+  type
+]));
 function getDeprecationReason(node) {
   const deprecated = getDirectiveValues(GraphQLDeprecatedDirective, node);
-  return deprecated === null || deprecated === undefined ? undefined : deprecated.reason;
+  return deprecated?.reason;
 }
 function getSpecifiedByURL(node) {
   const specifiedBy = getDirectiveValues(GraphQLSpecifiedByDirective, node);
-  return specifiedBy === null || specifiedBy === undefined ? undefined : specifiedBy.url;
+  return specifiedBy?.url;
 }
 function isOneOf(node) {
   return Boolean(getDirectiveValues(GraphQLOneOfDirective, node));
@@ -7588,8 +9913,7 @@ function isOneOf(node) {
 
 // node_modules/graphql/utilities/buildASTSchema.mjs
 function buildASTSchema(documentAST, options) {
-  documentAST != null && documentAST.kind === Kind.DOCUMENT || devAssert(false, "Must provide valid Document AST.");
-  if ((options === null || options === undefined ? undefined : options.assumeValid) !== true && (options === null || options === undefined ? undefined : options.assumeValidSDL) !== true) {
+  if (options?.assumeValid !== true && options?.assumeValidSDL !== true) {
     assertValidSDL(documentAST);
   }
   const emptySchemaConfig = {
@@ -7623,15 +9947,15 @@ function buildASTSchema(documentAST, options) {
   return new GraphQLSchema({ ...config, directives });
 }
 function buildSchema(source, options) {
-  const document = parse(source, {
-    noLocation: options === null || options === undefined ? undefined : options.noLocation,
-    allowLegacyFragmentVariables: options === null || options === undefined ? undefined : options.allowLegacyFragmentVariables
-  });
+  const document = parse(source, options);
   return buildASTSchema(document, {
-    assumeValidSDL: options === null || options === undefined ? undefined : options.assumeValidSDL,
-    assumeValid: options === null || options === undefined ? undefined : options.assumeValid
+    assumeValidSDL: options?.assumeValidSDL,
+    assumeValid: options?.assumeValid
   });
 }
+// node_modules/graphql/__dev__/index.mjs
+enableDevMode();
+
 // src/identity/attribution.ts
 function attributionTargets(schema) {
   const targets = new Map;
@@ -7710,7 +10034,10 @@ function rootField(schema, descriptor) {
   return field;
 }
 function selectableWithoutArgs(field) {
-  return field.args.every((arg) => !isNonNullType(arg.type) || arg.defaultValue !== undefined);
+  return !field.args.some(isRequiredArgument);
+}
+function defaultOf(input) {
+  return input.default?.literal ? coerceInputLiteral(input.default.literal, input.type) : input.default?.value;
 }
 function leafFieldNames(type) {
   if (!isObjectType(type) && !isInterfaceType(type))
@@ -7768,8 +10095,8 @@ function parseSelection(raw, label) {
       throw new Error(`${label}: invalid selection: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
-  const operations = parsed.definitions.filter((d) => d.kind === Kind.OPERATION_DEFINITION);
-  const fragments = parsed.definitions.filter((d) => d.kind === Kind.FRAGMENT_DEFINITION);
+  const operations = parsed.definitions.filter((d) => d.kind === OPERATION_DEFINITION);
+  const fragments = parsed.definitions.filter((d) => d.kind === FRAGMENT_DEFINITION);
   if (operations.length + fragments.length !== parsed.definitions.length) {
     throw new Error(`${label}: invalid selection: only a selection set and fragment definitions are allowed`);
   }
@@ -7792,15 +10119,15 @@ function composeOperation(descriptor, args, selection) {
   const argumentNodes = [];
   for (const arg of field.args) {
     if (!(arg.name in args) || args[arg.name] === undefined) {
-      if (isNonNullType(arg.type) && arg.defaultValue === undefined) {
+      if (isRequiredArgument(arg)) {
         throw new Error(`${descriptor.tool}: missing required argument "${arg.name}" of type ${String(arg.type)}`);
       }
       continue;
     }
     variables[arg.name] = args[arg.name];
-    const variable = { kind: Kind.VARIABLE, name: { kind: Kind.NAME, value: arg.name } };
-    variableDefinitions.push({ kind: Kind.VARIABLE_DEFINITION, variable, type: parseType(String(arg.type)) });
-    argumentNodes.push({ kind: Kind.ARGUMENT, name: { kind: Kind.NAME, value: arg.name }, value: variable });
+    const variable = { kind: VARIABLE, name: { kind: NAME, value: arg.name } };
+    variableDefinitions.push({ kind: VARIABLE_DEFINITION, variable, type: parseType(String(arg.type)) });
+    argumentNodes.push({ kind: ARGUMENT, name: { kind: NAME, value: arg.name }, value: variable });
   }
   const named = getNamedType(field.type);
   const composite = isObjectType(named) || isInterfaceType(named) || isUnionType(named);
@@ -7810,19 +10137,19 @@ function composeOperation(descriptor, args, selection) {
   }
   const parsedSelection = composite ? parseSelection(requested || defaultSelection(named, 2), descriptor.tool) : null;
   const rootFieldNode = {
-    kind: Kind.FIELD,
-    name: { kind: Kind.NAME, value: descriptor.root },
+    kind: FIELD,
+    name: { kind: NAME, value: descriptor.root },
     ...argumentNodes.length ? { arguments: argumentNodes } : {},
     ...parsedSelection ? { selectionSet: parsedSelection.selectionSet } : {}
   };
   const operation = {
-    kind: Kind.OPERATION_DEFINITION,
+    kind: OPERATION_DEFINITION,
     operation: descriptor.kind === "Query" ? OperationTypeNode.QUERY : OperationTypeNode.MUTATION,
-    name: { kind: Kind.NAME, value: descriptor.tool },
+    name: { kind: NAME, value: descriptor.tool },
     ...variableDefinitions.length ? { variableDefinitions } : {},
-    selectionSet: { kind: Kind.SELECTION_SET, selections: [rootFieldNode] }
+    selectionSet: { kind: SELECTION_SET, selections: [rootFieldNode] }
   };
-  const document = print({ kind: Kind.DOCUMENT, definitions: [operation, ...parsedSelection?.fragments ?? []] });
+  const document = print({ kind: DOCUMENT, definitions: [operation, ...parsedSelection?.fragments ?? []] });
   composeSelectionValidation(document, descriptor.tool);
   return { document, variables };
 }
@@ -7835,8 +10162,9 @@ function describeField(field, descriptor) {
   lines.push(field.args.length ? "Arguments:" : "Arguments: none");
   for (const arg of field.args) {
     const parts = [`  ${arg.name}: ${String(arg.type)}`];
-    if (arg.defaultValue !== undefined)
-      parts.push(`(default ${JSON.stringify(arg.defaultValue)})`);
+    const fallback = defaultOf(arg);
+    if (fallback !== undefined)
+      parts.push(`(default ${JSON.stringify(fallback)})`);
     if (arg.description)
       parts.push(`\u2014 ${arg.description.replace(/\s+/g, " ").trim()}`);
     lines.push(parts.join(" "));
@@ -7869,7 +10197,8 @@ function describeType(type) {
     return `scalar ${header}`;
   if (isInputObjectType(type)) {
     const fields = Object.values(type.getFields()).map((f) => {
-      const suffix = f.defaultValue !== undefined ? ` (default ${JSON.stringify(f.defaultValue)})` : "";
+      const fallback = defaultOf(f);
+      const suffix = fallback !== undefined ? ` (default ${JSON.stringify(fallback)})` : "";
       return `  ${f.name}: ${String(f.type)}${suffix}${f.deprecationReason ? ` [deprecated: ${f.deprecationReason}]` : ""}`;
     });
     return [`input ${header}`, ...fields].join(`
@@ -7942,7 +10271,7 @@ function parseDocument(document) {
   }
 }
 function selectOperation(parsed, operationName) {
-  const operations = parsed.definitions.filter((d) => d.kind === Kind.OPERATION_DEFINITION);
+  const operations = parsed.definitions.filter((d) => d.kind === OPERATION_DEFINITION);
   if (!operations.length)
     throw new Error("document contains no operation");
   if (operations.length > 1 && !operationName) {
@@ -7955,16 +10284,16 @@ function selectOperation(parsed, operationName) {
   return selected;
 }
 function fragmentsOf(parsed) {
-  return new Map(parsed.definitions.filter((d) => d.kind === Kind.FRAGMENT_DEFINITION).map((definition) => [definition.name.value, definition]));
+  return new Map(parsed.definitions.filter((d) => d.kind === FRAGMENT_DEFINITION).map((definition) => [definition.name.value, definition]));
 }
 function rootFields(selectionSet, fragments, seen = new Set) {
   const found = [];
   for (const selection of selectionSet.selections) {
-    if (selection.kind === Kind.FIELD) {
+    if (selection.kind === FIELD) {
       found.push(selection);
       continue;
     }
-    if (selection.kind === Kind.INLINE_FRAGMENT) {
+    if (selection.kind === INLINE_FRAGMENT) {
       found.push(...rootFields(selection.selectionSet, fragments, seen));
       continue;
     }
@@ -7994,10 +10323,10 @@ var DRIFT = {
   field: /^Cannot query field "([^"]+)" on type "([^"]+)"\./,
   argument: /^Unknown argument "([^"]+)" on field "([^"]+)"\./,
   type: /^Unknown type "([^"]+)"\./,
-  inputField: /^Field "([^"]+)" is not defined by type "([^"]+)"\./,
+  inputField: /^Expected value of type "([^"]+)" not to include unknown field "([^"]+)"/,
   enumValue: /^Value "([^"]+)" does not exist in "([^"]+)" enum\./,
   variablePosition: /^Variable "\$[^"]+" of type "([^"]+)" used in position expecting type/,
-  requiredArgument: /^Field "([^"]+)" argument "([^"]+)" of type .* is required, but it was not provided\./
+  requiredArgument: /^Argument "[^".]+\.([^"(]+)\([^"]+:\)" of type .* is required, but it was not provided\./
 };
 function partitionErrors(messages) {
   const unpinned = { fields: [], arguments: [], types: [], inputFields: [] };
@@ -8024,7 +10353,7 @@ function partitionErrors(messages) {
     }
     const inputField = DRIFT.inputField.exec(message);
     if (inputField) {
-      push(unpinned.inputFields, `${inputField[2]}.${inputField[1]}`);
+      push(unpinned.inputFields, `${inputField[1]}.${inputField[2]}`);
       continue;
     }
     const enumValue = DRIFT.enumValue.exec(message);
@@ -8128,21 +10457,21 @@ function injectCreateAsUser(document, variables, roots, author, operationName) {
         const label = `${node.alias?.value ?? node.name.value} (${node.name.value})`;
         const argument = node.arguments?.find((arg) => arg.name.value === inputArg);
         if (target.kind === "argument") {
-          if (argument?.value.kind === Kind.VARIABLE) {
+          if (argument?.value.kind === VARIABLE) {
             nextVariables[argument.value.name.value] = author;
             return;
           }
           const authored = {
-            kind: Kind.ARGUMENT,
-            name: { kind: Kind.NAME, value: inputArg },
-            value: { kind: Kind.STRING, value: author }
+            kind: ARGUMENT,
+            name: { kind: NAME, value: inputArg },
+            value: { kind: STRING, value: author }
           };
           const others = (node.arguments ?? []).filter((arg) => arg !== argument);
           return { ...node, arguments: [...others, authored] };
         }
         if (!argument)
           throw new Error(`${label}: missing "${inputArg}" argument, cannot attribute the author`);
-        if (argument.value.kind === Kind.VARIABLE) {
+        if (argument.value.kind === VARIABLE) {
           const name = argument.value.name.value;
           const current = nextVariables[name] ?? defaults.get(name);
           if (current === undefined)
@@ -8150,12 +10479,12 @@ function injectCreateAsUser(document, variables, roots, author, operationName) {
           nextVariables[name] = withCreateAsUser(current, author, label);
           return;
         }
-        if (argument.value.kind !== Kind.OBJECT)
+        if (argument.value.kind !== OBJECT)
           throw new Error(`${label}: "${inputArg}" is not an object literal or variable`);
         const field = {
-          kind: Kind.OBJECT_FIELD,
-          name: { kind: Kind.NAME, value: "createAsUser" },
-          value: { kind: Kind.STRING, value: author }
+          kind: OBJECT_FIELD,
+          name: { kind: NAME, value: "createAsUser" },
+          value: { kind: STRING, value: author }
         };
         const fields = [...argument.value.fields.filter((existing) => existing.name.value !== "createAsUser"), field];
         const nextArgument = { ...argument, value: { ...argument.value, fields } };
@@ -10386,7 +12715,7 @@ function normalizeValue(value) {
   if (value instanceof Date)
     return value.toISOString();
   if (Array.isArray(value))
-    return value.map(normalizeValue);
+    return Array.from(value, normalizeValue);
   if (value instanceof Set)
     return Array.from(value).map(normalizeValue);
   if (value instanceof Map)
@@ -10581,7 +12910,7 @@ function collectLeafValues(row, fields, leaves) {
 }
 function* encodeJsonValue(value, options, depth) {
   if (isEncodablePrimitive(value)) {
-    const encodedPrimitive = encodePrimitive(value, options.delimiter);
+    const encodedPrimitive = typeof value === "string" && value.startsWith("\uFEFF") ? `"${escapeString(value)}"` : encodePrimitive(value, options.delimiter);
     if (encodedPrimitive !== "")
       yield encodedPrimitive;
     return;
@@ -10741,7 +13070,7 @@ function* encodeObjectAsListItemLines(obj, depth, options) {
   const encodedKey = encodeKey(firstKey);
   if (isEncodablePrimitive(firstValue))
     yield indentedListItem(depth, `${encodedKey}: ${encodePrimitive(firstValue, options.delimiter)}`, options.indentSize);
-  else if (isJsonArray(firstValue))
+  else if (isJsonArray(firstValue)) {
     if (firstValue.length === 0)
       yield indentedListItem(depth, `${encodedKey}: []`, options.indentSize);
     else if (isArrayOfPrimitives(firstValue))
@@ -10751,7 +13080,7 @@ function* encodeObjectAsListItemLines(obj, depth, options) {
       for (const item of firstValue)
         yield* encodeListItemValueLines(item, depth + 2, options);
     }
-  else if (isJsonObject(firstValue)) {
+  } else if (isJsonObject(firstValue)) {
     yield indentedListItem(depth, `${encodedKey}:`, options.indentSize);
     if (!isEmptyObject(firstValue))
       yield* encodeObjectLines(firstValue, depth + 2, options);
@@ -10762,7 +13091,7 @@ function* encodeObjectAsListItemLines(obj, depth, options) {
 function* encodeListItemValueLines(value, depth, options) {
   if (isEncodablePrimitive(value))
     yield indentedListItem(depth, encodePrimitive(value, options.delimiter), options.indentSize);
-  else if (isJsonArray(value))
+  else if (isJsonArray(value)) {
     if (isArrayOfPrimitives(value))
       yield indentedListItem(depth, encodeInlineArrayLine(value, options.delimiter), options.indentSize);
     else {
@@ -10770,7 +13099,7 @@ function* encodeListItemValueLines(value, depth, options) {
       for (const item of value)
         yield* encodeListItemValueLines(item, depth + 1, options);
     }
-  else if (isJsonObject(value))
+  } else if (isJsonObject(value))
     yield* encodeObjectAsListItemLines(value, depth, options);
 }
 function indentedLine(depth, content, indentSize) {
@@ -11003,7 +13332,7 @@ class OmpError {
   }
 }
 var MISSING = Symbol("omptype.missing");
-function stringifyValue2(data) {
+function stringifyValue(data) {
   const seen = new WeakSet;
   return JSON.stringify(data, (_key, value) => {
     if (typeof value !== "object" || value === null)
@@ -11039,7 +13368,7 @@ function describeValue(data, code) {
     case "undefined":
       return "undefined";
     case "object":
-      return stringifyValue2(data);
+      return stringifyValue(data);
     case "function":
       return "a function";
     default:

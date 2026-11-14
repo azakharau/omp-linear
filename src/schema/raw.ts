@@ -150,10 +150,10 @@ const DRIFT = {
  field: /^Cannot query field "([^"]+)" on type "([^"]+)"\./,
  argument: /^Unknown argument "([^"]+)" on field "([^"]+)"\./,
  type: /^Unknown type "([^"]+)"\./,
- inputField: /^Field "([^"]+)" is not defined by type "([^"]+)"\./,
+ inputField: /^Expected value of type "([^"]+)" not to include unknown field "([^"]+)"/,
  enumValue: /^Value "([^"]+)" does not exist in "([^"]+)" enum\./,
  variablePosition: /^Variable "\$[^"]+" of type "([^"]+)" used in position expecting type/,
- requiredArgument: /^Field "([^"]+)" argument "([^"]+)" of type .* is required, but it was not provided\./,
+ requiredArgument: /^Argument "[^".]+\.([^"(]+)\([^"]+:\)" of type .* is required, but it was not provided\./,
 };
 
 function partitionErrors(messages: string[]): { unpinned: UnpinnedNames; hard: string[] } {
@@ -180,7 +180,7 @@ function partitionErrors(messages: string[]): { unpinned: UnpinnedNames; hard: s
   }
   const inputField = DRIFT.inputField.exec(message);
   if (inputField) {
-   push(unpinned.inputFields, `${inputField[2]}.${inputField[1]}`);
+   push(unpinned.inputFields, `${inputField[1]}.${inputField[2]}`);
    continue;
   }
   const enumValue = DRIFT.enumValue.exec(message);

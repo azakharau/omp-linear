@@ -22,7 +22,7 @@ import {
 	getIntrospectionQuery,
 	type IntrospectionQuery,
 	isIntrospectionType,
-	isNonNullType,
+	isRequiredArgument,
 	isSpecifiedScalarType,
 	NoDeprecatedCustomRule,
 	parse,
@@ -64,7 +64,7 @@ function compareRoots(pinned: FieldMap, live: FieldMap): RootDrift {
 		const pinnedArgs = new Set(pinned[name]!.args.map(arg => arg.name));
 		const liveArgs = new Set(liveField.args.map(arg => arg.name));
 		const changes = [
-			...liveField.args.filter(arg => !pinnedArgs.has(arg.name)).map(arg => `+${arg.name}${isNonNullType(arg.type) && arg.defaultValue === undefined ? "!" : ""}`),
+			...liveField.args.filter(arg => !pinnedArgs.has(arg.name)).map(arg => `+${arg.name}${isRequiredArgument(arg) ? "!" : ""}`),
 			...[...pinnedArgs].filter(arg => !liveArgs.has(arg)).map(arg => `-${arg}`),
 		];
 		if (changes.length > 0) changedArgs[name] = changes;
