@@ -362,6 +362,52 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
+	test("actor=app: ergonomic create, comment and link ops carry the ctx.agent author of the main and the child session; actor=user sends none", async () => {
+		const uuid = "11111111-2222-4333-8444-555555555555";
+		const linear = fakeLinear(body => {
+			if (body.query.includes("issueCreate(")) return { data: { issueCreate: { success: true, issue: { id: uuid } } } };
+			if (body.query.includes("commentCreate(")) return { data: { commentCreate: { success: true, comment: { id: uuid } } } };
+			if (body.query.includes("attachmentLinkURL(")) return { data: { attachmentLinkURL: { success: true, attachment: { id: uuid } } } };
+			return { data: { issue: { id: uuid, identifier: "ABC-1" }, comment: { id: uuid, body: "hi" }, attachment: { id: uuid, url: "https://x.test/pr/1" } } };
+		});
+		const removeApp = await storeConnection(connection("ergo-app", "app"));
+		const removeUser = await storeConnection(connection("ergo-user", "user"));
+		const script: ScriptedCall[] = [
+			activateCall("linear_issue_create"),
+			["linear_issue_create", { i: "Creating", team: uuid, title: "Attributed" }],
+			activateCall("linear_issue_comment_add"),
+			["linear_issue_comment_add", { i: "Commenting", issue: uuid, body: "hi" }],
+			activateCall("linear_issue_link_add"),
+			["linear_issue_link_add", { i: "Linking", issue: uuid, url: "https://x.test/pr/1" }],
+		];
+		const authorOf = (r: (typeof linear.requests)[number]) => {
+			const vars = r.body.variables ?? {};
+			return ((vars.input as { createAsUser?: string } | undefined)?.createAsUser ?? vars.createAsUser) as string | undefined;
+		};
+		const run = async (connectionId: string, agentId: string, child?: Scenario["child"]) => {
+			linear.requests.length = 0;
+			const sessionManager = host.SessionManager.inMemory();
+			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
+			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId, child }, async (session, model) => {
+				await session.prompt("create, comment, link");
+				for (const index of [2, 4, 6]) expect(toolOutputs(model.requests[index]!)[0]).not.toMatch(/failed|error/i);
+			});
+			const mutations = linear.requests.filter(r => r.body.query.trimStart().startsWith("mutation"));
+			expect(mutations.length).toBe(3);
+			return mutations.map(authorOf);
+		};
+		try {
+			expect(await run("ergo-app", "Main")).toEqual(["OMP · Main", "OMP · Main", "OMP · Main"]);
+			const childLabel = "OMP · reviewer [0-Ergo]";
+			expect(await run("ergo-app", "0-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([childLabel, childLabel, childLabel]);
+			expect(await run("ergo-user", "1-Ergo", { name: "reviewer", parentId: "Main" })).toEqual([undefined, undefined, undefined]);
+		} finally {
+			linear.stop();
+			await removeApp();
+			await removeUser();
+		}
+	}, 30_000);
+
 	test("actor=app rejects a caller-supplied createAsUser that differs from the session author, before any request", async () => {
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "x" } } } }));
 		const remove = await storeConnection(connection("key-app2", "app"));
