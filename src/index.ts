@@ -1,15 +1,15 @@
 /**
  * Native Oh My Pi extension for Linear.
  *
- * One tool is always active as a native top-level function: `linear_tool_search` (`loadMode:
- * "essential"`, never in the activatable set, so activation never removes it). It returns
- * ranked candidates from the private catalog and, given `activate`, swaps exactly one Linear
- * operation into the active tool set. Everything else — `linear_graphql`, `linear_schema_help`,
- * `linear_connections`, the ergonomic ops and 495 typed `lq_*`/`lm_*` operations — is registered
- * `defaultInactive` and becomes a top-level tool only when activated.
+ * Always active as native top-level functions (`loadMode: "essential"`, never in the activatable
+ * set): `linear_tool_search` and the ergonomic `linear_*` ops for daily work. The search returns
+ * ranked candidates from the private catalog and, given `activate`, adds one more tool to the
+ * session's working set of at most `MAX_ACTIVE` activated tools (the oldest one is removed).
+ * Everything else — the 495 typed `lq_*`/`lm_*` operations, `linear_schema_help`,
+ * `linear_connections` and the `linear_graphql` fallback — is registered `defaultInactive`.
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
- * activated operation are persisted as `linear-state` entries. The author of every outbound call
+ * activated tools are persisted as `linear-state` entries. The author of every outbound call
  * is the host-provided `ctx.agent` identity (OMP >= 18.20.0); `actor=app` connections attribute a
  * subagent's mutations to its display name via `createAsUser` and send none for the main agent,
  * so Linear shows the application itself.
@@ -30,7 +30,7 @@ import { OAUTH_DEFAULTS, ensureFreshAccessToken, loginOAuth, revokeToken } from 
 import { CREDENTIAL_ACCESS_REASON, credentialSpellings, readsCredentials } from "./auth/guard";
 import { readApiKeyFile } from "./auth/key-file";
 import { type Actor, type Connection, type ConnectionSummary, type CredentialStore, createCredentialStore, authHeadersFor } from "./auth/store";
-import { type SearchDoc, type SearchIndex, createSearchIndex, search } from "./catalog/search";
+import { type SearchDoc, type SearchIndex, createSearchIndex, search, tokenize } from "./catalog/search";
 import { type LinearClient, type LinearOutcome, type LinearResult, createLinearClient, safeMessage } from "./client/graphql";
 import { type Author, resolveAuthor } from "./identity/actor";
 import { attributeTypedArgs, attributionTargets } from "./identity/attribution";
@@ -68,11 +68,20 @@ interface AppCredentialsConnection {
 
 type CallConnection = Connection | AppCredentialsConnection;
 
-/** The only always-visible Linear tool. */
+/** Always-visible Linear tool that finds and activates the others. */
 export const SEARCH_TOOL = "linear_tool_search";
 
-/** Utility tools; activatable like every operation. */
-export const UTILITY_TOOLS = ["linear_schema_help", "linear_graphql", "linear_connections"] as const;
+/** Raw GraphQL: the fallback for what no typed or ergonomic tool covers. */
+export const RAW_TOOL = "linear_graphql";
+
+/** Tools that are always active: the search and the ergonomic ops. Activation never removes them. */
+export const ALWAYS_ACTIVE: ReadonlySet<string> = new Set([SEARCH_TOOL, ...ergonomicOps.map(op => op.name)]);
+
+/** Activated tools a session keeps at once; activating one more removes the oldest. */
+export const MAX_ACTIVE = 6;
+
+/** Utility tools; activatable like every typed operation. */
+export const UTILITY_TOOLS = ["linear_schema_help", RAW_TOOL, "linear_connections"] as const;
 
 export interface LinearExtensionOptions {
  /** Host agent directory; the credential store lives at `<agentDir>/linear/connections.json`. */
@@ -94,7 +103,7 @@ export interface LinearExtensionOptions {
 
 const UTILITY_SEARCH_TEXT: Record<(typeof UTILITY_TOOLS)[number], string> = {
  linear_schema_help: "Schema help for Linear operations and arguments.",
- linear_graphql: "Run a raw custom GraphQL document.",
+ linear_graphql: "Fallback only: run a raw custom GraphQL document when no ergonomic or typed tool fits.",
  linear_connections: "List Linear connections, the selected one and the session author.",
 };
 
@@ -102,7 +111,7 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_issue_create: "Create a Linear issue. Aliases: new issue, create ticket.",
  linear_issue_update: "Update a Linear issue: edit, rename.",
  linear_issue_transition: "Transition a Linear issue to another workflow state, done.",
- linear_issue_get: "Get a Linear issue by identifier ENG-123 or UUID.",
+ linear_issue_get: "Get a Linear issue by identifier ENG-123 or UUID with comments and relations.",
  linear_issue_comment_add: "Add a comment to a Linear issue, reply.",
  linear_issue_relation_add: "Add a relation between Linear issues: blocks, related.",
  linear_issue_search: "Search or list Linear issues: assignee me, project, state types, stale issues not updated in N days.",
@@ -116,6 +125,7 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_document_create: "Create a Linear document in a project or issue.",
  linear_document_update: "Update a Linear document title or content.",
  linear_document_get: "Get a Linear document by id, slug or title.",
+ linear_team_get: "Get a Linear team: workflow states, labels, members.",
 };
 
 /** The host injects and strips its own intent field (`i`); tool schemas declare only real arguments. */
@@ -238,7 +248,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
  const attributionEnabled = options.attribution !== false;
  const index = searchIndex(catalog);
  const targets = attributionTargets(getSchema());
- const activatable = new Set<string>([...UTILITY_TOOLS, ...ergonomicOps.map(op => op.name), ...catalog.map(d => d.tool)]);
+ const activatable = new Set<string>([...UTILITY_TOOLS, ...catalog.map(d => d.tool)]);
 
  return (pi: ExtensionAPI) => {
   const storeFile = path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json");
@@ -371,21 +381,19 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
   }
 
   /** Serialized: concurrent activations apply in call order and never interleave `setActiveTools`. */
-  function activate(name: string): Promise<{ activated: string | null; replaced: string | null }> {
+  function activate(name: string): Promise<{ activated: string | null; evicted: string[]; alwaysActive?: true }> {
    const run = activationChain.then(async () => {
-    if (!activatable.has(name)) {
-     throw new Error(
-      name === SEARCH_TOOL
-       ? `${name} is always active; nothing to activate`
-       : `Unknown Linear tool "${name}"; use linear_tool_search to find exact names`,
-     );
-    }
-    const replaced = state.activeOperation;
-    if (!activationEnabled) return { activated: null, replaced };
-    await pi.setActiveTools([...new Set([...pi.getActiveTools().filter(tool => !activatable.has(tool)), name])]);
-    state = { ...state, activeOperation: name };
+    if (ALWAYS_ACTIVE.has(name)) return { activated: null, evicted: [], alwaysActive: true as const };
+    if (!activatable.has(name)) throw new Error(`Unknown Linear tool "${name}"; use linear_tool_search to find exact names`);
+    if (!activationEnabled) return { activated: null, evicted: [] };
+    // Re-activating a tool makes it the newest; the oldest leave once the set is full.
+    const next = [...state.activeOperations.filter(tool => tool !== name), name];
+    const working = next.slice(-MAX_ACTIVE);
+    const evicted = next.slice(0, next.length - working.length);
+    await pi.setActiveTools([...new Set([...pi.getActiveTools().filter(tool => !activatable.has(tool)), ...working])]);
+    state = { ...state, activeOperations: working };
     persistState(pi, state);
-    return { activated: name, replaced };
+    return { activated: name, evicted };
    });
    activationChain = run.catch(() => undefined);
    return run;
@@ -403,9 +411,13 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    } catch {
     state = { ...state, actor: null };
    }
-   if (state.activeOperation && activationEnabled && !pi.getActiveTools().includes(state.activeOperation)) {
-    const restored = state.activeOperation;
-    await pi.setActiveTools([...new Set([...pi.getActiveTools().filter(tool => !activatable.has(tool)), restored])]);
+   const restored = state.activeOperations.filter(tool => activatable.has(tool)).slice(-MAX_ACTIVE);
+   state = { ...state, activeOperations: restored };
+   const active = pi.getActiveTools();
+   // The host may keep the previous session's tools across a switch: drop extras, add missing ones.
+   const drifted = restored.some(tool => !active.includes(tool)) || active.some(tool => activatable.has(tool) && !restored.includes(tool));
+   if (activationEnabled && drifted) {
+    await pi.setActiveTools([...new Set([...active.filter(tool => !activatable.has(tool)), ...restored])]);
    }
   }
 
@@ -428,7 +440,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    name: SEARCH_TOOL,
    label: "Linear tool search",
    description:
-    "Search the private Linear catalog (495 typed operations, ergonomic ops, raw GraphQL, schema help, connections) by natural language; returns ranked candidates only. Pass `activate` with an exact tool name to make that single Linear operation available (it replaces the previously activated one).",
+    "Search the private Linear catalog by natural language; returns ranked candidates only. The ergonomic linear_* tools for issues, comments, relations, projects, milestones, documents and teams are always available: use them first. Search finds the 495 typed lq_*/lm_* operations for everything else, plus linear_schema_help, linear_connections and the linear_graphql fallback. Pass `activate` with an exact tool name to add it to this session; up to 6 activated tools stay available, the oldest is removed.",
    parameters: {
     type: "object",
     properties: {
@@ -446,26 +458,31 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     if (!query && !toActivate) throw new Error("linear_tool_search needs `query` and/or `activate`");
     const activation = toActivate ? await activate(toActivate) : null;
     const active = new Set(pi.getActiveTools());
-    const candidates = query
-     ? search(index, query, limit ?? 5).map(hit => ({
-      tool: hit.tool,
-      kind: hit.kind,
-      score: Number(hit.score.toFixed(3)),
-      summary: hit.summary,
-      active: active.has(hit.tool),
-     }))
-     : [];
+    const max = limit ?? 5;
+    const hits = query ? search(index, query, max + 1) : [];
+    // Raw GraphQL is the fallback: it ranks last unless the query asks for raw GraphQL.
+    const wantsRaw = query !== undefined && tokenize(query).includes("raw");
+    const ranked = wantsRaw ? hits : [...hits.filter(hit => hit.tool !== RAW_TOOL), ...hits.filter(hit => hit.tool === RAW_TOOL)];
+    const candidates = ranked.slice(0, max).map(hit => ({
+     tool: hit.tool,
+     kind: hit.kind,
+     score: Number(hit.score.toFixed(3)),
+     summary: hit.summary,
+     active: active.has(hit.tool),
+    }));
     const lines: string[] = [];
     if (toActivate) {
      lines.push(
-      activation?.activated
-       ? `Activated ${toActivate}${activation.replaced ? ` (replaced ${activation.replaced})` : ""}.`
-       : `Activation of ${toActivate} is disabled in this session (activation seam off).`,
+      activation?.alwaysActive
+       ? `${toActivate} is always active; call it directly.`
+       : activation?.activated
+        ? `Activated ${toActivate}${activation.evicted.length > 0 ? ` (removed the oldest: ${activation.evicted.join(", ")})` : ""}.`
+        : `Activation of ${toActivate} is disabled in this session (activation seam off).`,
      );
     }
     if (query) lines.push(encodeOutput({ query, candidates }).text);
     if (!toActivate) lines.push("Nothing was activated. Call linear_tool_search again with `activate: <exact tool name>`.");
-    return text(lines.join("\n"), { candidates, activation }, toActivate !== undefined && activation?.activated === null);
+    return text(lines.join("\n"), { candidates, activation }, toActivate !== undefined && !activation?.alwaysActive && activation?.activated === null);
    },
   });
 
@@ -484,10 +501,10 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
   });
 
   pi.registerTool({
-   name: "linear_graphql",
+   name: RAW_TOOL,
    label: "Linear GraphQL",
    description:
-    "Execute a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the subagent author; the main session writes as the application and may not set createAsUser.",
+    "Fallback for Linear work that no linear_* or typed lq_*/lm_* tool covers; prefer those tools. Executes a raw GraphQL document against Linear with the selected connection. The document is validated against the pinned schema; names the pinned schema does not know are reported as validation=unknown and still sent. Queries need read approval, mutations need write approval. Subscriptions are rejected. With an actor=app connection every mutation that accepts createAsUser is attributed to the subagent author; the main session writes as the application and may not set createAsUser.",
    parameters: objectSchema(
     {
      document: { type: "string", minLength: 1 },
@@ -533,7 +550,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     const payload = {
      selected: state.connectionId,
      effective: effectiveConnection(ctx.cwd),
-     activeOperation: state.activeOperation,
+     activeOperations: state.activeOperations,
      author: state.actor,
      connections: store.list(),
     };
@@ -548,7 +565,6 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     description: op.description,
     parameters: op.parameters as never,
     loadMode: "essential",
-    defaultInactive: true,
     approval: op.tier,
     async execute(_id, params, _signal, _onUpdate, ctx) {
      const call = openCall(ctx);

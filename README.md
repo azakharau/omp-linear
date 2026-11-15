@@ -4,17 +4,21 @@ Native Oh My Pi extension for Linear. It gives OMP agents and `task` subagents:
 
 - 495 typed GraphQL operations (`lq_*` queries, `lm_*` mutations), generated from the pinned
   Linear schema;
-- 17 ergonomic ops for daily work (`linear_issue_create`, `linear_issue_search`,
-  `linear_project_status_post`, `linear_document_create`, ...);
-- a raw `linear_graphql` tool, `linear_schema_help` and `linear_connections`.
+- 18 ergonomic ops for daily work (`linear_issue_get`, `linear_issue_create`,
+  `linear_issue_search`, `linear_team_get`, `linear_project_status_post`, ...);
+- `linear_schema_help`, `linear_connections` and a raw `linear_graphql` fallback.
 
 ## How the tools work
 
-At start the model sees one Linear tool, the native function `linear_tool_search`. It returns
-ranked candidates from the private catalog. With `activate: <exact name>` it adds one Linear
-operation to the active tools and removes the operation that was active before. Every model
-request carries `linear_tool_search` plus at most one activated Linear operation; the other
-Linear tools stay registered but inactive, so their names and schemas never reach the model.
+At start the model sees `linear_tool_search` and the 18 ergonomic ops as native functions.
+Agents use the ergonomic ops first. `linear_tool_search` returns ranked candidates from the
+private catalog for everything else. With `activate: <exact name>` it adds that tool to the
+active tools. A session keeps up to 6 activated tools. Activating a seventh removes the oldest
+one, and activating a tool again makes it the newest. Inactive tools stay registered, but their
+names and schemas never reach the model.
+
+`linear_graphql` is the fallback for what no ergonomic or typed tool covers. Search ranks it
+below the other candidates unless the query asks for raw GraphQL (`raw`, `graphql`, `custom`).
 
 ## Requirements
 
@@ -155,12 +159,13 @@ a lookup. A reference that matches zero or many records is an error that lists t
 | --- | --- |
 | `linear_issue_create` | Create an issue with assignee, labels, project, milestone, parent and relations (`blocks`, `blockedBy`, `related`, `duplicate`). |
 | `linear_issue_update`, `linear_issue_transition` | Change fields or the workflow state. |
-| `linear_issue_get`, `linear_issue_search` | Read one issue. Search by text, or list by team, state, state type, assignee (`me`), project, priority, labels (any of) and `staleDays`. |
+| `linear_issue_get`, `linear_issue_search` | Read one issue with the 20 newest comments (newest first) and its relations in both directions. Search by text, or list by team, state, state type, assignee (`me`), project, priority, labels (any of) and `staleDays`. |
 | `linear_issue_comment_add`, `linear_issue_relation_add`, `linear_issue_link_add` | Comment, relate issues, attach a URL. |
 | `linear_project_create`, `linear_project_update`, `linear_project_get` | Projects, with `lead`. |
 | `linear_project_status_post` | Post a project update with health `onTrack`, `atRisk` or `offTrack`. |
 | `linear_milestone_create`, `linear_milestone_update` | Project milestones. |
 | `linear_document_create`, `linear_document_update`, `linear_document_get` | Documents in a project or an issue. |
+| `linear_team_get` | One team with its workflow states, team labels and members. |
 
 A write op sends one mutation and then reads the result once. If issue creation succeeds and a
 relation fails, the error names the new issue and the relations that were and were not created.
@@ -229,10 +234,10 @@ Dependencies, bun and OMP stay on their latest releases. Before work on the repo
 
 `smoke:binary` runs the `omp` binary on PATH by default (`--omp <bin>` or `OMP_BIN`
 changes it). It uses a throwaway HOME and agent dir under `.scratch/`, a fake model and a fake
-Linear on loopback. It checks that `linear_tool_search` is the only Linear tool at start and is a
-native function, that `linear_issue_get` works in the main agent, in a `task` child and in a
-child restricted to `read`, that each Linear request carries the key file value, and that the
-key never reaches a model request.
+Linear on loopback. It checks that the Linear tools at start are `linear_tool_search` and the
+ergonomic ops as native functions, that `linear_issue_get` works in the main agent, in a `task`
+child and in a child restricted to `read`, that each Linear request carries the key file value,
+and that the key never reaches a model request.
 
 Design notes live in [`docs/research-report.md`](docs/research-report.md). Changes are listed in
 [`CHANGELOG.md`](CHANGELOG.md). See [`CONTRIBUTING.md`](CONTRIBUTING.md) before you open a pull

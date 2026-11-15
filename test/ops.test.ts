@@ -142,6 +142,7 @@ describe("operation documents", () => {
 			"linear_project_get",
 			"linear_project_status_post",
 			"linear_project_update",
+			"linear_team_get",
 		]);
 		for (const op of ergonomicOps) {
 			expect(op.parameters.type).toBe("object");
@@ -155,7 +156,7 @@ describe("operation documents", () => {
 				.filter(op => op.tier === "read")
 				.map(op => op.name)
 				.sort(),
-		).toEqual(["linear_document_get", "linear_issue_get", "linear_issue_search", "linear_project_get"]);
+		).toEqual(["linear_document_get", "linear_issue_get", "linear_issue_search", "linear_project_get", "linear_team_get"]);
 	});
 });
 
@@ -391,9 +392,22 @@ describe("reference resolution", () => {
 	});
 
 	test("a UUID reference skips the lookup request entirely", async () => {
-		const { client, calls } = await fakeLinear({ LinearIssueGet: () => ({ issue: ISSUE_ABC12 }) });
+		const { client, calls } = await fakeLinear({ LinearIssueDetailGet: () => ({ issue: ISSUE_ABC12 }) });
 		await opNamed("linear_issue_get").run(client, { issue: ISSUE_ABC12.id }, USER_CTX);
-		expect(calls.map(call => call.name)).toEqual(["LinearIssueGet"]);
+		expect(calls.map(call => call.name)).toEqual(["LinearIssueDetailGet"]);
+	});
+
+	test("linear_team_get resolves a team key and reads the team once", async () => {
+		const team = { id: "t-1", key: "ABC", name: "Alpha", states: { nodes: [{ id: "s-todo", name: "Todo", type: "unstarted", position: 1 }] } };
+		const { client, calls } = await fakeLinear({
+			LinearTeamLookup: () => ({ teams: { nodes: [{ id: "t-1", key: "ABC", name: "Alpha" }] } }),
+			LinearTeamGet: () => ({ team }),
+		});
+		expect(await opNamed("linear_team_get").run(client, { team: "ABC" }, USER_CTX)).toEqual({ team });
+		expect(calls.map(call => [call.name, call.variables])).toEqual([
+			["LinearTeamLookup", { ref: "ABC" }],
+			["LinearTeamGet", { id: "t-1" }],
+		]);
 	});
 });
 

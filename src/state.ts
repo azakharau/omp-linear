@@ -6,14 +6,14 @@ export const STATE_ENTRY_TYPE = "linear-state";
 export interface LinearSessionState {
 	/** Selected credential id from the connection store, null when nothing is selected. */
 	connectionId: string | null;
-	/** Currently activated typed/ergonomic tool name, null when only the always-on tools are active. */
-	activeOperation: string | null;
+	/** Activated typed/utility tools, oldest first; empty when only the always-on tools are active. */
+	activeOperations: string[];
 	/** Host-provided author of this session (`ctx.agent`), null when the host gives no identity. */
 	actor: { id: string; displayName: string; label: string | null } | null;
 }
 
 export function emptyState(): LinearSessionState {
-	return { connectionId: null, activeOperation: null, actor: null };
+	return { connectionId: null, activeOperations: [], actor: null };
 }
 
 interface AppendEntry {
@@ -40,7 +40,9 @@ function normalize(data: unknown): LinearSessionState {
 	if (!data || typeof data !== "object") return state;
 	const raw = data as Record<string, unknown>;
 	if (typeof raw.connectionId === "string") state.connectionId = raw.connectionId;
-	if (typeof raw.activeOperation === "string") state.activeOperation = raw.activeOperation;
+	if (Array.isArray(raw.activeOperations)) state.activeOperations = raw.activeOperations.filter((name): name is string => typeof name === "string");
+	// Entries written before the working set held a single `activeOperation` string.
+	else if (typeof raw.activeOperation === "string") state.activeOperations = [raw.activeOperation];
 	const actor = raw.actor;
 	if (
 		actor &&
