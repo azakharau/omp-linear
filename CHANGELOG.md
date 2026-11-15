@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `linear_team_get` returns a team with its workflow states, team labels and members.
-- `linear_issue_get` also returns the latest 20 comments and the issue relations in both
+- `linear_issue_get` also returns the 20 newest comments (newest first) and the issue relations in both
   directions.
 
 ### Changed

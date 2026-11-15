@@ -11783,9 +11783,9 @@ var ISSUE_GET = `query LinearIssueGet($id: String!) {
 var ISSUE_DETAIL_GET = `query LinearIssueDetailGet($id: String!) {
   issue(id: $id) {
     ${ISSUE_FIELDS}
-    comments(last: 20) {
+    comments(first: 20) {
       nodes { id body createdAt user { id displayName } botActor { name } }
-      pageInfo { hasPreviousPage }
+      pageInfo { hasNextPage }
     }
     relations(first: 50) { nodes { id type relatedIssue { id identifier title state { name } } } }
     inverseRelations(first: 50) { nodes { id type issue { id identifier title state { name } } } }
@@ -12228,7 +12228,7 @@ var issueTransition = {
 };
 var issueGet = {
   name: "linear_issue_get",
-  description: "Fetch one issue with its state, team, assignee, project, milestone, labels, the latest 20 comments and its relations in both directions (relations: this issue \u2192 other; inverseRelations: other \u2192 this issue).",
+  description: "Fetch one issue with its state, team, assignee, project, milestone, labels, the 20 newest comments (newest first) and its relations in both directions (relations: this issue \u2192 other; inverseRelations: other \u2192 this issue).",
   tier: "read",
   parameters: {
     type: "object",
@@ -20839,7 +20839,8 @@ function createLinearExtension(options = {}) {
       const restored = state.activeOperations.filter((tool) => activatable.has(tool)).slice(-MAX_ACTIVE);
       state = { ...state, activeOperations: restored };
       const active = pi.getActiveTools();
-      if (activationEnabled && restored.some((tool) => !active.includes(tool))) {
+      const drifted = restored.some((tool) => !active.includes(tool)) || active.some((tool) => activatable.has(tool) && !restored.includes(tool));
+      if (activationEnabled && drifted) {
         await pi.setActiveTools([...new Set([...active.filter((tool) => !activatable.has(tool)), ...restored])]);
       }
     }

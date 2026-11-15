@@ -64,13 +64,13 @@ export const ISSUE_GET = `query LinearIssueGet($id: String!) {
   issue(id: $id) { ${ISSUE_FIELDS} }
 }`;
 
-/** `linear_issue_get` only: the issue with its latest comments and relations in both directions. */
+/** `linear_issue_get` only: the issue with its newest comments and relations in both directions. */
 export const ISSUE_DETAIL_GET = `query LinearIssueDetailGet($id: String!) {
   issue(id: $id) {
     ${ISSUE_FIELDS}
-    comments(last: 20) {
+    comments(first: 20) {
       nodes { id body createdAt user { id displayName } botActor { name } }
-      pageInfo { hasPreviousPage }
+      pageInfo { hasNextPage }
     }
     relations(first: 50) { nodes { id type relatedIssue { id identifier title state { name } } } }
     inverseRelations(first: 50) { nodes { id type issue { id identifier title state { name } } } }
@@ -617,7 +617,7 @@ const issueTransition: ErgonomicOp = {
 const issueGet: ErgonomicOp = {
  name: "linear_issue_get",
  description:
-  "Fetch one issue with its state, team, assignee, project, milestone, labels, the latest 20 comments and its relations in both directions (relations: this issue → other; inverseRelations: other → this issue).",
+  "Fetch one issue with its state, team, assignee, project, milestone, labels, the 20 newest comments (newest first) and its relations in both directions (relations: this issue → other; inverseRelations: other → this issue).",
  tier: "read",
  parameters: {
   type: "object",

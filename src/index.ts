@@ -414,7 +414,9 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    const restored = state.activeOperations.filter(tool => activatable.has(tool)).slice(-MAX_ACTIVE);
    state = { ...state, activeOperations: restored };
    const active = pi.getActiveTools();
-   if (activationEnabled && restored.some(tool => !active.includes(tool))) {
+   // The host may keep the previous session's tools across a switch: drop extras, add missing ones.
+   const drifted = restored.some(tool => !active.includes(tool)) || active.some(tool => activatable.has(tool) && !restored.includes(tool));
+   if (activationEnabled && drifted) {
     await pi.setActiveTools([...new Set([...active.filter(tool => !activatable.has(tool)), ...restored])]);
    }
   }

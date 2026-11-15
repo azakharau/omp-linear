@@ -159,7 +159,7 @@ a lookup. A reference that matches zero or many records is an error that lists t
 | --- | --- |
 | `linear_issue_create` | Create an issue with assignee, labels, project, milestone, parent and relations (`blocks`, `blockedBy`, `related`, `duplicate`). |
 | `linear_issue_update`, `linear_issue_transition` | Change fields or the workflow state. |
-| `linear_issue_get`, `linear_issue_search` | Read one issue with the latest 20 comments and its relations in both directions. Search by text, or list by team, state, state type, assignee (`me`), project, priority, labels (any of) and `staleDays`. |
+| `linear_issue_get`, `linear_issue_search` | Read one issue with the 20 newest comments (newest first) and its relations in both directions. Search by text, or list by team, state, state type, assignee (`me`), project, priority, labels (any of) and `staleDays`. |
 | `linear_issue_comment_add`, `linear_issue_relation_add`, `linear_issue_link_add` | Comment, relate issues, attach a URL. |
 | `linear_project_create`, `linear_project_update`, `linear_project_get` | Projects, with `lead`. |
 | `linear_project_status_post` | Post a project update with health `onTrack`, `atRisk` or `offTrack`. |

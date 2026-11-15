@@ -277,7 +277,7 @@ function startLinear(authorizations: string[]) {
 							priority: 0, createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
 							state: { id: "s1", name: "Todo", type: "unstarted" }, team: { id: "t1", key: "SMK", name: "Smoke" },
 							assignee: null, project: null, projectMilestone: null, labels: { nodes: [] },
-							comments: { nodes: [], pageInfo: { hasPreviousPage: false } }, relations: { nodes: [] }, inverseRelations: { nodes: [] },
+							comments: { nodes: [], pageInfo: { hasNextPage: false } }, relations: { nodes: [] }, inverseRelations: { nodes: [] },
 						},
 					},
 				});
