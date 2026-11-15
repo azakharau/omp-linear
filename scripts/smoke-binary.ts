@@ -5,14 +5,15 @@
  * `-e src/index.ts` and `extensions: [<repo>]` in the agent config. HOME, XDG_* and the agent
  * dir live in a scratch dir under `.scratch/`; the real `~/.omp` is never read or written.
  *
- * Checks per load path: at start `linear_tool_search` is the only Linear tool, as a native
- * function, and no Linear xd:// device is listed; `linear_issue_get` returns the fake issue in the main agent (S2), in a `task`
+ * Checks per load path: at start the Linear tools are `linear_tool_search` and the ergonomic
+ * `linear_*` ops as native functions, no typed or utility tool, and no Linear xd:// device is listed; `linear_issue_get` returns the fake issue in the main agent (S2), in a `task`
  * child (S3) and in a child restricted to `read` (S4); every Linear request carries the key
  * file value; the key never appears in a model request.
  * Prints a JSON summary with PASS/FAIL per step and exits non-zero when any step fails.
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { ergonomicOps } from "../src/ops/index.ts";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const VARIANTS = ["ext", "ext-manifest"] as const;
@@ -59,9 +60,10 @@ function check(reports: Report[]): Step[] {
 			record(`${variant} ${scenario}: key absent from model requests`, !report.keyInModelRequests, `keyInModelRequests=${report.keyInModelRequests}`);
 			if (scenario === "S1") {
 				const start = report.start;
+				const expected = ["linear_tool_search", ...ergonomicOps.map(op => op.name)].sort().join();
 				record(
-					`${variant} S1: linear_tool_search is the only Linear tool, native, no Linear device`,
-					start !== null && start.linearTools.join() === "linear_tool_search" && start.linearDevices === 0,
+					`${variant} S1: linear_tool_search and the ergonomic ops are the only Linear tools, native, no Linear device`,
+					start !== null && [...start.linearTools].sort().join() === expected && start.linearDevices === 0,
 					`linearTools=${JSON.stringify(start?.linearTools)}, linearDevices=${start?.linearDevices}`,
 				);
 				continue;

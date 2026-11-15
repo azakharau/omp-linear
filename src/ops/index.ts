@@ -64,6 +64,19 @@ export const ISSUE_GET = `query LinearIssueGet($id: String!) {
   issue(id: $id) { ${ISSUE_FIELDS} }
 }`;
 
+/** `linear_issue_get` only: the issue with its latest comments and relations in both directions. */
+export const ISSUE_DETAIL_GET = `query LinearIssueDetailGet($id: String!) {
+  issue(id: $id) {
+    ${ISSUE_FIELDS}
+    comments(last: 20) {
+      nodes { id body createdAt user { id displayName } botActor { name } }
+      pageInfo { hasPreviousPage }
+    }
+    relations(first: 50) { nodes { id type relatedIssue { id identifier title state { name } } } }
+    inverseRelations(first: 50) { nodes { id type issue { id identifier title state { name } } } }
+  }
+}`;
+
 export const ISSUE_WITH_RELATIONS_GET = `query LinearIssueRelationsGet($id: String!) {
   issue(id: $id) {
     id identifier updatedAt
@@ -196,9 +209,20 @@ export const DOCUMENT_GET = `query LinearDocumentGet($id: String!) {
   }
 }`;
 
+export const TEAM_GET = `query LinearTeamGet($id: String!) {
+  team(id: $id) {
+    id key name
+    states(first: 100) { nodes { id name type position } }
+    labels(first: 250) { nodes { id name } }
+    members(first: 250) { nodes { id name displayName active } }
+  }
+}`;
+
 /** Every hand-written document in this module, for schema validation in tests. */
 export const OP_DOCUMENTS: Record<string, string> = {
  ISSUE_GET,
+ ISSUE_DETAIL_GET,
+ TEAM_GET,
  ISSUE_WITH_RELATIONS_GET,
  COMMENT_GET,
  PROJECT_GET,
@@ -592,7 +616,8 @@ const issueTransition: ErgonomicOp = {
 
 const issueGet: ErgonomicOp = {
  name: "linear_issue_get",
- description: "Fetch one issue with its state, team, assignee, project, milestone and labels.",
+ description:
+  "Fetch one issue with its state, team, assignee, project, milestone, labels, the latest 20 comments and its relations in both directions (relations: this issue → other; inverseRelations: other → this issue).",
  tier: "read",
  parameters: {
   type: "object",
@@ -602,7 +627,7 @@ const issueGet: ErgonomicOp = {
  },
  async run(client, args) {
   const id = await resolveIssueId(client, requiredString(args, "issue"));
-  return { issue: record(await request(client, ISSUE_GET, { id }), "issue", "issueGet") };
+  return { issue: record(await request(client, ISSUE_DETAIL_GET, { id }), "issue", "issueGet") };
  },
 };
 
@@ -1061,6 +1086,23 @@ const documentGet: ErgonomicOp = {
  },
 };
 
+const teamGet: ErgonomicOp = {
+ name: "linear_team_get",
+ description:
+  "Fetch one team with its workflow states (name, type, position), team labels and members. Use the names it returns for issue states, labels and assignees.",
+ tier: "read",
+ parameters: {
+  type: "object",
+  properties: { team: { type: "string", description: "Team key (ENG), name or UUID" } },
+  required: ["team"],
+  additionalProperties: false,
+ },
+ async run(client, args) {
+  const id = await resolveTeamId(client, requiredString(args, "team"));
+  return { team: record(await request(client, TEAM_GET, { id }), "team", "teamGet") };
+ },
+};
+
 export const ergonomicOps: ErgonomicOp[] = [
  issueCreate,
  issueUpdate,
@@ -1079,4 +1121,5 @@ export const ergonomicOps: ErgonomicOp[] = [
  documentCreate,
  documentUpdate,
  documentGet,
+ teamGet,
 ];

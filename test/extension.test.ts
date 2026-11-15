@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { type Connection, createCredentialStore } from "../src/auth/store";
 import { authorLabel, resolveAuthor } from "../src/identity/actor";
-import { SEARCH_TOOL, createLinearExtension } from "../src/index";
+import { ALWAYS_ACTIVE, SEARCH_TOOL, createLinearExtension } from "../src/index";
 import { type LinearSessionState, STATE_ENTRY_TYPE } from "../src/state";
 import {
 	type Host,
@@ -157,20 +157,23 @@ const activateCall = (tool: string): ScriptedCall => searchCall({ activate: tool
 const linearToolsOf = (request: ModelRequest): string[] => toolNamesOf(request).filter(name => name.startsWith("linear_") || isLinearOperation(name)).sort();
 
 describe("linear extension in a real OMP session", () => {
-	test("first model request exposes linear_tool_search as the only native Linear tool; everything else is registered but inactive", async () => {
+	test("first model request exposes linear_tool_search and the ergonomic ops; typed and utility tools are registered but inactive", async () => {
 		await withSession({ script: [] }, async (session, model) => {
 			await session.prompt("hello");
 			const seen = toolNamesOf(model.requests[0]!);
 			expect(seen).toContain("unrelated_sentinel");
-			expect(linearToolsOf(model.requests[0]!)).toEqual([SEARCH_TOOL]);
+			expect(linearToolsOf(model.requests[0]!)).toEqual([...ALWAYS_ACTIVE].sort());
+			expect(seen).toContain("linear_issue_get");
+			expect(seen).toContain("linear_team_get");
 			const body = JSON.stringify(model.requests[0]!);
 			expect(body).not.toContain(`xd://${SEARCH_TOOL}`);
 			const all = session.getAllToolNames();
 			expect(all.filter(isLinearOperation).length).toBe(495);
-			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "linear_issue_create", "lm_issueCreate", "lq_issue"]) {
+			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "lm_issueCreate", "lq_issue"]) {
 				expect(all).toContain(name);
-				expect(body).not.toContain(name);
+				expect(seen).not.toContain(name);
 			}
+			for (const name of ["lm_issueCreate", "lq_issue"]) expect(body).not.toContain(name);
 		});
 	}, 30_000); // First session in the file: cold host start-up.
 
@@ -180,24 +183,51 @@ describe("linear extension in a real OMP session", () => {
 			const output = toolOutputs(model.requests[1]!)[0]!;
 			expect(output).toContain("linear_issue_create");
 			expect(output).toContain("Nothing was activated");
-			expect(session.getActiveToolNames().filter(name => isLinearOperation(name) || name.startsWith("linear_"))).toEqual([SEARCH_TOOL]);
-			expect(linearToolsOf(model.requests[1]!)).toEqual([SEARCH_TOOL]);
+			expect(session.getActiveToolNames().filter(name => isLinearOperation(name) || name.startsWith("linear_")).sort()).toEqual([...ALWAYS_ACTIVE].sort());
+			expect(linearToolsOf(model.requests[1]!)).toEqual([...ALWAYS_ACTIVE].sort());
 		});
 	});
 
-	test("activate swaps exactly one Linear operation, keeps linear_tool_search native and unrelated tools, and persists the choice", async () => {
-		const script: ScriptedCall[] = [activateCall("lq_issue"), activateCall("lm_issueCreate"), activateCall("linear_graphql")];
+	test("raw GraphQL ranks after specific tools unless the query asks for raw GraphQL", async () => {
+		// Plain ranking puts linear_graphql first for both queries.
+		const script: ScriptedCall[] = [searchCall({ query: "run query" }), searchCall({ query: "raw graphql" })];
 		await withSession({ script }, async (session, model) => {
+			await session.prompt("search");
+			const ranked = (request: ModelRequest) =>
+				(toolOutputs(request).at(-1)!.match(/\b(?:linear|lq|lm)_\w+/g) ?? []).filter(name => name !== SEARCH_TOOL);
+			const fallback = ranked(model.requests[1]!);
+			expect(fallback.length).toBe(5);
+			expect(fallback).not.toContain("linear_graphql");
+			expect(ranked(model.requests[2]!)[0]).toBe("linear_graphql");
+		});
+	});
+
+	test("activating an always-active tool is a hint, not an error, and changes nothing", async () => {
+		await withSession({ script: [activateCall("linear_issue_get")] }, async (session, model) => {
 			await session.prompt("activate");
-			// Every request after an activation carries the native search tool plus exactly the one activated op.
-			expect(linearToolsOf(model.requests[1]!)).toEqual([SEARCH_TOOL, "lq_issue"].sort());
-			expect(linearToolsOf(model.requests[2]!)).toEqual([SEARCH_TOOL, "lm_issueCreate"].sort());
-			expect(linearToolsOf(model.requests[3]!)).toEqual([SEARCH_TOOL, "linear_graphql"].sort());
+			expect(toolOutputs(model.requests[1]!)[0]).toContain("linear_issue_get is always active; call it directly");
+			expect(linearToolsOf(model.requests[1]!)).toEqual([...ALWAYS_ACTIVE].sort());
+		});
+	});
+
+	test("activations accumulate in a working set of six; the oldest leaves first, re-activation refreshes, and the set persists", async () => {
+		const order = ["lq_issue", "lm_issueCreate", "lq_teams", "lq_viewer", "lq_projects", "linear_graphql", "lq_issue", "lq_users"];
+		await withSession({ script: order.map(activateCall) }, async (session, model) => {
+			await session.prompt("activate");
+			const expected = (...names: string[]) => [...ALWAYS_ACTIVE, ...names].sort();
+			expect(linearToolsOf(model.requests[1]!)).toEqual(expected("lq_issue"));
+			expect(linearToolsOf(model.requests[2]!)).toEqual(expected("lq_issue", "lm_issueCreate"));
+			// Six activated: the set is full. Re-activating lq_issue only makes it the newest.
+			expect(linearToolsOf(model.requests[7]!)).toEqual(expected(...order.slice(0, 6)));
+			expect(toolOutputs(model.requests[7]!).at(-1)).toBe("Activated lq_issue.");
+			// The seventh distinct tool removes the oldest one, lm_issueCreate.
+			const working = ["lq_teams", "lq_viewer", "lq_projects", "linear_graphql", "lq_issue", "lq_users"];
+			expect(linearToolsOf(model.requests[8]!)).toEqual(expected(...working));
+			expect(toolOutputs(model.requests[8]!).at(-1)).toBe("Activated lq_users (removed the oldest: lm_issueCreate).");
 			for (const request of model.requests) expect(toolNamesOf(request)).toContain("unrelated_sentinel");
-			expect(session.getActiveToolNames()).toContain("linear_graphql");
 			const branch = session.sessionManager.getBranch() as { type: string; customType?: string; data?: LinearSessionState }[];
 			const states = branch.filter(e => e.type === "custom" && e.customType === STATE_ENTRY_TYPE);
-			expect(states.at(-1)?.data?.activeOperation).toBe("linear_graphql");
+			expect(states.at(-1)?.data?.activeOperations).toEqual(working);
 		});
 	});
 
@@ -236,7 +266,7 @@ describe("linear extension in a real OMP session", () => {
 		const remove = await storeConnection(connection("key-test", "user"));
 		const linear = fakeLinear(() => ({ data: { viewer: { id: "user-1", name: "Tester" } } }));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-test", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-test", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [activateCall("lq_viewer"), ["lq_viewer", { i: "Reading viewer" }]];
 		try {
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager }, async (session, model) => {
@@ -385,7 +415,7 @@ describe("linear extension in a real OMP session", () => {
 		const script: ScriptedCall[] = [activateCall("lm_issueCreate"), ["lm_issueCreate", { i: "Creating", input }]];
 		try {
 			const denied = host.SessionManager.inMemory();
-			seedState(denied, { connectionId: "key-deny", activeOperation: null, actor: null });
+			seedState(denied, { connectionId: "key-deny", activeOperations: [], actor: null });
 			await withSession(
 				{ script, endpoint: `${linear.url}graphql`, sessionManager: denied, settings: { "tools.approval": { lm_issueCreate: "deny" } } },
 				async (session, model) => {
@@ -394,7 +424,7 @@ describe("linear extension in a real OMP session", () => {
 				},
 			);
 			const allowed = host.SessionManager.inMemory();
-			seedState(allowed, { connectionId: "key-deny", activeOperation: null, actor: null });
+			seedState(allowed, { connectionId: "key-deny", activeOperations: [], actor: null });
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager: allowed }, async (session, model) => {
 				expect(await promptForOutput(session, model, 2)).toContain("ABC-1");
 				expect(linear.requests.length).toBe(1);
@@ -421,7 +451,7 @@ describe("linear extension in a real OMP session", () => {
 		];
 		const run = async (connectionId: string, agentId: string, attribution?: boolean, child?: Scenario["child"]) => {
 			const sessionManager = host.SessionManager.inMemory();
-			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
+			seedState(sessionManager, { connectionId, activeOperations: [], actor: null });
 			return withSession({ script: scriptFor(), endpoint: `${linear.url}graphql`, sessionManager, agentId, attribution, child }, async (_session, model) => {
 				await _session.prompt("create and comment");
 				expect(toolOutputs(model.requests[2]!)[0]).not.toMatch(/failed|error/i);
@@ -482,7 +512,7 @@ describe("linear extension in a real OMP session", () => {
 		const run = async (connectionId: string, agentId: string, child?: Scenario["child"]) => {
 			linear.requests.length = 0;
 			const sessionManager = host.SessionManager.inMemory();
-			seedState(sessionManager, { connectionId, activeOperation: null, actor: null });
+			seedState(sessionManager, { connectionId, activeOperations: [], actor: null });
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager, agentId, child }, async (session, model) => {
 				await session.prompt("create, comment, link");
 				for (const index of [2, 4, 6]) expect(toolOutputs(model.requests[index]!)[0]).not.toMatch(/failed|error/i);
@@ -506,7 +536,7 @@ describe("linear extension in a real OMP session", () => {
 		const linear = fakeLinear(() => ({ data: { issueCreate: { success: true, issue: { id: "x" } } } }));
 		const remove = await storeConnection(connection("key-app2", "app"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-app2", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-app2", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [
 			activateCall("lm_issueCreate"),
 			["lm_issueCreate", { i: "Creating", input: { teamId: "team-1", title: "Spoof", createAsUser: "someone else" } }],
@@ -537,7 +567,7 @@ describe("linear extension in a real OMP session", () => {
 		const linear = fakeLinear(() => ({ data: { issueArchive: { success: true }, extra: { success: true } } }));
 		const remove = await storeConnection(connection("key-sel", "user"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-sel", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-sel", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [
 			activateCall("lm_issueArchive"),
 			["lm_issueArchive", { i: "Archiving", id: "issue-1", selection: '{ success } extra: issueDelete(id:"x"){success}' }],
@@ -557,7 +587,7 @@ describe("linear extension in a real OMP session", () => {
 		const linear = fakeLinear(() => ({ data: { made: { success: false } } }));
 		const remove = await storeConnection(connection("key-frag", "app"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-frag", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-frag", activeOperations: [], actor: null });
 		const document = [
 			"mutation Create($input: IssueCreateInput!) { ...Roots }",
 			"fragment Roots on Mutation { made: issueCreate(input: $input) { success } }",
@@ -583,7 +613,7 @@ describe("linear extension in a real OMP session", () => {
 		const linear = fakeLinear(() => ({ data: { viewer: { id: "user-1", futureField: 42 } } }));
 		const remove = await storeConnection(connection("key-drift", "user"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-drift", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-drift", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [activateCall("linear_graphql"), ["linear_graphql", { i: "Raw", document: "{ viewer { id futureField } }" }]];
 		try {
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager }, async (session, model) => {
@@ -613,7 +643,7 @@ describe("linear extension in a real OMP session", () => {
 		const linear = fakeLinear(() => new Response("upstream exploded", { status: 500 }));
 		const remove = await storeConnection(connection("key-500", "user"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-500", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-500", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [activateCall("lm_issueArchive"), ["lm_issueArchive", { i: "Archiving", id: "issue-1" }]];
 		try {
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager }, async (session, model) => {
@@ -629,12 +659,12 @@ describe("linear extension in a real OMP session", () => {
 		}
 	});
 
-	test("reopening a session restores the selected connection and the activated operation", async () => {
+	test("reopening a session restores the selected connection and the activated tools", async () => {
 		const sessionsDir = tempDir("omp-linear-sessions-");
 		try {
 			const sessionFile = path.join(sessionsDir, "session.jsonl");
 			const first = await host.SessionManager.open(sessionFile, sessionsDir);
-			seedState(first, { connectionId: "conn-A", activeOperation: null, actor: null });
+			seedState(first, { connectionId: "conn-A", activeOperations: [], actor: null });
 			let sessionId = "";
 			await withSession({ script: [activateCall("lq_teams")], sessionManager: first }, async session => {
 				await session.prompt("activate teams");
@@ -647,9 +677,9 @@ describe("linear extension in a real OMP session", () => {
 				expect(toolNamesOf(model.requests[0]!)).toContain("lq_teams");
 				const rawOutput = toolOutputs(model.requests[2]!).find(o => o.includes('"selected"'));
 				if (!rawOutput) throw new Error(`connections output missing: ${JSON.stringify(toolOutputs(model.requests[2]!))}`);
-				const output = JSON.parse(rawOutput) as { selected: string; activeOperation: string; author: { label: string | null } };
+				const output = JSON.parse(rawOutput) as { selected: string; activeOperations: string[]; author: { label: string | null } };
 				expect(output.selected).toBe("conn-A");
-				expect(output.activeOperation).toBe("linear_connections");
+				expect(output.activeOperations).toEqual(["lq_teams", "linear_connections"]);
 				expect(output.author.label).toBeNull();
 			});
 		} finally {
@@ -691,7 +721,7 @@ describe("linear extension in a real OMP session", () => {
 		});
 		const remove = await storeConnection(connection("key-diag", "user"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-diag", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-diag", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [activateCall("lq_issue"), ["lq_issue", { i: "Reading", id: "issue-1" }]];
 		try {
 			await withSession({ script, endpoint: `${linear.url}graphql`, sessionManager }, async (session, model) => {
@@ -723,7 +753,7 @@ describe("linear extension in a real OMP session", () => {
 		);
 		const remove = await storeConnection(connection("key-partial", "user"));
 		const sessionManager = host.SessionManager.inMemory();
-		seedState(sessionManager, { connectionId: "key-partial", activeOperation: null, actor: null });
+		seedState(sessionManager, { connectionId: "key-partial", activeOperations: [], actor: null });
 		const script: ScriptedCall[] = [
 			activateCall("lq_issue"),
 			["lq_issue", { i: "Reading", id: "issue-1" }],

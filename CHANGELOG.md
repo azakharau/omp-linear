@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-15
+
+### Added
+
+- `linear_team_get` returns a team with its workflow states, team labels and members.
+- `linear_issue_get` also returns the latest 20 comments and the issue relations in both
+  directions.
+
+### Changed
+
+- The ergonomic ops are always visible next to `linear_tool_search`. Agents no longer need a
+  search and an activation before each daily operation.
+- Activated tools form a working set of up to 6. A new activation removes the oldest tool
+  instead of the previous one. The `linear-state` entry stores `activeOperations`, and older
+  entries with `activeOperation` still restore.
+- `linear_graphql` is the fallback: its description says so, and search ranks it below the
+  other candidates unless the query asks for raw GraphQL.
+
 ## [1.0.4] - 2026-11-14
 
 ### Fixed
@@ -97,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
+[1.1.0]: https://github.com/azakharau/omp-linear/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/azakharau/omp-linear/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/azakharau/omp-linear/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/azakharau/omp-linear/compare/v1.0.1...v1.0.2

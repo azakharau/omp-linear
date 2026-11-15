@@ -151,7 +151,7 @@ async function runMain(host: Host): Promise<void> {
   const visibleAfterSearch = model.requests[1]!.tools.map(t => t.name).filter(n => n.startsWith("lm_"));
   record("search: candidates returned, nothing activated", searchOutput.includes("lm_issueCreate") && visibleAfterSearch.length === 0, `candidates include lm_issueCreate=${searchOutput.includes("lm_issueCreate")}, lm_* visible after search=${visibleAfterSearch.length}`);
   const visibleAfterActivate = model.requests[2]!.tools.map(t => t.name).filter(n => n.startsWith("lm_") || n.startsWith("lq_"));
-  record("activate: lm_issueCreate is the only active operation", visibleAfterActivate.length === 1 && visibleAfterActivate[0] === "lm_issueCreate", `active operations: ${visibleAfterActivate.join(",") || "none"}`);
+  record("activate: lm_issueCreate is the only activated typed operation", visibleAfterActivate.length === 1 && visibleAfterActivate[0] === "lm_issueCreate", `active operations: ${visibleAfterActivate.join(",") || "none"}`);
   const createOutput = toolOutputs(model.requests[3]!)[0] ?? "";
   const first = linear.requests[0];
   record(
@@ -182,7 +182,7 @@ async function runMain(host: Host): Promise<void> {
 
  const deniedModel = fakeModelServer([script[1], script[2]]);
  const deniedManager = host.SessionManager.inMemory();
- deniedManager.appendCustomEntry(STATE_ENTRY_TYPE, { connectionId: "key-smoke", activeOperation: null, actor: null });
+ deniedManager.appendCustomEntry(STATE_ENTRY_TYPE, { connectionId: "key-smoke", activeOperations: [], actor: null });
  const before = linear.requests.length;
  const denied = await openSession({
   host,

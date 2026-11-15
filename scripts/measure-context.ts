@@ -260,7 +260,7 @@ function startModel(recorded: Recorded[]) {
 	});
 }
 
-/** Fake Linear: an issue for `LinearIssueGet`, a viewer for anything else. Records authorization headers. */
+/** Fake Linear: an issue for `LinearIssueDetailGet`, a viewer for anything else. Records authorization headers. */
 function startLinear(authorizations: string[]) {
 	return Bun.serve({
 		port: 0,
@@ -269,7 +269,7 @@ function startLinear(authorizations: string[]) {
 			authorizations.push(request.headers.get("authorization") ?? "");
 			const body: unknown = await request.json();
 			const query = isRecord(body) && typeof body.query === "string" ? body.query : "";
-			if (query.includes("LinearIssueGet")) {
+			if (query.includes("LinearIssueDetailGet")) {
 				return Response.json({
 					data: {
 						issue: {
@@ -277,6 +277,7 @@ function startLinear(authorizations: string[]) {
 							priority: 0, createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
 							state: { id: "s1", name: "Todo", type: "unstarted" }, team: { id: "t1", key: "SMK", name: "Smoke" },
 							assignee: null, project: null, projectMilestone: null, labels: { nodes: [] },
+							comments: { nodes: [], pageInfo: { hasPreviousPage: false } }, relations: { nodes: [] }, inverseRelations: { nodes: [] },
 						},
 					},
 				});
