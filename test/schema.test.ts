@@ -85,6 +85,25 @@ describe("catalog coverage", () => {
 		const orderBy = properties(teams).orderBy as { anyOf: [{ enum: string[] }, unknown] };
 		expect(orderBy.anyOf[0].enum).toEqual(["createdAt", "updatedAt"]);
 	});
+
+	test("no parameter schema uses the not keyword, which Codex rejects", () => {
+		const withNot: string[] = [];
+		const walk = (node: unknown, where: string): void => {
+			if (!node || typeof node !== "object") return;
+			const schemaNode = node as Record<string, unknown>;
+			if ("not" in schemaNode) withNot.push(where);
+			for (const key of ["properties", "$defs"]) {
+				const map = schemaNode[key] as Record<string, unknown> | undefined;
+				for (const [name, child] of Object.entries(map ?? {})) walk(child, `${where}.${name}`);
+			}
+			walk(schemaNode.items, `${where}[]`);
+			for (const [index, child] of ((schemaNode.anyOf as unknown[] | undefined) ?? []).entries()) walk(child, `${where}|${index}`);
+		};
+		for (const d of catalog) walk(d.parameters, d.tool);
+		expect(withNot).toEqual([]);
+		const timeframe = (descriptor("lq_searchDocuments").parameters as { $defs: Record<string, { properties: Record<string, { anyOf: unknown[] }> }> }).$defs.DateComparator.properties.eq;
+		expect(timeframe.anyOf[0]).toEqual({ type: "string", description: "GraphQL scalar DateTimeOrDuration" });
+	});
 });
 
 describe("composeOperation", () => {

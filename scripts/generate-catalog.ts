@@ -32,8 +32,14 @@ const SDL_PATH = path.join(ROOT, "schema", "linear.schema.graphql");
 const OUT_DIR = path.join(ROOT, "generated");
 type JsonSchema = Record<string, unknown>;
 
-/** Scalars that carry no extra structure beyond a JSON string. */
-const STRING_SCALARS = new Set(["String", "ID", "DateTime", "TimelessDate", "URL", "UUID"]);
+/**
+ * Scalars that carry no extra structure beyond a JSON string. `Duration` and the `*OrDuration`
+ * scalars take an ISO 8601 date or duration string, for example `2026-01-31` or `-P2W`.
+ */
+const STRING_SCALARS = new Set(["String", "ID", "DateTime", "TimelessDate", "URL", "UUID", "Duration", "DateTimeOrDuration", "TimelessDateOrDuration"]);
+
+/** Any non-null JSON value. Codex rejects the `not` keyword in tool schemas, so list the types. */
+const NON_NULL_JSON_TYPES = ["string", "number", "boolean", "object", "array"];
 
 /** Default of an argument or input field as a JSON value; graphql 17 keeps SDL defaults as literals. */
 function defaultOf(input: GraphQLArgument | GraphQLInputField): unknown {
@@ -51,7 +57,7 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
   if (STRING_SCALARS.has(named.name)) return { type: "string", description: `GraphQL scalar ${named.name}` };
   if (named.name === "JSONObject") return { type: "object", additionalProperties: true, description: "GraphQL scalar JSONObject" };
   // JSON and any unknown custom scalar: any non-null JSON value.
-  return { not: { type: "null" }, description: `GraphQL scalar ${named.name}` };
+  return { type: NON_NULL_JSON_TYPES, description: `GraphQL scalar ${named.name}` };
  }
  if (isInputObjectType(named)) {
   if (!defs[named.name] && !building.has(named.name)) {
@@ -72,7 +78,7 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
   }
   return { $ref: `#/$defs/${named.name}` };
  }
- return { not: { type: "null" } };
+ throw new Error(`unsupported GraphQL input type ${String(type)}`);
 }
 
 /** JSON Schema for a GraphQL input type, preserving nullability recursively. */
