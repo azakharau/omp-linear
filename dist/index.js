@@ -11656,6 +11656,9 @@ var DOCUMENT_LOOKUP = `query LinearDocumentLookup($ref: String!) {
     nodes { id title slugId }
   }
 }`;
+var AGENT_SESSION_LOOKUP = `query LinearAgentSessionLookup($ref: String!) {
+  agentSession(id: $ref) { id }
+}`;
 async function request(client, document, variables) {
   const result = await client.execute(document, variables);
   if (!result.ok) {
@@ -11763,6 +11766,14 @@ async function resolveDocumentId(client, ref) {
     return ref;
   const data = await request(client, DOCUMENT_LOOKUP, { ref });
   return exactlyOne(connectionNodes(data, "documents"), "document", ref, (node) => `${node.title} ${node.slugId}`).id;
+}
+async function resolveAgentSessionId(client, ref) {
+  if (UUID_PATTERN.test(ref))
+    return ref;
+  const id = readRecord(await request(client, AGENT_SESSION_LOOKUP, { ref }), "agentSession").id;
+  if (typeof id !== "string")
+    throw new Error('linear response field "agentSession.id" is not a string');
+  return id;
 }
 
 // src/ops/index.ts
@@ -11907,6 +11918,56 @@ var TEAM_GET = `query LinearTeamGet($id: String!) {
     members(first: 250) { nodes { id name displayName active } }
   }
 }`;
+var AGENT_SESSION_FIELDS = `id slugId url status summary createdAt updatedAt startedAt endedAt
+    creator { id displayName }
+    appUser { id displayName }
+    issue { id identifier title url }
+    externalLinks { label url }`;
+var AGENT_ACTIVITY_CONTENT = `content {
+      __typename
+      ... on AgentActivityThoughtContent { body }
+      ... on AgentActivityActionContent { action parameter result }
+      ... on AgentActivityResponseContent { body }
+      ... on AgentActivityElicitationContent { body }
+      ... on AgentActivityErrorContent { body reasonCode }
+      ... on AgentActivityPromptContent { body title }
+    }`;
+var AGENT_SESSION_GET = `query LinearAgentSessionGet($id: String!) {
+  agentSession(id: $id) {
+    ${AGENT_SESSION_FIELDS}
+    plan context
+    comment { id body }
+    activities(first: 20) {
+      nodes { id createdAt ephemeral signal user { displayName } ${AGENT_ACTIVITY_CONTENT} }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+}`;
+var AGENT_SESSION_LIST = `query LinearAgentSessionList($first: Int, $after: String, $includeArchived: Boolean) {
+  agentSessions(first: $first, after: $after, includeArchived: $includeArchived) {
+    nodes { ${AGENT_SESSION_FIELDS} }
+    pageInfo { hasNextPage endCursor }
+  }
+}`;
+var AGENT_SESSION_CREATE_ON_ISSUE = `mutation LinearAgentSessionCreateOnIssue($input: AgentSessionCreateOnIssue!) {
+  agentSessionCreateOnIssue(input: $input) { success agentSession { id } }
+}`;
+var AGENT_SESSION_CREATE_ON_COMMENT = `mutation LinearAgentSessionCreateOnComment($input: AgentSessionCreateOnComment!) {
+  agentSessionCreateOnComment(input: $input) { success agentSession { id } }
+}`;
+var AGENT_SESSION_UPDATE = `mutation LinearAgentSessionUpdate($id: String!, $input: AgentSessionUpdateInput!) {
+  agentSessionUpdate(id: $id, input: $input) { success agentSession { id } }
+}`;
+var AGENT_ACTIVITY_CREATE = `mutation LinearAgentActivityCreate($input: AgentActivityCreateInput!) {
+  agentActivityCreate(input: $input) { success agentActivity { id } }
+}`;
+var AGENT_ACTIVITY_GET = `query LinearAgentActivityGet($id: String!) {
+  agentActivity(id: $id) {
+    id createdAt ephemeral signal
+    ${AGENT_ACTIVITY_CONTENT}
+    agentSession { id slugId url status }
+  }
+}`;
 function record(value, field, context) {
   if (typeof value !== "object" || value === null || !(field in value)) {
     throw new Error(`${context}: linear response is missing "${field}"`);
@@ -11972,6 +12033,14 @@ function optionalNumber(args, key) {
     return;
   if (typeof value !== "number")
     throw new Error(`argument "${key}" must be a number`);
+  return value;
+}
+function optionalBoolean(args, key) {
+  const value = args[key];
+  if (value === undefined || value === null)
+    return;
+  if (typeof value !== "boolean")
+    throw new Error(`argument "${key}" must be a boolean`);
   return value;
 }
 function assertExpected(issue, args, reference) {
@@ -12689,6 +12758,246 @@ var teamGet = {
     return { team: record(await request(client, TEAM_GET, { id }), "team", "teamGet") };
   }
 };
+var APP_ONLY = " Needs an actor=app connection (OAuth app login): Linear rejects agent session writes from a personal API key.";
+var AGENT_SESSION_REF = {
+  type: "string",
+  minLength: 1,
+  description: "Agent session UUID or the slug from its URL"
+};
+var EXTERNAL_LINKS = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      url: { type: "string", minLength: 1 },
+      label: { type: "string", minLength: 1 }
+    },
+    required: ["url", "label"],
+    additionalProperties: false
+  }
+};
+var PLAN_STATUSES = ["pending", "inProgress", "completed", "canceled"];
+var ACTIVITY_TYPES = ["thought", "action", "response", "elicitation", "error"];
+function externalLinks(args, key) {
+  const value = args[key];
+  if (value === undefined || value === null)
+    return;
+  const message = `argument "${key}" must be a list of {url, label} objects`;
+  if (!Array.isArray(value))
+    throw new Error(message);
+  return value.map((entry) => {
+    if (typeof entry !== "object" || entry === null)
+      throw new Error(message);
+    const { url, label } = entry;
+    if (typeof url !== "string" || typeof label !== "string")
+      throw new Error(message);
+    return { url, label };
+  });
+}
+function agentPlan(args) {
+  const value = args.plan;
+  if (value === undefined || value === null)
+    return;
+  const message = `argument "plan" must be a list of {content, status} with status one of ${PLAN_STATUSES.join(", ")}`;
+  if (!Array.isArray(value) || value.length === 0)
+    throw new Error(message);
+  return value.map((entry) => {
+    if (typeof entry !== "object" || entry === null)
+      throw new Error(message);
+    const { content, status } = entry;
+    if (typeof content !== "string" || !PLAN_STATUSES.includes(status)) {
+      throw new Error(message);
+    }
+    return { content, status };
+  });
+}
+async function agentSessionResult(client, id) {
+  return {
+    agentSession: record(await request(client, AGENT_SESSION_GET, { id }), "agentSession", "agentSessionGet")
+  };
+}
+var agentSessionStart = {
+  name: "linear_agent_session_start",
+  description: "Start a Linear agent session on an issue or on a root comment, so Linear shows the agent's work there; report progress with linear_agent_activity_add." + APP_ONLY,
+  tier: "write",
+  onDemand: true,
+  parameters: {
+    type: "object",
+    properties: {
+      issue: ISSUE_REF,
+      comment: { type: "string", minLength: 1, description: "Root comment UUID; pass this or issue, not both" },
+      externalLinks: { ...EXTERNAL_LINKS, description: "Links shown on the session, such as a dashboard or a pull request" }
+    },
+    additionalProperties: false
+  },
+  async run(client, args) {
+    const issue = optionalString(args, "issue");
+    const comment = optionalString(args, "comment");
+    if (issue === undefined === (comment === undefined))
+      throw new Error('pass exactly one of "issue" or "comment"');
+    const links = externalLinks(args, "externalLinks");
+    const input = issue !== undefined ? { issueId: issue } : { commentId: comment };
+    if (links !== undefined)
+      input.externalUrls = links;
+    const id = issue !== undefined ? await mutateForId(client, AGENT_SESSION_CREATE_ON_ISSUE, { input }, "agentSessionCreateOnIssue", "agentSession") : await mutateForId(client, AGENT_SESSION_CREATE_ON_COMMENT, { input }, "agentSessionCreateOnComment", "agentSession");
+    return agentSessionResult(client, id);
+  }
+};
+var agentSessionGet = {
+  name: "linear_agent_session_get",
+  description: "Fetch one agent session: status, summary, plan, issue, comment, links, context and the 20 newest activities (newest first).",
+  tier: "read",
+  onDemand: true,
+  parameters: {
+    type: "object",
+    properties: { session: AGENT_SESSION_REF },
+    required: ["session"],
+    additionalProperties: false
+  },
+  async run(client, args) {
+    return agentSessionResult(client, requiredString(args, "session"));
+  }
+};
+var agentSessionList = {
+  name: "linear_agent_session_list",
+  description: "List agent sessions visible to this connection in one bounded page, with status, summary and issue. Linear offers no filter for this list.",
+  tier: "read",
+  onDemand: true,
+  parameters: {
+    type: "object",
+    properties: {
+      first: { type: "integer", minimum: 1, maximum: 50, default: 25 },
+      after: { type: "string", description: "Cursor from a previous pageInfo.endCursor" },
+      includeArchived: { type: "boolean" }
+    },
+    additionalProperties: false
+  },
+  async run(client, args) {
+    const data = await request(client, AGENT_SESSION_LIST, {
+      first: Math.min(optionalNumber(args, "first") ?? 25, 50),
+      after: optionalString(args, "after") ?? null,
+      includeArchived: optionalBoolean(args, "includeArchived") === true
+    });
+    const connection = record(data, "agentSessions", "agentSessionList");
+    return { agentSessions: connection.nodes, pageInfo: connection.pageInfo };
+  }
+};
+var agentActivityAdd = {
+  name: "linear_agent_activity_add",
+  description: "Post an activity to an agent session; Linear derives the session status from the latest one. thought: progress note. action: a tool step (action, parameter, optional result). elicitation: ask the user, the session waits for input. response: final answer, ends the turn unless continueTurn. error: the turn failed." + APP_ONLY,
+  tier: "write",
+  onDemand: true,
+  parameters: {
+    type: "object",
+    properties: {
+      session: AGENT_SESSION_REF,
+      type: { type: "string", enum: [...ACTIVITY_TYPES] },
+      body: { type: "string", minLength: 1, description: "Markdown; required for every type except action" },
+      action: { type: "string", minLength: 1, description: "Action label such as Searching; action type only" },
+      parameter: { type: "string", description: "What the action works on; action type only" },
+      result: { type: "string", description: "Markdown result of a finished action; action type only" },
+      ephemeral: { type: "boolean", description: "Replace this activity with the next one; thought and action only" },
+      continueTurn: { type: "boolean", description: "Keep the turn active after a response; response only" }
+    },
+    required: ["session", "type"],
+    additionalProperties: false
+  },
+  async run(client, args) {
+    const type = requiredString(args, "type");
+    if (!ACTIVITY_TYPES.includes(type)) {
+      throw new Error(`argument "type" must be one of ${ACTIVITY_TYPES.join(", ")}`);
+    }
+    const body = optionalString(args, "body");
+    const actionFields = ["action", "parameter", "result"].filter((key) => args[key] !== undefined && args[key] !== null);
+    let content;
+    if (type === "action") {
+      if (body !== undefined)
+        throw new Error('an action takes "action", "parameter" and "result", not "body"');
+      content = { type, action: requiredString(args, "action"), parameter: requiredString(args, "parameter") };
+      const result = optionalString(args, "result");
+      if (result !== undefined)
+        content.result = result;
+    } else {
+      if (actionFields.length > 0)
+        throw new Error(`"${actionFields.join('", "')}" apply only to an action`);
+      if (body === undefined)
+        throw new Error(`a ${type} needs "body"`);
+      content = { type, body };
+    }
+    const ephemeral = optionalBoolean(args, "ephemeral");
+    if (ephemeral === true && type !== "thought" && type !== "action") {
+      throw new Error('"ephemeral" applies only to a thought or an action');
+    }
+    const continueTurn = optionalBoolean(args, "continueTurn");
+    if (continueTurn === true && type !== "response")
+      throw new Error('"continueTurn" applies only to a response');
+    const input = {
+      agentSessionId: await resolveAgentSessionId(client, requiredString(args, "session")),
+      content
+    };
+    if (ephemeral === true)
+      input.ephemeral = true;
+    if (continueTurn === true)
+      input.signal = "continue";
+    const id = await mutateForId(client, AGENT_ACTIVITY_CREATE, { input }, "agentActivityCreate", "agentActivity");
+    return {
+      agentActivity: record(await request(client, AGENT_ACTIVITY_GET, { id }), "agentActivity", "agentActivityGet")
+    };
+  }
+};
+var agentSessionUpdate = {
+  name: "linear_agent_session_update",
+  description: "Update an agent session: summary, the whole plan checklist (it replaces the previous plan), and links to add or remove. Status follows activities, not this tool." + APP_ONLY,
+  tier: "write",
+  onDemand: true,
+  parameters: {
+    type: "object",
+    properties: {
+      session: AGENT_SESSION_REF,
+      summary: { type: "string" },
+      plan: {
+        type: "array",
+        minItems: 1,
+        maxItems: 100,
+        description: "The full plan; replaces the previous one",
+        items: {
+          type: "object",
+          properties: {
+            content: { type: "string", minLength: 1 },
+            status: { type: "string", enum: [...PLAN_STATUSES] }
+          },
+          required: ["content", "status"],
+          additionalProperties: false
+        }
+      },
+      addExternalLinks: { ...EXTERNAL_LINKS, description: "Links to add, such as a pull request" },
+      removeExternalLinks: { type: "array", items: { type: "string" }, description: "URLs of links to remove" }
+    },
+    required: ["session"],
+    additionalProperties: false
+  },
+  async run(client, args) {
+    const input = {};
+    const summary = optionalString(args, "summary");
+    if (summary !== undefined)
+      input.summary = summary;
+    const plan = agentPlan(args);
+    if (plan !== undefined)
+      input.plan = plan;
+    const added = externalLinks(args, "addExternalLinks");
+    if (added !== undefined)
+      input.addedExternalUrls = added;
+    const removed = stringList(args, "removeExternalLinks");
+    if (removed !== undefined)
+      input.removedExternalUrls = removed;
+    if (Object.keys(input).length === 0) {
+      throw new Error('pass at least one of "summary", "plan", "addExternalLinks" or "removeExternalLinks"');
+    }
+    const id = await resolveAgentSessionId(client, requiredString(args, "session"));
+    await mutateForId(client, AGENT_SESSION_UPDATE, { id, input }, "agentSessionUpdate", "agentSession");
+    return agentSessionResult(client, id);
+  }
+};
 var ergonomicOps = [
   issueCreate,
   issueUpdate,
@@ -12707,7 +13016,12 @@ var ergonomicOps = [
   documentCreate,
   documentUpdate,
   documentGet,
-  teamGet
+  teamGet,
+  agentSessionStart,
+  agentSessionGet,
+  agentSessionList,
+  agentActivityAdd,
+  agentSessionUpdate
 ];
 
 // node_modules/@toon-format/toon/dist/index.mjs
@@ -20567,7 +20881,10 @@ var LINEAR_ENDPOINT = "https://api.linear.app/graphql";
 var API_KEY_FILE_CONNECTION = { id: "api-key-file", kind: "api_key", label: "API key file", actor: "user", workspace: null };
 var SEARCH_TOOL = "linear_tool_search";
 var RAW_TOOL = "linear_graphql";
-var ALWAYS_ACTIVE = new Set([SEARCH_TOOL, ...ergonomicOps.map((op) => op.name)]);
+var ALWAYS_ACTIVE = new Set([
+  SEARCH_TOOL,
+  ...ergonomicOps.filter((op) => !op.onDemand).map((op) => op.name)
+]);
 var MAX_ACTIVE = 6;
 var UTILITY_TOOLS = ["linear_schema_help", RAW_TOOL, "linear_connections"];
 var UTILITY_SEARCH_TEXT = {
@@ -20593,7 +20910,12 @@ var ERGONOMIC_SEARCH_TEXT = {
   linear_document_create: "Create a Linear document in a project or issue.",
   linear_document_update: "Update a Linear document title or content.",
   linear_document_get: "Get a Linear document by id, slug or title.",
-  linear_team_get: "Get a Linear team: workflow states, labels, members."
+  linear_team_get: "Get a Linear team: workflow states, labels, members.",
+  linear_agent_session_start: "Start a Linear agent session on an issue or comment to show agent work progress.",
+  linear_agent_session_get: "Get a Linear agent session: status, plan, activities.",
+  linear_agent_session_list: "List Linear agent sessions with status.",
+  linear_agent_activity_add: "Add an agent activity to a Linear agent session: thought, action, response, elicitation, error, progress.",
+  linear_agent_session_update: "Update a Linear agent session: summary, plan checklist, external links, pull request."
 };
 function objectSchema(properties, required) {
   return { type: "object", properties, required, additionalProperties: false };
@@ -20699,7 +21021,11 @@ function createLinearExtension(options = {}) {
   const attributionEnabled = options.attribution !== false;
   const index = searchIndex(catalog);
   const targets = attributionTargets(getSchema());
-  const activatable = new Set([...UTILITY_TOOLS, ...catalog.map((d) => d.tool)]);
+  const activatable = new Set([
+    ...UTILITY_TOOLS,
+    ...ergonomicOps.filter((op) => op.onDemand).map((op) => op.name),
+    ...catalog.map((d) => d.tool)
+  ]);
   return (pi) => {
     const storeFile = path4.join(options.agentDir ?? getAgentDir(), "linear", "connections.json");
     const store = createCredentialStore(storeFile);
@@ -20861,7 +21187,7 @@ function createLinearExtension(options = {}) {
     pi.registerTool({
       name: SEARCH_TOOL,
       label: "Linear tool search",
-      description: "Search the private Linear catalog by natural language; returns ranked candidates only. The ergonomic linear_* tools for issues, comments, relations, projects, milestones, documents and teams are always available: use them first. Search finds the 495 typed lq_*/lm_* operations for everything else, plus linear_schema_help, linear_connections and the linear_graphql fallback. Pass `activate` with an exact tool name to add it to this session; up to 6 activated tools stay available, the oldest is removed.",
+      description: "Search the private Linear catalog by natural language; returns ranked candidates only. The ergonomic linear_* tools for issues, comments, relations, projects, milestones, documents and teams are always available: use them first. Search finds the linear_agent_* tools that report agent work into Linear agent sessions, the 495 typed lq_*/lm_* operations for everything else, plus linear_schema_help, linear_connections and the linear_graphql fallback. Pass `activate` with an exact tool name to add it to this session; up to 6 activated tools stay available, the oldest is removed.",
       parameters: {
         type: "object",
         properties: {
@@ -20969,6 +21295,7 @@ function createLinearExtension(options = {}) {
         description: op.description,
         parameters: op.parameters,
         loadMode: "essential",
+        ...op.onDemand ? { defaultInactive: true } : {},
         approval: op.tier,
         async execute(_id, params, _signal, _onUpdate, ctx) {
           const call = openCall(ctx);

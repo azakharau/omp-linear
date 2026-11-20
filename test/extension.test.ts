@@ -169,7 +169,7 @@ describe("linear extension in a real OMP session", () => {
 			expect(body).not.toContain(`xd://${SEARCH_TOOL}`);
 			const all = session.getAllToolNames();
 			expect(all.filter(isLinearOperation).length).toBe(495);
-			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "lm_issueCreate", "lq_issue"]) {
+			for (const name of ["linear_graphql", "linear_schema_help", "linear_connections", "linear_agent_activity_add", "lm_issueCreate", "lq_issue"]) {
 				expect(all).toContain(name);
 				expect(seen).not.toContain(name);
 			}
@@ -208,6 +208,19 @@ describe("linear extension in a real OMP session", () => {
 			expect(toolOutputs(model.requests[1]!)[0]).toContain("linear_issue_get is always active; call it directly");
 			expect(linearToolsOf(model.requests[1]!)).toEqual([...ALWAYS_ACTIVE].sort());
 		});
+	});
+
+	test("agent session tools start inactive; search finds them and activation adds them to the working set", async () => {
+		await withSession(
+			{ script: [searchCall({ query: "report agent progress thought" }), activateCall("linear_agent_activity_add")] },
+			async (session, model) => {
+				await session.prompt("report progress");
+				expect(linearToolsOf(model.requests[0]!)).not.toContain("linear_agent_activity_add");
+				expect(toolOutputs(model.requests[1]!)[0]).toContain("linear_agent_activity_add");
+				expect(toolOutputs(model.requests[2]!).at(-1)).toBe("Activated linear_agent_activity_add.");
+				expect(linearToolsOf(model.requests[2]!)).toEqual([...ALWAYS_ACTIVE, "linear_agent_activity_add"].sort());
+			},
+		);
 	});
 
 	test("activations accumulate in a working set of six; the oldest leaves first, re-activation refreshes, and the set persists", async () => {

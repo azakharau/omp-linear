@@ -15,7 +15,8 @@ Agents use the ergonomic ops first. `linear_tool_search` returns ranked candidat
 private catalog for everything else. With `activate: <exact name>` it adds that tool to the
 active tools. A session keeps up to 6 activated tools. Activating a seventh removes the oldest
 one, and activating a tool again makes it the newest. Inactive tools stay registered, but their
-names and schemas never reach the model.
+names and schemas never reach the model. The agent session ops (`linear_agent_*`) are ergonomic
+ops, but they also start inactive: search finds and activates them like typed tools.
 
 `linear_graphql` is the fallback for what no ergonomic or typed tool covers. Search ranks it
 below the other candidates unless the query asks for raw GraphQL (`raw`, `graphql`, `custom`).
@@ -169,6 +170,26 @@ a lookup. A reference that matches zero or many records is an error that lists t
 
 A write op sends one mutation and then reads the result once. If issue creation succeeds and a
 relation fails, the error names the new issue and the relations that were and were not created.
+
+### Agent sessions
+
+An agent session is the panel where Linear shows an agent's progress on an issue or a comment.
+These ops let an omp agent report its work there. They start inactive; activate them through
+`linear_tool_search`.
+
+| Op | Purpose |
+| --- | --- |
+| `linear_agent_session_start` | Start a session on an issue (`ENG-123` or UUID) or on a root comment, with optional links. |
+| `linear_agent_activity_add` | Post a `thought`, `action`, `elicitation`, `response` or `error`. Linear sets the session status from the latest activity: a response completes the turn unless `continueTurn`, an elicitation waits for the user, an error marks the turn as failed. |
+| `linear_agent_session_update` | Set the summary, replace the whole plan checklist, add or remove links such as a pull request. |
+| `linear_agent_session_get`, `linear_agent_session_list` | Read one session (UUID or URL slug) with the 20 newest activities, or list sessions one page at a time. Linear has no filter for the list. |
+
+The writes need an `actor=app` connection: a session belongs to the OAuth application, and the
+Linear schema states that personal API keys cannot publish agent activities. The extension does
+not receive webhooks. When a user mentions the app or delegates an issue to it, Linear creates a
+session and expects an answer within 10 seconds. Something outside omp must receive that webhook
+and start the agent. Without such an orchestrator, do not add `app:assignable` or
+`app:mentionable` to `linear.oauth.scopes`, so users cannot delegate work that nobody answers.
 
 ## Approval and safety
 

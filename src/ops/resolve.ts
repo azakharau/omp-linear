@@ -61,6 +61,10 @@ export const DOCUMENT_LOOKUP = `query LinearDocumentLookup($ref: String!) {
   }
 }`;
 
+export const AGENT_SESSION_LOOKUP = `query LinearAgentSessionLookup($ref: String!) {
+  agentSession(id: $ref) { id }
+}`;
+
 /** Every lookup document in this module, for schema validation. */
 export const LOOKUP_DOCUMENTS: Record<string, string> = {
 	TEAM_LOOKUP,
@@ -72,6 +76,7 @@ export const LOOKUP_DOCUMENTS: Record<string, string> = {
 	VIEWER_LOOKUP,
 	USER_LOOKUP,
 	DOCUMENT_LOOKUP,
+	AGENT_SESSION_LOOKUP,
 };
 
 export interface LookupNode {
@@ -221,4 +226,12 @@ export async function resolveDocumentId(client: LinearClient, ref: string): Prom
  if (UUID_PATTERN.test(ref)) return ref;
  const data = await request(client, DOCUMENT_LOOKUP, { ref });
  return exactlyOne(connectionNodes(data, "documents"), "document", ref, node => `${node.title} ${node.slugId}`).id;
+}
+
+/** Mutations take the session UUID; the URL slug from a session link is looked up once. */
+export async function resolveAgentSessionId(client: LinearClient, ref: string): Promise<string> {
+ if (UUID_PATTERN.test(ref)) return ref;
+ const id = readRecord(await request(client, AGENT_SESSION_LOOKUP, { ref }), "agentSession").id;
+ if (typeof id !== "string") throw new Error('linear response field "agentSession.id" is not a string');
+ return id;
 }

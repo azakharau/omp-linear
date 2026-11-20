@@ -5,8 +5,9 @@
  * set): `linear_tool_search` and the ergonomic `linear_*` ops for daily work. The search returns
  * ranked candidates from the private catalog and, given `activate`, adds one more tool to the
  * session's working set of at most `MAX_ACTIVE` activated tools (the oldest one is removed).
- * Everything else — the 495 typed `lq_*`/`lm_*` operations, `linear_schema_help`,
- * `linear_connections` and the `linear_graphql` fallback — is registered `defaultInactive`.
+ * Everything else — the `onDemand` ergonomic ops (agent sessions), the 495 typed `lq_*`/`lm_*`
+ * operations, `linear_schema_help`, `linear_connections` and the `linear_graphql` fallback — is
+ * registered `defaultInactive`.
  *
  * Credentials live under the host agent dir (never under cwd). The selected connection and the
  * activated tools are persisted as `linear-state` entries. The author of every outbound call
@@ -74,8 +75,11 @@ export const SEARCH_TOOL = "linear_tool_search";
 /** Raw GraphQL: the fallback for what no typed or ergonomic tool covers. */
 export const RAW_TOOL = "linear_graphql";
 
-/** Tools that are always active: the search and the ergonomic ops. Activation never removes them. */
-export const ALWAYS_ACTIVE: ReadonlySet<string> = new Set([SEARCH_TOOL, ...ergonomicOps.map(op => op.name)]);
+/** Tools that are always active: the search and the ergonomic ops not marked `onDemand`. Activation never removes them. */
+export const ALWAYS_ACTIVE: ReadonlySet<string> = new Set([
+ SEARCH_TOOL,
+ ...ergonomicOps.filter(op => !op.onDemand).map(op => op.name),
+]);
 
 /** Activated tools a session keeps at once; activating one more removes the oldest. */
 export const MAX_ACTIVE = 6;
@@ -126,6 +130,11 @@ const ERGONOMIC_SEARCH_TEXT: Record<string, string> = {
  linear_document_update: "Update a Linear document title or content.",
  linear_document_get: "Get a Linear document by id, slug or title.",
  linear_team_get: "Get a Linear team: workflow states, labels, members.",
+ linear_agent_session_start: "Start a Linear agent session on an issue or comment to show agent work progress.",
+ linear_agent_session_get: "Get a Linear agent session: status, plan, activities.",
+ linear_agent_session_list: "List Linear agent sessions with status.",
+ linear_agent_activity_add: "Add an agent activity to a Linear agent session: thought, action, response, elicitation, error, progress.",
+ linear_agent_session_update: "Update a Linear agent session: summary, plan checklist, external links, pull request.",
 };
 
 /** The host injects and strips its own intent field (`i`); tool schemas declare only real arguments. */
@@ -248,7 +257,11 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
  const attributionEnabled = options.attribution !== false;
  const index = searchIndex(catalog);
  const targets = attributionTargets(getSchema());
- const activatable = new Set<string>([...UTILITY_TOOLS, ...catalog.map(d => d.tool)]);
+ const activatable = new Set<string>([
+  ...UTILITY_TOOLS,
+  ...ergonomicOps.filter(op => op.onDemand).map(op => op.name),
+  ...catalog.map(d => d.tool),
+ ]);
 
  return (pi: ExtensionAPI) => {
   const storeFile = path.join(options.agentDir ?? getAgentDir(), "linear", "connections.json");
@@ -440,7 +453,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
    name: SEARCH_TOOL,
    label: "Linear tool search",
    description:
-    "Search the private Linear catalog by natural language; returns ranked candidates only. The ergonomic linear_* tools for issues, comments, relations, projects, milestones, documents and teams are always available: use them first. Search finds the 495 typed lq_*/lm_* operations for everything else, plus linear_schema_help, linear_connections and the linear_graphql fallback. Pass `activate` with an exact tool name to add it to this session; up to 6 activated tools stay available, the oldest is removed.",
+    "Search the private Linear catalog by natural language; returns ranked candidates only. The ergonomic linear_* tools for issues, comments, relations, projects, milestones, documents and teams are always available: use them first. Search finds the linear_agent_* tools that report agent work into Linear agent sessions, the 495 typed lq_*/lm_* operations for everything else, plus linear_schema_help, linear_connections and the linear_graphql fallback. Pass `activate` with an exact tool name to add it to this session; up to 6 activated tools stay available, the oldest is removed.",
    parameters: {
     type: "object",
     properties: {
@@ -565,6 +578,7 @@ export function createLinearExtension(options: LinearExtensionOptions = {}): Ext
     description: op.description,
     parameters: op.parameters as never,
     loadMode: "essential",
+    ...(op.onDemand ? { defaultInactive: true } : {}),
     approval: op.tier,
     async execute(_id, params, _signal, _onUpdate, ctx) {
      const call = openCall(ctx);
