@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (thought, action, elicitation, response, error), `linear_agent_session_update` (summary,
   plan, links), `linear_agent_session_get` and `linear_agent_session_list`. The writes need an
   `actor=app` connection. The ops start inactive, and `linear_tool_search` finds and activates
-  them, so they add nothing to the start-up context.
+  them, so their schemas are not sent at start-up.
 
 ## [1.1.1] - 2026-11-19
 

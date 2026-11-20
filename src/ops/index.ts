@@ -237,16 +237,21 @@ const AGENT_ACTIVITY_CONTENT = `content {
       ... on AgentActivityPromptContent { body title }
     }`;
 
-export const AGENT_SESSION_GET = `query LinearAgentSessionGet($id: String!) {
+export const AGENT_SESSION_GET = `query LinearAgentSessionGet($id: String!, $activities: Int, $after: String) {
   agentSession(id: $id) {
     ${AGENT_SESSION_FIELDS}
     plan context
     comment { id body }
-    activities(first: 20) {
+    activities(first: $activities, after: $after) {
       nodes { id createdAt ephemeral signal user { displayName } ${AGENT_ACTIVITY_CONTENT} }
       pageInfo { hasNextPage endCursor }
     }
   }
+}`;
+
+/** Readback after a session write: no activity history, so a long session cannot overflow it. */
+export const AGENT_SESSION_BRIEF_GET = `query LinearAgentSessionBriefGet($id: String!) {
+  agentSession(id: $id) { ${AGENT_SESSION_FIELDS} plan }
 }`;
 
 export const AGENT_SESSION_LIST = `query LinearAgentSessionList($first: Int, $after: String, $includeArchived: Boolean) {
@@ -308,6 +313,7 @@ export const OP_DOCUMENTS: Record<string, string> = {
  DOCUMENT_UPDATE,
  DOCUMENT_GET,
  AGENT_SESSION_GET,
+ AGENT_SESSION_BRIEF_GET,
  AGENT_SESSION_LIST,
  AGENT_SESSION_CREATE_ON_ISSUE,
  AGENT_SESSION_CREATE_ON_COMMENT,
@@ -1234,7 +1240,7 @@ function agentPlan(args: Record<string, unknown>): { content: string; status: st
 
 async function agentSessionResult(client: LinearClient, id: string): Promise<unknown> {
  return {
-  agentSession: record(await request(client, AGENT_SESSION_GET, { id }), "agentSession", "agentSessionGet"),
+  agentSession: record(await request(client, AGENT_SESSION_BRIEF_GET, { id }), "agentSession", "agentSessionGet"),
  };
 }
 
@@ -1273,17 +1279,26 @@ const agentSessionStart: ErgonomicOp = {
 const agentSessionGet: ErgonomicOp = {
  name: "linear_agent_session_get",
  description:
-  "Fetch one agent session: status, summary, plan, issue, comment, links, context and the 20 newest activities (newest first).",
+  "Fetch one agent session: status, summary, plan, issue, comment, links, context and one page of activities, newest first.",
  tier: "read",
  onDemand: true,
  parameters: {
   type: "object",
-  properties: { session: AGENT_SESSION_REF },
+  properties: {
+   session: AGENT_SESSION_REF,
+   activities: { type: "integer", minimum: 1, maximum: 50, default: 20, description: "Activities per page" },
+   after: { type: "string", description: "Cursor from a previous activities.pageInfo.endCursor" },
+  },
   required: ["session"],
   additionalProperties: false,
  },
  async run(client, args) {
-  return agentSessionResult(client, requiredString(args, "session"));
+  const data = await request(client, AGENT_SESSION_GET, {
+   id: requiredString(args, "session"),
+   activities: Math.min(optionalNumber(args, "activities") ?? 20, 50),
+   after: optionalString(args, "after") ?? null,
+  });
+  return { agentSession: record(data, "agentSession", "agentSessionGet") };
  },
 };
 
@@ -1375,7 +1390,7 @@ const agentActivityAdd: ErgonomicOp = {
 const agentSessionUpdate: ErgonomicOp = {
  name: "linear_agent_session_update",
  description:
-  "Update an agent session: summary, the whole plan checklist (it replaces the previous plan), and links to add or remove. Status follows activities, not this tool." +
+  "Update an agent session: summary, the whole plan checklist (it replaces the previous plan), and links to add or remove. An update acknowledges a pending or stale session by making it active; activities decide how a turn ends." +
   APP_ONLY,
  tier: "write",
  onDemand: true,

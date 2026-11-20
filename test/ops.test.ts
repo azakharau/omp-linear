@@ -967,7 +967,7 @@ describe("agent session ops", () => {
 		LinearAgentSessionLookup: () => ({ agentSession: { id: SESSION_ID } }),
 		LinearAgentSessionCreateOnIssue: () => ({ agentSessionCreateOnIssue: { success: true, agentSession: { id: SESSION_ID } } }),
 		LinearAgentSessionUpdate: () => ({ agentSessionUpdate: { success: true, agentSession: { id: SESSION_ID } } }),
-		LinearAgentSessionGet: () => ({ agentSession: SESSION }),
+		LinearAgentSessionBriefGet: () => ({ agentSession: SESSION }),
 		LinearAgentActivityCreate: () => ({ agentActivityCreate: { success: true, agentActivity: { id: "act-1" } } }),
 		LinearAgentActivityGet: () => ({ agentActivity: { id: "act-1", agentSession: { id: SESSION_ID, status: "active" } } }),
 	};
@@ -977,7 +977,7 @@ describe("agent session ops", () => {
 		const links = [{ url: "https://example.com/run/1", label: "Run" }];
 		const result = await opNamed("linear_agent_session_start").run(client, { issue: "ABC-12", externalLinks: links }, APP_CTX);
 		expect(result).toMatchObject({ agentSession: { id: SESSION_ID, status: "active" } });
-		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionCreateOnIssue", "LinearAgentSessionGet"]);
+		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionCreateOnIssue", "LinearAgentSessionBriefGet"]);
 		expect(calls[0]!.variables).toEqual({ input: { issueId: "ABC-12", externalUrls: links } });
 	});
 
@@ -1018,7 +1018,7 @@ describe("agent session ops", () => {
 		];
 		const pr = [{ url: "https://github.com/o/r/pull/7", label: "PR #7" }];
 		await opNamed("linear_agent_session_update").run(client, { session: SESSION_ID, plan, addExternalLinks: pr }, APP_CTX);
-		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionUpdate", "LinearAgentSessionGet"]);
+		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionUpdate", "LinearAgentSessionBriefGet"]);
 		expect(calls[0]!.variables).toEqual({ id: SESSION_ID, input: { plan, addedExternalUrls: pr } });
 		await expect(
 			opNamed("linear_agent_session_update").run(client, { session: SESSION_ID, plan: [{ content: "x", status: "done" }] }, APP_CTX),

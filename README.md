@@ -181,8 +181,8 @@ These ops let an omp agent report its work there. They start inactive; activate 
 | --- | --- |
 | `linear_agent_session_start` | Start a session on an issue (`ENG-123` or UUID) or on a root comment, with optional links. |
 | `linear_agent_activity_add` | Post a `thought`, `action`, `elicitation`, `response` or `error`. Linear sets the session status from the latest activity: a response completes the turn unless `continueTurn`, an elicitation waits for the user, an error marks the turn as failed. |
-| `linear_agent_session_update` | Set the summary, replace the whole plan checklist, add or remove links such as a pull request. |
-| `linear_agent_session_get`, `linear_agent_session_list` | Read one session (UUID or URL slug) with the 20 newest activities, or list sessions one page at a time. Linear has no filter for the list. |
+| `linear_agent_session_update` | Set the summary, replace the whole plan checklist, add or remove links such as a pull request. An update also makes a pending or stale session active. |
+| `linear_agent_session_get`, `linear_agent_session_list` | Read one session (UUID or URL slug) with a page of activities, newest first (20 by default, up to 50), or list sessions one page at a time. Linear has no filter for the list. |
 
 The writes need an `actor=app` connection: a session belongs to the OAuth application, and the
 Linear schema states that personal API keys cannot publish agent activities. The extension does
