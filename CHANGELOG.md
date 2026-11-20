@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-20
+
+### Added
+
+- Agent session ops let an omp agent report its work in Linear's agent session panel:
+  `linear_agent_session_start` (on an issue or a root comment), `linear_agent_activity_add`
+  (thought, action, elicitation, response, error), `linear_agent_session_update` (summary,
+  plan, links), `linear_agent_session_get` and `linear_agent_session_list`. The writes need an
+  `actor=app` connection. The ops start inactive, and `linear_tool_search` finds and activates
+  them, so their schemas are not sent at start-up.
+
 ## [1.1.1] - 2026-11-19
 
 ### Fixed
@@ -122,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
+[1.2.0]: https://github.com/azakharau/omp-linear/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/azakharau/omp-linear/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/azakharau/omp-linear/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/azakharau/omp-linear/compare/v1.0.3...v1.0.4

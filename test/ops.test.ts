@@ -125,6 +125,11 @@ describe("operation documents", () => {
 
 	test("the catalog exposes the contracted ops with JSON Schema parameters", () => {
 		expect(ergonomicOps.map(op => op.name).sort()).toEqual([
+			"linear_agent_activity_add",
+			"linear_agent_session_get",
+			"linear_agent_session_list",
+			"linear_agent_session_start",
+			"linear_agent_session_update",
 			"linear_document_create",
 			"linear_document_get",
 			"linear_document_update",
@@ -156,7 +161,15 @@ describe("operation documents", () => {
 				.filter(op => op.tier === "read")
 				.map(op => op.name)
 				.sort(),
-		).toEqual(["linear_document_get", "linear_issue_get", "linear_issue_search", "linear_project_get", "linear_team_get"]);
+		).toEqual([
+			"linear_agent_session_get",
+			"linear_agent_session_list",
+			"linear_document_get",
+			"linear_issue_get",
+			"linear_issue_search",
+			"linear_project_get",
+			"linear_team_get",
+		]);
 	});
 });
 
@@ -943,6 +956,74 @@ describe("comment, relation, project and milestone ops", () => {
 		await expect(opNamed("linear_document_update").run(client, { document: "Spec" }, USER_CTX)).rejects.toThrow(
 			'argument "title" or "content" is required',
 		);
+		expect(calls.length).toBe(2);
+	});
+});
+
+describe("agent session ops", () => {
+	const SESSION_ID = "22222222-2222-4222-8222-222222222222";
+	const SESSION = { id: SESSION_ID, slugId: "a1b2c3", status: "active", activities: { nodes: [], pageInfo: { hasNextPage: false } } };
+	const canned: Record<string, Responder> = {
+		LinearAgentSessionLookup: () => ({ agentSession: { id: SESSION_ID } }),
+		LinearAgentSessionCreateOnIssue: () => ({ agentSessionCreateOnIssue: { success: true, agentSession: { id: SESSION_ID } } }),
+		LinearAgentSessionUpdate: () => ({ agentSessionUpdate: { success: true, agentSession: { id: SESSION_ID } } }),
+		LinearAgentSessionBriefGet: () => ({ agentSession: SESSION }),
+		LinearAgentActivityCreate: () => ({ agentActivityCreate: { success: true, agentActivity: { id: "act-1" } } }),
+		LinearAgentActivityGet: () => ({ agentActivity: { id: "act-1", agentSession: { id: SESSION_ID, status: "active" } } }),
+	};
+
+	test("start on an issue identifier sends it as issueId, then reads the session once", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		const links = [{ url: "https://example.com/run/1", label: "Run" }];
+		const result = await opNamed("linear_agent_session_start").run(client, { issue: "ABC-12", externalLinks: links }, APP_CTX);
+		expect(result).toMatchObject({ agentSession: { id: SESSION_ID, status: "active" } });
+		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionCreateOnIssue", "LinearAgentSessionBriefGet"]);
+		expect(calls[0]!.variables).toEqual({ input: { issueId: "ABC-12", externalUrls: links } });
+	});
+
+	test("an action activity on a session slug resolves the slug, sends one mutation and reads the activity", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		const args = { session: "a1b2c3", type: "action", action: "Searched", parameter: "flaky test", result: "found 2", ephemeral: true };
+		const result = await opNamed("linear_agent_activity_add").run(client, args, APP_CTX);
+		expect(result).toMatchObject({ agentActivity: { id: "act-1", agentSession: { status: "active" } } });
+		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionLookup", "LinearAgentActivityCreate", "LinearAgentActivityGet"]);
+		expect(calls[1]!.variables).toEqual({
+			input: {
+				agentSessionId: SESSION_ID,
+				content: { type: "action", action: "Searched", parameter: "flaky test", result: "found 2" },
+				ephemeral: true,
+			},
+		});
+	});
+
+	test("a response with continueTurn sends the continue signal; invalid combinations fail before any request", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		await opNamed("linear_agent_activity_add").run(client, { session: SESSION_ID, type: "response", body: "Done part one", continueTurn: true }, APP_CTX);
+		expect(calls[0]!.variables).toEqual({
+			input: { agentSessionId: SESSION_ID, content: { type: "response", body: "Done part one" }, signal: "continue" },
+		});
+		const op = opNamed("linear_agent_activity_add");
+		await expect(op.run(client, { session: SESSION_ID, type: "response", body: "x", ephemeral: true }, APP_CTX)).rejects.toThrow(/ephemeral/);
+		await expect(op.run(client, { session: SESSION_ID, type: "thought", body: "x", continueTurn: true }, APP_CTX)).rejects.toThrow(/continueTurn/);
+		await expect(op.run(client, { session: SESSION_ID, type: "thought", action: "Read" }, APP_CTX)).rejects.toThrow(/apply only to an action/);
+		await expect(op.run(client, { session: SESSION_ID, type: "action", action: "Read" }, APP_CTX)).rejects.toThrow(/"parameter" is required/);
+		expect(calls.length).toBe(2);
+	});
+
+	test("update sends the whole plan and added links, then reads the session once", async () => {
+		const { client, calls } = await fakeLinear(canned);
+		const plan = [
+			{ content: "Reproduce", status: "completed" },
+			{ content: "Fix", status: "inProgress" },
+		];
+		const pr = [{ url: "https://github.com/o/r/pull/7", label: "PR #7" }];
+		await opNamed("linear_agent_session_update").run(client, { session: SESSION_ID, plan, addExternalLinks: pr }, APP_CTX);
+		expect(calls.map(call => call.name)).toEqual(["LinearAgentSessionUpdate", "LinearAgentSessionBriefGet"]);
+		expect(calls[0]!.variables).toEqual({ id: SESSION_ID, input: { plan, addedExternalUrls: pr } });
+		await expect(
+			opNamed("linear_agent_session_update").run(client, { session: SESSION_ID, plan: [{ content: "x", status: "done" }] }, APP_CTX),
+		).rejects.toThrow(/status one of/);
+		await expect(opNamed("linear_agent_session_update").run(client, { session: SESSION_ID }, APP_CTX)).rejects.toThrow(/at least one/);
 		expect(calls.length).toBe(2);
 	});
 });

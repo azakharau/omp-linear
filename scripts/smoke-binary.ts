@@ -60,7 +60,7 @@ function check(reports: Report[]): Step[] {
 			record(`${variant} ${scenario}: key absent from model requests`, !report.keyInModelRequests, `keyInModelRequests=${report.keyInModelRequests}`);
 			if (scenario === "S1") {
 				const start = report.start;
-				const expected = ["linear_tool_search", ...ergonomicOps.map(op => op.name)].sort().join();
+				const expected = ["linear_tool_search", ...ergonomicOps.filter(op => !op.onDemand).map(op => op.name)].sort().join();
 				record(
 					`${variant} S1: linear_tool_search and the ergonomic ops are the only Linear tools, native, no Linear device`,
 					start !== null && [...start.linearTools].sort().join() === expected && start.linearDevices === 0,
