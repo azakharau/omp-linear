@@ -239,9 +239,8 @@ ergonomic ops as native functions, that `linear_issue_get` works in the main age
 child and in a child restricted to `read`, that each Linear request carries the key file value,
 and that the key never reaches a model request.
 
-Design notes live in [`docs/research-report.md`](docs/research-report.md). Changes are listed in
-[`CHANGELOG.md`](CHANGELOG.md). See [`CONTRIBUTING.md`](CONTRIBUTING.md) before you open a pull
-request.
+Changes are listed in [`CHANGELOG.md`](CHANGELOG.md). See [`CONTRIBUTING.md`](CONTRIBUTING.md)
+before you open a pull request.
 
 ## Security notes
 

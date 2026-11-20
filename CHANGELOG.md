@@ -55,8 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The repository is public. Examples use neutral identifiers (`ENG-123`).
 - `smoke:binary` and `measure-context` use the `omp` binary on PATH by default.
-- The research assignment is no longer part of the repository. The research report stays in
-  `docs/`.
+- The research assignment is no longer part of the repository.
 
 ## [1.0.1] - 2026-11-14
 
@@ -101,7 +100,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `omp.extensions` entry, so a marketplace install loads without a dependency install, and
   package metadata (keywords, author, repository, engines).
 - `bun run check`: typecheck, stale-bundle check and tests. GitHub Actions CI runs it.
-- Design documents in `docs/`: the research assignment and the research report.
 
 ### Changed
 
