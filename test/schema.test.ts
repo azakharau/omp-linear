@@ -68,7 +68,7 @@ describe("catalog coverage", () => {
 		}
 	});
 
-	test("recursive input objects round-trip through $defs/$ref", () => {
+	test("recursive input objects round-trip through $defs/$ref; nested relation filters stay opaque", () => {
 		const issues = descriptor("lq_issues");
 		const filter = properties(issues).filter as { anyOf: [{ $ref: string }, unknown] };
 		expect(filter.anyOf[0].$ref).toBe("#/$defs/IssueFilter");
@@ -76,8 +76,22 @@ describe("catalog coverage", () => {
 		expect(defs.IssueFilter).toBeDefined();
 		const or = defs.IssueFilter.properties.or as { anyOf: [{ items: { $ref: string } }, unknown] };
 		expect(or.anyOf[0].items.$ref).toBe("#/$defs/IssueFilter");
-		const state = defs.IssueFilter.properties.state as { anyOf: [{ $ref: string }, unknown] };
-		expect(defs[state.anyOf[0].$ref.replace("#/$defs/", "")]).toBeDefined();
+		// A comparator is spelled out; a filter on another entity names its type for linear_schema_help.
+		const title = defs.IssueFilter.properties.title as { anyOf: [{ $ref: string }, unknown] };
+		expect(defs[title.anyOf[0].$ref.replace("#/$defs/", "")]?.properties.eq).toBeDefined();
+		const state = defs.IssueFilter.properties.state as { anyOf: [Record<string, unknown>, unknown] };
+		expect(state.anyOf[0]).toMatchObject({ type: "object", additionalProperties: true });
+		expect(state.anyOf[0].description).toContain("WorkflowStateFilter");
+		expect(defs.WorkflowStateFilter).toBeUndefined();
+	});
+
+	test("every parameter schema stays small enough to keep in each model request", () => {
+		// A host can keep an activated tool's schema in every later request; the full filter
+		// closure once made lq_teams and lq_projects about 250 000 characters each.
+		const oversized = catalog
+			.map((d) => [d.tool, JSON.stringify(d.parameters).length] as const)
+			.filter(([, size]) => size > 64_000);
+		expect(oversized).toEqual([]);
 	});
 
 	test("enum arguments expose their values", () => {

@@ -23,6 +23,7 @@ import {
  type GraphQLArgument,
  type GraphQLField,
  type GraphQLInputField,
+ type GraphQLInputObjectType,
  type GraphQLInputType,
  type GraphQLSchema,
 } from "graphql";
@@ -46,8 +47,39 @@ function defaultOf(input: GraphQLArgument | GraphQLInputField): unknown {
  return input.default?.literal ? coerceInputLiteral(input.default.literal, input.type) : input.default?.value;
 }
 
-function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>, building: Set<string>): JsonSchema {
- if (isListType(type)) return { type: "array", items: jsonSchema(type.ofType, defs, building) };
+/**
+ * A nested input object is spelled out only when few other input objects are reachable from it,
+ * such as StringComparator or AgentSessionExternalUrlInput. Others become opaque objects that
+ * name their GraphQL type. Linear filters reference each other (IssueFilter → TeamFilter →
+ * ProjectCollectionFilter → …): a full closure put about 90 types and 250 000 characters into
+ * one tool schema, and a host may keep an activated tool's schema in every later request.
+ * An argument's own type is always spelled out.
+ */
+export const MAX_NESTED_CLOSURE = 3;
+
+const closureCache = new Map<string, number>();
+
+/** Number of other input object types reachable from `type`. */
+function closureSize(type: GraphQLInputObjectType): number {
+ const cached = closureCache.get(type.name);
+ if (cached !== undefined) return cached;
+ const seen = new Set<string>([type.name]);
+ const stack = [type];
+ while (stack.length > 0) {
+  for (const field of Object.values(stack.pop()!.getFields())) {
+   const named = getNamedType(field.type);
+   if (isInputObjectType(named) && !seen.has(named.name)) {
+    seen.add(named.name);
+    stack.push(named);
+   }
+  }
+ }
+ closureCache.set(type.name, seen.size - 1);
+ return seen.size - 1;
+}
+
+function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>, building: Set<string>, depth: number): JsonSchema {
+ if (isListType(type)) return { type: "array", items: jsonSchema(type.ofType, defs, building, depth) };
  const named = getNamedType(type);
  if (isEnumType(named)) return { type: "string", enum: named.getValues().map((v) => v.name) };
  if (isScalarType(named)) {
@@ -60,14 +92,22 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
   return { type: NON_NULL_JSON_TYPES, description: `GraphQL scalar ${named.name}` };
  }
  if (isInputObjectType(named)) {
-  if (!defs[named.name] && !building.has(named.name)) {
+  const known = defs[named.name] !== undefined || building.has(named.name);
+  if (!known && depth > 1 && closureSize(named) > MAX_NESTED_CLOSURE) {
+   return {
+    type: "object",
+    additionalProperties: true,
+    description: `GraphQL input ${named.name}; linear_schema_help lists its fields`,
+   };
+  }
+  if (!known) {
    building.add(named.name);
    const properties: Record<string, JsonSchema> = {};
    const required: string[] = [];
    for (const field of Object.values(named.getFields())) {
     const fallback = defaultOf(field);
     properties[field.name] = {
-     ...jsonSchema(field.type, defs, building),
+     ...jsonSchema(field.type, defs, building, depth + 1),
      ...(field.description ? { description: field.description } : {}),
      ...(fallback !== undefined ? { default: fallback } : {}),
     };
@@ -82,9 +122,9 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
 }
 
 /** JSON Schema for a GraphQL input type, preserving nullability recursively. */
-function jsonSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>, building: Set<string> = new Set()): JsonSchema {
- if (isNonNullType(type)) return nonNullSchema(type.ofType, defs, building);
- return { anyOf: [nonNullSchema(type, defs, building), { type: "null" }] };
+function jsonSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>, building: Set<string> = new Set(), depth = 1): JsonSchema {
+ if (isNonNullType(type)) return nonNullSchema(type.ofType, defs, building, depth);
+ return { anyOf: [nonNullSchema(type, defs, building, depth), { type: "null" }] };
 }
 
 function argumentSchema(args: readonly GraphQLArgument[], kind: string, root: string): JsonSchema {
