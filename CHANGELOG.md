@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-11-23
+
+### Fixed
+
+- Typed tool schemas no longer include every filter type that a filter can reach. 35 tools,
+  such as `lq_teams` and `lq_projects`, had schemas of about 250 000 characters (about 60 000
+  tokens). The host can keep an activated tool's schema in each later request, so two such tools
+  kept a session above the compaction threshold, and compaction ran after every turn. A nested
+  input object is now written out only when few other input types are reachable from it, such
+  as `StringComparator`. Other nested inputs, such as `team: TeamFilter` inside `IssueFilter`,
+  are open objects that name their GraphQL type; `linear_schema_help` describes it. Typed tools
+  now check every argument against the GraphQL types before the request, so a wrong value inside
+  such an object fails locally. The largest schema (`lq_issues`) is now about 13 000 tokens,
+  `lq_teams` about 4 000.
+
 ## [1.2.0] - 2026-11-20
 
 ### Added
@@ -133,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A late HTTP 401 drops only the cached app token it carried, not its replacement.
 - Credential files must be regular files of at most 64 KiB.
 
+[1.2.1]: https://github.com/azakharau/omp-linear/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/azakharau/omp-linear/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/azakharau/omp-linear/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/azakharau/omp-linear/compare/v1.0.4...v1.1.0

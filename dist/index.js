@@ -10124,6 +10124,10 @@ function composeOperation(descriptor, args, selection) {
       }
       continue;
     }
+    const problems = [];
+    validateInputValue(args[arg.name], arg.type, (error, at) => problems.push(`${[arg.name, ...at].join(".")}: ${error.message}`));
+    if (problems.length > 0)
+      throw new Error(`${descriptor.tool}: invalid argument ${problems.join("; ")}`);
     variables[arg.name] = args[arg.name];
     const variable = { kind: VARIABLE, name: { kind: NAME, value: arg.name } };
     variableDefinitions.push({ kind: VARIABLE_DEFINITION, variable, type: parseType(String(arg.type)) });
