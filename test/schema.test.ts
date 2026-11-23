@@ -1,5 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { buildSchema, Kind, getNamedType, isObjectType, isRequiredArgument } from "graphql";
+import {
+	buildSchema,
+	isEnumType,
+	isInputObjectType,
+	isListType,
+	isNonNullType,
+	isRequiredArgument,
+	isRequiredInputField,
+	Kind,
+	type GraphQLInputType,
+} from "graphql";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -76,7 +86,6 @@ describe("catalog coverage", () => {
 		expect(defs.IssueFilter).toBeDefined();
 		const or = defs.IssueFilter.properties.or as { anyOf: [{ items: { $ref: string } }, unknown] };
 		expect(or.anyOf[0].items.$ref).toBe("#/$defs/IssueFilter");
-		// A comparator is spelled out; a filter on another entity names its type for linear_schema_help.
 		const title = defs.IssueFilter.properties.title as { anyOf: [{ $ref: string }, unknown] };
 		expect(defs[title.anyOf[0].$ref.replace("#/$defs/", "")]?.properties.eq).toBeDefined();
 		const state = defs.IssueFilter.properties.state as { anyOf: [Record<string, unknown>, unknown] };
@@ -86,8 +95,7 @@ describe("catalog coverage", () => {
 	});
 
 	test("every parameter schema stays small enough to keep in each model request", () => {
-		// A host can keep an activated tool's schema in every later request; the full filter
-		// closure once made lq_teams and lq_projects about 250 000 characters each.
+		// A host can keep an activated tool's schema in every later request.
 		const oversized = catalog
 			.map((d) => [d.tool, JSON.stringify(d.parameters).length] as const)
 			.filter(([, size]) => size > 64_000);
@@ -132,6 +140,13 @@ describe("composeOperation", () => {
 		expect(document).toContain("pageInfo {");
 		expect(document).toContain("hasNextPage");
 		expect(variables).toEqual({ first: 10, filter: { title: { contains: "bug" } } });
+	});
+
+	test("rejects an invalid value inside a nested input that the tool schema leaves open", () => {
+		expect(() => composeOperation(descriptor("lq_issues"), { filter: { team: { key: [] } } })).toThrow(/^lq_issues: invalid argument filter\.team\.key/);
+		expect(() => composeOperation(descriptor("lq_issues"), { filter: { team: { nope: { eq: "x" } } } })).toThrow(/nope/);
+		const { variables } = composeOperation(descriptor("lq_issues"), { filter: { team: { key: { eq: "ENG" } } } });
+		expect(variables).toEqual({ filter: { team: { key: { eq: "ENG" } } } });
 	});
 
 	test("honours an explicit selection override", () => {
@@ -181,6 +196,18 @@ describe("composeOperation", () => {
 	});
 
 	test("every generated descriptor composes into a schema-valid document", () => {
+		// Smallest value of a GraphQL input type: required fields only, one list item.
+		const sample = (type: GraphQLInputType): unknown => {
+			const inner = isNonNullType(type) ? type.ofType : type;
+			if (isListType(inner)) return [sample(inner.ofType)];
+			if (isInputObjectType(inner)) {
+				return Object.fromEntries(Object.values(inner.getFields()).filter(isRequiredInputField).map((f) => [f.name, sample(f.type)]));
+			}
+			if (isEnumType(inner)) return inner.getValues()[0]!.name;
+			if (inner.name === "Int" || inner.name === "Float") return 1;
+			if (inner.name === "Boolean") return true;
+			return "x";
+		};
 		const failures: string[] = [];
 		for (const d of catalog) {
 			const rootType = d.kind === "Query" ? schema.getQueryType()! : schema.getMutationType()!;
@@ -188,7 +215,7 @@ describe("composeOperation", () => {
 			const args: Record<string, unknown> = {};
 			for (const arg of field.args) {
 				if (!isRequiredArgument(arg)) continue;
-				args[arg.name] = isObjectType(getNamedType(arg.type)) ? {} : "x";
+				args[arg.name] = sample(arg.type);
 			}
 			try {
 				composeOperation(d, args);

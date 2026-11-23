@@ -15,8 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   kept a session above the compaction threshold, and compaction ran after every turn. A nested
   input object is now written out only when few other input types are reachable from it, such
   as `StringComparator`. Other nested inputs, such as `team: TeamFilter` inside `IssueFilter`,
-  are open objects that name their GraphQL type; `linear_schema_help` describes it. The largest
-  schema (`lq_issues`) is now about 13 000 tokens, `lq_teams` about 4 000.
+  are open objects that name their GraphQL type; `linear_schema_help` describes it. Typed tools
+  now check every argument against the GraphQL types before the request, so a wrong value inside
+  such an object fails locally. The largest schema (`lq_issues`) is now about 13 000 tokens,
+  `lq_teams` about 4 000.
 
 ## [1.2.0] - 2026-11-20
 

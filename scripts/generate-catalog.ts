@@ -49,19 +49,18 @@ function defaultOf(input: GraphQLArgument | GraphQLInputField): unknown {
 
 /**
  * A nested input object is spelled out only when few other input objects are reachable from it,
- * such as StringComparator or AgentSessionExternalUrlInput. Others become opaque objects that
- * name their GraphQL type. Linear filters reference each other (IssueFilter → TeamFilter →
- * ProjectCollectionFilter → …): a full closure put about 90 types and 250 000 characters into
- * one tool schema, and a host may keep an activated tool's schema in every later request.
+ * such as StringComparator. Others, such as the filters on related entities, become open objects
+ * that name their GraphQL type: a host may keep an activated tool's schema in every later request.
  * An argument's own type is always spelled out.
  */
 export const MAX_NESTED_CLOSURE = 3;
 
-const closureCache = new Map<string, number>();
+const OPAQUE_PREFIX = "GraphQL input ";
 
-/** Number of other input object types reachable from `type`. */
+const closureCache = new WeakMap<GraphQLInputObjectType, number>();
+
 function closureSize(type: GraphQLInputObjectType): number {
- const cached = closureCache.get(type.name);
+ const cached = closureCache.get(type);
  if (cached !== undefined) return cached;
  const seen = new Set<string>([type.name]);
  const stack = [type];
@@ -74,7 +73,7 @@ function closureSize(type: GraphQLInputObjectType): number {
    }
   }
  }
- closureCache.set(type.name, seen.size - 1);
+ closureCache.set(type, seen.size - 1);
  return seen.size - 1;
 }
 
@@ -97,7 +96,7 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
    return {
     type: "object",
     additionalProperties: true,
-    description: `GraphQL input ${named.name}; linear_schema_help lists its fields`,
+    description: `${OPAQUE_PREFIX}${named.name}; linear_schema_help lists its fields`,
    };
   }
   if (!known) {
@@ -106,9 +105,12 @@ function nonNullSchema(type: GraphQLInputType, defs: Record<string, JsonSchema>,
    const required: string[] = [];
    for (const field of Object.values(named.getFields())) {
     const fallback = defaultOf(field);
+    const schema = jsonSchema(field.type, defs, building, depth + 1);
+    // A non-null open object carries its type name only in its own description; keep it.
+    const hint = typeof schema.description === "string" && schema.description.startsWith(OPAQUE_PREFIX) ? ` (${schema.description})` : "";
     properties[field.name] = {
-     ...jsonSchema(field.type, defs, building, depth + 1),
-     ...(field.description ? { description: field.description } : {}),
+     ...schema,
+     ...(field.description ? { description: `${field.description}${hint}` } : {}),
      ...(fallback !== undefined ? { default: fallback } : {}),
     };
     if (isRequiredInputField(field)) required.push(field.name);

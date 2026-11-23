@@ -36,6 +36,7 @@ import {
  type SelectionSetNode,
  type VariableDefinitionNode,
  type VariableNode,
+ validateInputValue,
 } from "graphql";
 import { composeSelectionValidation } from "./raw.ts";
 
@@ -205,6 +206,10 @@ export function composeOperation(
    }
    continue;
   }
+  // Tool schemas leave large nested inputs open, so the GraphQL types check them before any request.
+  const problems: string[] = [];
+  validateInputValue(args[arg.name], arg.type, (error, at) => problems.push(`${[arg.name, ...at].join(".")}: ${error.message}`));
+  if (problems.length > 0) throw new Error(`${descriptor.tool}: invalid argument ${problems.join("; ")}`);
   variables[arg.name] = args[arg.name];
   const variable: VariableNode = { kind: Kind.VARIABLE, name: { kind: Kind.NAME, value: arg.name } };
   variableDefinitions.push({ kind: Kind.VARIABLE_DEFINITION, variable, type: parseType(String(arg.type)) });
